@@ -30,7 +30,7 @@ import vercel from "@astrojs/vercel";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://fuwari.vercel.app/",
+  site: "https://www.freebird.asia/",
   base: "/",
   trailingSlash: "always",
 
