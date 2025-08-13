@@ -1,6 +1,6 @@
 # 关于
 
-#我是free bird
+# 我是free bird
 
 
 一个碌碌无为的高中生
