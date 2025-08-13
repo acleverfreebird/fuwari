@@ -3,8 +3,8 @@ title: 如何使用anaconda
 published: 2025-08-12
 description: ''
 image: ''
-tags: ['python']
-category: ''
+tags: ['Python']
+category: 'Python'
 draft: false 
 lang: ''
 ---
