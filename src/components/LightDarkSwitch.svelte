@@ -20,9 +20,11 @@ onMount(() => {
 	const changeThemeWhenSchemeChanged: Parameters<
 		typeof darkModePreference.addEventListener<"change">
 	>[1] = (_e) => {
-		applyThemeToDocument(mode);
+		setTheme(mode); // Call setTheme to also update Giscus
 	};
 	darkModePreference.addEventListener("change", changeThemeWhenSchemeChanged);
+	// Also call setTheme on initial mount to ensure Giscus is updated
+	setTheme(mode);
 	return () => {
 		darkModePreference.removeEventListener(
 			"change",
