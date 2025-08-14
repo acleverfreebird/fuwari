@@ -54,6 +54,34 @@ export function applyThemeToDocument(theme: LIGHT_DARK_MODE) {
 export function setTheme(theme: LIGHT_DARK_MODE): void {
 	localStorage.setItem("theme", theme);
 	applyThemeToDocument(theme);
+
+	// Update Giscus theme
+	const giscusFrame = document.querySelector("iframe.giscus-frame") as HTMLIFrameElement;
+	if (giscusFrame) {
+		let giscusTheme: string;
+		switch (theme) {
+			case LIGHT_MODE:
+				giscusTheme = "light";
+				break;
+			case DARK_MODE:
+				giscusTheme = "dark";
+				break;
+			case AUTO_MODE:
+			default:
+				giscusTheme = "preferred_color_scheme";
+				break;
+		}
+		giscusFrame.contentWindow?.postMessage(
+			{
+				giscus: {
+					setConfig: {
+						theme: giscusTheme,
+					},
+				},
+			},
+			"https://giscus.app",
+		);
+	}
 }
 
 export function getStoredTheme(): LIGHT_DARK_MODE {
