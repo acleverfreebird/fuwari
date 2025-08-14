@@ -56,32 +56,38 @@ export function setTheme(theme: LIGHT_DARK_MODE): void {
 	applyThemeToDocument(theme);
 
 	// Update Giscus theme
-	const giscusFrame = document.querySelector("iframe.giscus-frame") as HTMLIFrameElement;
-	if (giscusFrame) {
-		let giscusTheme: string;
-		switch (theme) {
-			case LIGHT_MODE:
-				giscusTheme = "light";
-				break;
-			case DARK_MODE:
-				giscusTheme = "dark";
-				break;
-			case AUTO_MODE:
-			default:
-				giscusTheme = "preferred_color_scheme";
-				break;
-		}
-		giscusFrame.contentWindow?.postMessage(
-			{
-				giscus: {
-					setConfig: {
-						theme: giscusTheme,
+	const sendGiscusTheme = () => {
+		const giscusFrame = document.querySelector("iframe.giscus-frame") as HTMLIFrameElement;
+		if (giscusFrame) {
+			let giscusTheme: string;
+			switch (theme) {
+				case LIGHT_MODE:
+					giscusTheme = "light";
+					break;
+				case DARK_MODE:
+					giscusTheme = "dark";
+					break;
+				case AUTO_MODE:
+				default:
+					giscusTheme = "preferred_color_scheme";
+					break;
+			}
+			giscusFrame.contentWindow?.postMessage(
+				{
+					giscus: {
+						setConfig: {
+							theme: giscusTheme,
+						},
 					},
 				},
-			},
-			"https://giscus.app",
-		);
-	}
+				"https://giscus.app",
+			);
+		} else {
+			// If iframe not found, retry after a short delay
+			setTimeout(sendGiscusTheme, 500);
+		}
+	};
+	sendGiscusTheme(); // Initial call
 }
 
 export function getStoredTheme(): LIGHT_DARK_MODE {
