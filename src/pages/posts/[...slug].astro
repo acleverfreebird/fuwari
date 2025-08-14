@@ -112,22 +112,23 @@ const jsonLd = {
     </div>
 
 
-    <script src="https://giscus.app/client.js"
-            data-repo="acleverfreebird/fuwari"
-            data-repo-id="R_kgDOPbwShw"
-            data-category="General"
-            data-category-id="DIC_kwDOPbwSh84CuH7J"
-            data-mapping="og:title"
-            data-strict="0"
-            data-reactions-enabled="1"
-            data-emit-metadata="0"
-            data-input-position="top"
-            data-theme="preferred_color_scheme"
-            data-lang="zh-CN"
-            crossorigin="anonymous"
-            async>
-    </script>
-
+    <div class="card-base p-6 rounded-[var(--radius-large)] mb-4">
+        <script src="https://giscus.app/client.js"
+                data-repo="acleverfreebird/fuwari"
+                data-repo-id="R_kgDOPbwShw"
+                data-category="General"
+                data-category-id="DIC_kwDOPbwSh84CuH7J"
+                data-mapping="og:title"
+                data-strict="0"
+                data-reactions-enabled="1"
+                data-emit-metadata="0"
+                data-input-position="top"
+                data-theme="preferred_color_scheme"
+                data-lang="zh-CN"
+                crossorigin="anonymous"
+                async>
+        </script>
+    </div>
 
     <div class="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full">
         <a href={entry.data.nextSlug ? getPostUrlBySlug(entry.data.nextSlug) : "#"}
