@@ -13,6 +13,7 @@ interface Props {
 	category: string | null;
 	hideTagsForMobile?: boolean;
 	hideUpdateDate?: boolean;
+	viewCount?: number;
 }
 const {
 	published,
@@ -21,6 +22,7 @@ const {
 	category,
 	hideTagsForMobile = false,
 	hideUpdateDate = false,
+	viewCount = 0,
 } = Astro.props;
 const className = Astro.props.class;
 ---
@@ -78,5 +80,13 @@ const className = Astro.props.class;
             ))}
             {!(tags && tags.length > 0) && <div class="transition text-50 text-sm font-medium">{i18n(I18nKey.noTags)}</div>}
         </div>
+    </div>
+
+    <!-- view count -->
+    <div class="flex items-center">
+        <div class="meta-icon">
+            <Icon name="material-symbols:visibility-rounded" class="text-xl"></Icon>
+        </div>
+        <span class="text-50 text-sm font-medium">{viewCount} {i18n(I18nKey.viewsCount)}</span>
     </div>
 </div>

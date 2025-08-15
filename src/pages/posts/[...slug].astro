@@ -13,16 +13,21 @@ import ImageWrapper from "../../components/misc/ImageWrapper.astro";
 import PostMetadata from "../../components/PostMeta.astro";
 import { profileConfig, siteConfig } from "../../config";
 import { formatDateToYYYYMMDD } from "../../utils/date-utils";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+    entry: CollectionEntry<"posts">;
+}
 
 export async function getStaticPaths() {
 	const blogEntries = await getSortedPosts();
-	return blogEntries.map((entry) => ({
+	return blogEntries.map((entry: CollectionEntry<"posts">) => ({
 		params: { slug: entry.slug },
 		props: { entry },
 	}));
 }
 
-const { entry } = Astro.props;
+const { entry } = Astro.props as Props;
 const { Content, headings } = await entry.render();
 
 const { remarkPluginFrontmatter } = await entry.render();
@@ -91,6 +96,7 @@ const jsonLd = {
                         updated={entry.data.updated}
                         tags={entry.data.tags}
                         category={entry.data.category}
+                        viewCount={1234}
                 ></PostMetadata>
                 {!entry.data.image && <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>}
             </div>
