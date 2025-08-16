@@ -5,6 +5,20 @@ import { url } from "../../utils/url-utils";
 import ImageWrapper from "../misc/ImageWrapper.astro";
 
 const config = profileConfig;
+
+let totalViews = 0;
+
+if (import.meta.env.SSR) {
+	try {
+		const response = await fetch(`${Astro.url.origin}/api/views/total`);
+		if (response.ok) {
+			const data = await response.json();
+			totalViews = data.totalViews;
+		}
+	} catch (error) {
+		console.error("Error fetching total views:", error);
+	}
+}
 ---
 <div class="card-base p-3">
     <a aria-label="Go to About Page" href={url('/about/')}
@@ -34,6 +48,30 @@ const config = profileConfig;
                 {config.links[0].name}
             </a>}
         </div>
+        <div class="text-center text-neutral-400 text-sm mt-2">
+            总浏览量: <span id="total-views">{totalViews}</span>
+        </div>
     </div>
 </div>
+
+<script>
+  const fetchTotalViews = async () => {
+    try {
+      const response = await fetch("/api/views/total");
+      if (response.ok) {
+        const data = await response.json();
+        const totalViewsElement = document.getElementById("total-views");
+        if (totalViewsElement) {
+          totalViewsElement.textContent = data.totalViews;
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching total views:", error);
+    }
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    fetchTotalViews();
+  });
+</script>
 

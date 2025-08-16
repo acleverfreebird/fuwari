@@ -201,7 +201,7 @@ if (import.meta.env.SSR) {
         const data = await response.json();
         const viewCountElement = document.getElementById("view-count");
         if (viewCountElement) {
-          viewCountElement.textContent = data.views;
+          viewCountElement.textContent = `${data.views} 阅读`; // Directly add "阅读" for now
           viewCountElement.classList.remove("hidden"); // Make it visible
         }
       }
