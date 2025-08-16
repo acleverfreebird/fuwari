@@ -238,26 +238,26 @@ if (import.meta.env.SSR) {
   document.addEventListener("DOMContentLoaded", () => {
     incrementCount("views");
     fetchCounts();
-  });
 
-  // Increment read count when scrolled to bottom
-  let readCountTriggered = false;
-  window.addEventListener("scroll", () => {
-    if (readCountTriggered) return;
+    // Increment read count when scrolled to bottom
+    let readCountTriggered = false;
+    window.addEventListener("scroll", () => {
+      console.log("Scroll event detected.");
+      if (readCountTriggered) return;
 
-    const documentHeight = document.documentElement.scrollHeight;
-    const viewportHeight = window.innerHeight;
-    const scrollY = window.scrollY;
+      const documentHeight = document.documentElement.scrollHeight;
+      const viewportHeight = window.innerHeight;
+      const scrollY = window.scrollY;
 
-    console.log(`Scroll: ${scrollY}, Viewport: ${viewportHeight}, Document: ${documentHeight}, Trigger at: ${documentHeight * 0.9}`);
-
-    // Trigger when scrolled to 90% of the page
-    if (scrollY + viewportHeight >= documentHeight * 0.9) {
-      console.log("Scroll trigger condition met for reads!");
-      incrementCount("reads");
-      readCountTriggered = true;
-      // Optionally, remove the event listener after triggering to prevent multiple increments
-      // window.removeEventListener("scroll", arguments.callee);
-    }
+      console.log(`Scroll: ${scrollY}, Viewport: ${viewportHeight}, Document: ${documentHeight}, Trigger at: ${documentHeight * 0.5}`);
+      // Trigger when scrolled to 50% of the page for easier testing
+      if (scrollY + viewportHeight >= documentHeight * 0.5) {
+        console.log("Scroll trigger condition met for reads!");
+        incrementCount("reads");
+        readCountTriggered = true;
+        // Optionally, remove the event listener after triggering to prevent multiple increments
+        // window.removeEventListener("scroll", arguments.callee);
+      }
+    });
   });
 </script>
