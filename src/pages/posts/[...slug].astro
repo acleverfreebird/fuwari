@@ -191,7 +191,7 @@ if (import.meta.env.SSR) {
     const hasCounted = sessionStorage.getItem(`${type}-${slug}`);
     if (!hasCounted) {
       try {
-        const response = await fetch(`/api/views/${slug}/?type=${type}`, { // Added trailing slash
+        const response = await fetch(`/api/views/${slug}?type=${type}`, {
           method: "POST",
         });
         if (response.ok) {
@@ -209,8 +209,8 @@ if (import.meta.env.SSR) {
 
   const fetchCounts = async () => {
     try {
-      const viewResponse = await fetch(`/api/views/${slug}/?type=views`); // Added trailing slash
-      const readResponse = await fetch(`/api/views/${slug}/?type=reads`); // Added trailing slash
+      const viewResponse = await fetch(`/api/views/${slug}?type=views`);
+      const readResponse = await fetch(`/api/views/${slug}?type=reads`);
 
       if (viewResponse.ok && readResponse.ok) {
         const viewData = await viewResponse.json();
