@@ -188,16 +188,14 @@ if (import.meta.env.SSR) {
 
 <script define:vars={{ slug: entry.slug }}>
   const incrementCount = async (type) => {
-    console.log(`Attempting to increment ${type} for slug: ${slug}`);
     const hasCounted = sessionStorage.getItem(`${type}-${slug}`);
     if (!hasCounted) {
       try {
-        const response = await fetch(`/api/views/${slug}?type=${type}`, {
+        const response = await fetch(`/api/views/${slug}/?type=${type}`, { // Added trailing slash
           method: "POST",
         });
         if (response.ok) {
           sessionStorage.setItem(`${type}-${slug}`, "true");
-          console.log(`${type} incremented successfully for slug: ${slug}`);
           // After incrementing, fetch and update counts immediately
           fetchCounts();
         } else {
@@ -206,15 +204,13 @@ if (import.meta.env.SSR) {
       } catch (error) {
         console.error(`Error incrementing ${type}:`, error);
       }
-    } else {
-      console.log(`${type} already counted for slug: ${slug}`);
     }
   };
 
   const fetchCounts = async () => {
     try {
-      const viewResponse = await fetch(`/api/views/${slug}?type=views`);
-      const readResponse = await fetch(`/api/views/${slug}?type=reads`);
+      const viewResponse = await fetch(`/api/views/${slug}/?type=views`); // Added trailing slash
+      const readResponse = await fetch(`/api/views/${slug}/?type=reads`); // Added trailing slash
 
       if (viewResponse.ok && readResponse.ok) {
         const viewData = await viewResponse.json();
@@ -242,17 +238,14 @@ if (import.meta.env.SSR) {
     // Increment read count when scrolled to bottom
     let readCountTriggered = false;
     window.addEventListener("scroll", () => {
-      console.log("Scroll event detected.");
       if (readCountTriggered) return;
 
       const documentHeight = document.documentElement.scrollHeight;
       const viewportHeight = window.innerHeight;
       const scrollY = window.scrollY;
 
-      console.log(`Scroll: ${scrollY}, Viewport: ${viewportHeight}, Document: ${documentHeight}, Trigger at: ${documentHeight * 0.5}`);
       // Trigger when scrolled to 50% of the page for easier testing
       if (scrollY + viewportHeight >= documentHeight * 0.5) {
-        console.log("Scroll trigger condition met for reads!");
         incrementCount("reads");
         readCountTriggered = true;
         // Optionally, remove the event listener after triggering to prevent multiple increments
