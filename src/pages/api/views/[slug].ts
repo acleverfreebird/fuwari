@@ -1,3 +1,5 @@
+export const prerender = false;
+
 import { Redis } from "@upstash/redis";
 import type { APIRoute } from "astro";
 
