@@ -51,17 +51,27 @@ const jsonLd = {
 };
 
 let viewCount = 0;
+let readCount = 0;
 
 if (import.meta.env.SSR) {
-	// Server-side rendering: fetch initial view count
+	// Server-side rendering: fetch initial view count and read count
 	try {
-		const response = await fetch(`${Astro.url.origin}/api/views/${entry.slug}`);
-		if (response.ok) {
-			const data = await response.json();
+		const viewResponse = await fetch(
+			`${Astro.url.origin}/api/views/${entry.slug}?type=views`,
+		);
+		if (viewResponse.ok) {
+			const data = await viewResponse.json();
 			viewCount = data.views;
 		}
+		const readResponse = await fetch(
+			`${Astro.url.origin}/api/views/${entry.slug}?type=reads`,
+		);
+		if (readResponse.ok) {
+			const data = await readResponse.json();
+			readCount = data.reads;
+		}
 	} catch (error) {
-		console.error("Error fetching initial view count:", error);
+		console.error("Error fetching initial counts:", error);
 	}
 }
 ---
@@ -112,6 +122,7 @@ if (import.meta.env.SSR) {
                         tags={entry.data.tags}
                         category={entry.data.category}
                         viewCount={viewCount}
+                        readCount={readCount}
                 ></PostMetadata>
                 {!entry.data.image && <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>}
             </div>
@@ -176,42 +187,64 @@ if (import.meta.env.SSR) {
 </MainGridLayout>
 
 <script define:vars={{ slug: entry.slug }}>
-  const incrementView = async () => {
-    const hasVisited = sessionStorage.getItem(`viewed-${slug}`);
-    if (!hasVisited) {
+  const incrementCount = async (type) => {
+    const hasCounted = sessionStorage.getItem(`${type}-${slug}`);
+    if (!hasCounted) {
       try {
-        await fetch("/api/views", {
+        await fetch(`/api/views/${slug}?type=${type}`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ slug }),
         });
-        sessionStorage.setItem(`viewed-${slug}`, "true");
+        sessionStorage.setItem(`${type}-${slug}`, "true");
       } catch (error) {
-        console.error("Error incrementing view:", error);
+        console.error(`Error incrementing ${type}:`, error);
       }
     }
   };
 
-  const fetchViewCount = async () => {
+  const fetchCounts = async () => {
     try {
-      const response = await fetch(`/api/views/${slug}`);
-      if (response.ok) {
-        const data = await response.json();
+      const viewResponse = await fetch(`/api/views/${slug}?type=views`);
+      const readResponse = await fetch(`/api/views/${slug}?type=reads`);
+
+      if (viewResponse.ok && readResponse.ok) {
+        const viewData = await viewResponse.json();
+        const readData = await readResponse.json();
+
+        const viewCount = viewData.views || 0;
+        const readCount = readData.reads || 0;
+
         const viewCountElement = document.getElementById("view-count");
         if (viewCountElement) {
-          viewCountElement.textContent = `${data.views} 阅读`; // Directly add "阅读" for now
-          viewCountElement.classList.remove("hidden"); // Make it visible
+          viewCountElement.textContent = `${readCount} 阅读 / ${viewCount} 访问`;
+          viewCountElement.classList.remove("hidden");
         }
       }
     } catch (error) {
-      console.error("Error fetching view count:", error);
+      console.error("Error fetching counts:", error);
     }
   };
 
+  // Increment view count on page load
   document.addEventListener("DOMContentLoaded", () => {
-    incrementView();
-    fetchViewCount();
+    incrementCount("views");
+    fetchCounts();
+  });
+
+  // Increment read count when scrolled to bottom
+  let readCountTriggered = false;
+  window.addEventListener("scroll", () => {
+    if (readCountTriggered) return;
+
+    const documentHeight = document.documentElement.scrollHeight;
+    const viewportHeight = window.innerHeight;
+    const scrollY = window.scrollY;
+
+    // Trigger when scrolled to 90% of the page
+    if (scrollY + viewportHeight >= documentHeight * 0.9) {
+      incrementCount("reads");
+      readCountTriggered = true;
+      // Optionally, remove the event listener after triggering to prevent multiple increments
+      // window.removeEventListener("scroll", arguments.callee);
+    }
   });
 </script>

@@ -14,6 +14,7 @@ interface Props {
 	hideTagsForMobile?: boolean;
 	hideUpdateDate?: boolean;
 	viewCount?: number;
+	readCount?: number;
 }
 const {
 	published,
@@ -23,6 +24,7 @@ const {
 	hideTagsForMobile = false,
 	hideUpdateDate = false,
 	viewCount = 0,
+	readCount = 0,
 } = Astro.props;
 const className = Astro.props.class;
 ---
@@ -87,6 +89,6 @@ const className = Astro.props.class;
         <div class="meta-icon">
             <Icon name="material-symbols:visibility-rounded" class="text-xl"></Icon>
         </div>
-        <span id="view-count" class="text-50 text-sm font-medium">{viewCount} {i18n(I18nKey.viewsCount)}</span>
+        <span id="view-count" class="text-50 text-sm font-medium">{readCount} 阅读 / {viewCount} 访问</span>
     </div>
 </div>

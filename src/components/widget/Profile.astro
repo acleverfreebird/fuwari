@@ -7,6 +7,7 @@ import ImageWrapper from "../misc/ImageWrapper.astro";
 const config = profileConfig;
 
 let totalViews = 0;
+let totalReads = 0;
 
 if (import.meta.env.SSR) {
 	try {
@@ -14,9 +15,10 @@ if (import.meta.env.SSR) {
 		if (response.ok) {
 			const data = await response.json();
 			totalViews = data.totalViews;
+			totalReads = data.totalReads;
 		}
 	} catch (error) {
-		console.error("Error fetching total views:", error);
+		console.error("Error fetching total counts:", error);
 	}
 }
 ---
@@ -49,29 +51,33 @@ if (import.meta.env.SSR) {
             </a>}
         </div>
         <div class="text-center text-neutral-400 text-sm mt-2">
-            总浏览量: <span id="total-views">{totalViews}</span>
+            总阅读量: <span id="total-reads">{totalReads}</span> / 总访问量: <span id="total-views">{totalViews}</span>
         </div>
     </div>
 </div>
 
 <script>
-  const fetchTotalViews = async () => {
+  const fetchTotalCounts = async () => {
     try {
       const response = await fetch("/api/views/total");
       if (response.ok) {
         const data = await response.json();
         const totalViewsElement = document.getElementById("total-views");
+        const totalReadsElement = document.getElementById("total-reads");
         if (totalViewsElement) {
           totalViewsElement.textContent = data.totalViews;
         }
+        if (totalReadsElement) {
+          totalReadsElement.textContent = data.totalReads;
+        }
       }
     } catch (error) {
-      console.error("Error fetching total views:", error);
+      console.error("Error fetching total counts:", error);
     }
   };
 
   document.addEventListener("DOMContentLoaded", () => {
-    fetchTotalViews();
+    fetchTotalCounts();
   });
 </script>
 

@@ -10,18 +10,28 @@ const redis = new Redis({
 
 export const GET: APIRoute = async () => {
 	try {
-		const keys = await redis.keys("views:*");
+		const viewKeys = await redis.keys("views:*");
+		const readKeys = await redis.keys("reads:*");
 		let totalViews = 0;
+		let totalReads = 0;
 
-		if (keys.length > 0) {
-			const views = await redis.mget(...keys);
+		if (viewKeys.length > 0) {
+			const views = await redis.mget(...viewKeys);
 			totalViews = (views as (string | null)[]).reduce(
 				(sum: number, current: string | null) => sum + (Number(current) || 0),
 				0,
 			);
 		}
 
-		return new Response(JSON.stringify({ totalViews }), {
+		if (readKeys.length > 0) {
+			const reads = await redis.mget(...readKeys);
+			totalReads = (reads as (string | null)[]).reduce(
+				(sum: number, current: string | null) => sum + (Number(current) || 0),
+				0,
+			);
+		}
+
+		return new Response(JSON.stringify({ totalViews, totalReads }), {
 			headers: { "Content-Type": "application/json" },
 		});
 	} catch (error) {
