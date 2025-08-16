@@ -1,4 +1,5 @@
 ---
+import type { CollectionEntry } from "astro:content";
 import path from "node:path";
 import License from "@components/misc/License.astro";
 import Markdown from "@components/misc/Markdown.astro";
@@ -13,10 +14,9 @@ import ImageWrapper from "../../components/misc/ImageWrapper.astro";
 import PostMetadata from "../../components/PostMeta.astro";
 import { profileConfig, siteConfig } from "../../config";
 import { formatDateToYYYYMMDD } from "../../utils/date-utils";
-import type { CollectionEntry } from "astro:content";
 
 interface Props {
-    entry: CollectionEntry<"posts">;
+	entry: CollectionEntry<"posts">;
 }
 
 export async function getStaticPaths() {
@@ -49,6 +49,21 @@ const jsonLd = {
 		: siteConfig.lang.replace("_", "-"),
 	// TODO include cover image here
 };
+
+let viewCount = 0;
+
+if (import.meta.env.SSR) {
+	// Server-side rendering: fetch initial view count
+	try {
+		const response = await fetch(`${Astro.url.origin}/api/views/${entry.slug}`);
+		if (response.ok) {
+			const data = await response.json();
+			viewCount = data.views;
+		}
+	} catch (error) {
+		console.error("Error fetching initial view count:", error);
+	}
+}
 ---
 <MainGridLayout banner={entry.data.image} title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings}>
     <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
@@ -96,7 +111,7 @@ const jsonLd = {
                         updated={entry.data.updated}
                         tags={entry.data.tags}
                         category={entry.data.category}
-                        viewCount={1234}
+                        viewCount={viewCount}
                 ></PostMetadata>
                 {!entry.data.image && <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>}
             </div>
@@ -159,3 +174,44 @@ const jsonLd = {
     </div>
 
 </MainGridLayout>
+
+<script define:vars={{ slug: entry.slug }}>
+  const incrementView = async () => {
+    const hasVisited = sessionStorage.getItem(`viewed-${slug}`);
+    if (!hasVisited) {
+      try {
+        await fetch("/api/views", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ slug }),
+        });
+        sessionStorage.setItem(`viewed-${slug}`, "true");
+      } catch (error) {
+        console.error("Error incrementing view:", error);
+      }
+    }
+  };
+
+  const fetchViewCount = async () => {
+    try {
+      const response = await fetch(`/api/views/${slug}`);
+      if (response.ok) {
+        const data = await response.json();
+        const viewCountElement = document.getElementById("view-count");
+        if (viewCountElement) {
+          viewCountElement.textContent = data.views;
+          viewCountElement.classList.remove("hidden"); // Make it visible
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching view count:", error);
+    }
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    incrementView();
+    fetchViewCount();
+  });
+</script>
