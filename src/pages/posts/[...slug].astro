@@ -188,16 +188,26 @@ if (import.meta.env.SSR) {
 
 <script define:vars={{ slug: entry.slug }}>
   const incrementCount = async (type) => {
+    console.log(`Attempting to increment ${type} for slug: ${slug}`);
     const hasCounted = sessionStorage.getItem(`${type}-${slug}`);
     if (!hasCounted) {
       try {
-        await fetch(`/api/views/${slug}?type=${type}`, {
+        const response = await fetch(`/api/views/${slug}?type=${type}`, {
           method: "POST",
         });
-        sessionStorage.setItem(`${type}-${slug}`, "true");
+        if (response.ok) {
+          sessionStorage.setItem(`${type}-${slug}`, "true");
+          console.log(`${type} incremented successfully for slug: ${slug}`);
+          // After incrementing, fetch and update counts immediately
+          fetchCounts();
+        } else {
+          console.error(`Failed to increment ${type}:`, response.status, response.statusText);
+        }
       } catch (error) {
         console.error(`Error incrementing ${type}:`, error);
       }
+    } else {
+      console.log(`${type} already counted for slug: ${slug}`);
     }
   };
 
@@ -239,8 +249,11 @@ if (import.meta.env.SSR) {
     const viewportHeight = window.innerHeight;
     const scrollY = window.scrollY;
 
+    console.log(`Scroll: ${scrollY}, Viewport: ${viewportHeight}, Document: ${documentHeight}, Trigger at: ${documentHeight * 0.9}`);
+
     // Trigger when scrolled to 90% of the page
     if (scrollY + viewportHeight >= documentHeight * 0.9) {
+      console.log("Scroll trigger condition met for reads!");
       incrementCount("reads");
       readCountTriggered = true;
       // Optionally, remove the event listener after triggering to prevent multiple increments
