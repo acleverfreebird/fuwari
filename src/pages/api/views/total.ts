@@ -10,29 +10,60 @@ const redis = new Redis({
 
 export const GET: APIRoute = async () => {
 	try {
+		const startTime = Date.now();
+
+		console.log("[DEBUG] Starting total count calculation...");
+
+		const keysStartTime = Date.now();
 		const viewKeys = await redis.keys("views:*");
 		const readKeys = await redis.keys("reads:*");
+		const keysDuration = Date.now() - keysStartTime;
+
+		console.log(
+			`[DEBUG] Found keys - Views: ${viewKeys.length}, Reads: ${readKeys.length}, Keys query took: ${keysDuration}ms`,
+		);
+
 		let totalViews = 0;
 		let totalReads = 0;
 
 		if (viewKeys.length > 0) {
+			const viewsStartTime = Date.now();
 			const views = await redis.mget(...viewKeys);
+			const viewsDuration = Date.now() - viewsStartTime;
+
 			totalViews = (views as (string | null)[]).reduce(
 				(sum: number, current: string | null) => sum + (Number(current) || 0),
 				0,
 			);
+
+			console.log(
+				`[DEBUG] Views calculation took: ${viewsDuration}ms, Total views: ${totalViews}`,
+			);
 		}
 
 		if (readKeys.length > 0) {
+			const readsStartTime = Date.now();
 			const reads = await redis.mget(...readKeys);
+			const readsDuration = Date.now() - readsStartTime;
+
 			totalReads = (reads as (string | null)[]).reduce(
 				(sum: number, current: string | null) => sum + (Number(current) || 0),
 				0,
 			);
+
+			console.log(
+				`[DEBUG] Reads calculation took: ${readsDuration}ms, Total reads: ${totalReads}`,
+			);
 		}
 
+		const totalDuration = Date.now() - startTime;
+		console.log(`[DEBUG] Total API call duration: ${totalDuration}ms`);
+
 		return new Response(JSON.stringify({ totalViews, totalReads }), {
-			headers: { "Content-Type": "application/json" },
+			headers: {
+				"Content-Type": "application/json",
+				"Cache-Control": "public, max-age=300, s-maxage=300",
+			},
 		});
 	} catch (error) {
 		console.error("Error fetching total views:", error);

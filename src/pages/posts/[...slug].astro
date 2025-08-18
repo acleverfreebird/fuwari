@@ -191,9 +191,14 @@ if (import.meta.env.SSR) {
     const hasCounted = sessionStorage.getItem(`${type}-${slug}`);
     if (!hasCounted) {
       try {
+        const startTime = Date.now();
         const response = await fetch(`/api/views/${slug}?type=${type}`, {
           method: "POST",
         });
+        const duration = Date.now() - startTime;
+        
+        console.log(`[DEBUG] Frontend increment ${type} for ${slug} took: ${duration}ms`);
+        
         if (response.ok) {
           sessionStorage.setItem(`${type}-${slug}`, "true");
           // After incrementing, fetch and update counts immediately
@@ -209,8 +214,12 @@ if (import.meta.env.SSR) {
 
   const fetchCounts = async () => {
     try {
+      const startTime = Date.now();
       const viewResponse = await fetch(`/api/views/${slug}?type=views`);
       const readResponse = await fetch(`/api/views/${slug}?type=reads`);
+      const duration = Date.now() - startTime;
+
+      console.log(`[DEBUG] Frontend fetch counts for ${slug} took: ${duration}ms`);
 
       if (viewResponse.ok && readResponse.ok) {
         const viewData = await viewResponse.json();
@@ -232,6 +241,7 @@ if (import.meta.env.SSR) {
 
   // Increment view count on page load
   document.addEventListener("DOMContentLoaded", () => {
+    console.log(`[DEBUG] Page loaded, starting count operations for ${slug}`);
     incrementCount("views");
     fetchCounts();
 
@@ -246,6 +256,7 @@ if (import.meta.env.SSR) {
 
       // Trigger when scrolled to 50% of the page for easier testing
       if (scrollY + viewportHeight >= documentHeight * 0.5) {
+        console.log(`[DEBUG] Scroll trigger reached, incrementing read count for ${slug}`);
         incrementCount("reads");
         readCountTriggered = true;
         // Optionally, remove the event listener after triggering to prevent multiple increments
