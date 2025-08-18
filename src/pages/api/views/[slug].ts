@@ -3,6 +3,16 @@ export const prerender = false;
 import { Redis } from "@upstash/redis";
 import type { APIRoute } from "astro";
 
+console.log("[DEBUG] API: Initializing Redis connection...");
+console.log(
+	"[DEBUG] API: UPSTASH_REDIS_REST_URL exists:",
+	!!import.meta.env.UPSTASH_REDIS_REST_URL,
+);
+console.log(
+	"[DEBUG] API: UPSTASH_REDIS_REST_TOKEN exists:",
+	!!import.meta.env.UPSTASH_REDIS_REST_TOKEN,
+);
+
 const redis = new Redis({
 	url: import.meta.env.UPSTASH_REDIS_REST_URL,
 	token: import.meta.env.UPSTASH_REDIS_REST_TOKEN,

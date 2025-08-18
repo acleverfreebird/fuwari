@@ -45,15 +45,43 @@ const { remarkPluginFrontmatter } = await entry.render();
 let viewCount = 0;
 let readCount = 0;
 
+console.log(`[DEBUG] PostCard: Attempting to fetch views for ${entry.slug}`);
+console.log(`[DEBUG] PostCard: Astro.url.origin = ${Astro.url.origin}`);
+console.log(
+	`[DEBUG] PostCard: Full API URL = ${Astro.url.origin}/api/views/${entry.slug}`,
+);
+
 try {
-	const response = await fetch(`${Astro.url.origin}/api/views/${entry.slug}`);
+	const apiUrl = `${Astro.url.origin}/api/views/${entry.slug}`;
+	console.log(`[DEBUG] PostCard: Fetching from ${apiUrl}`);
+	const response = await fetch(apiUrl);
+	console.log(`[DEBUG] PostCard: Response status = ${response.status}`);
+	console.log(`[DEBUG] PostCard: Response ok = ${response.ok}`);
+
 	if (response.ok) {
 		const data = await response.json();
+		console.log(`[DEBUG] PostCard: Response data for ${entry.slug} =`, data);
 		viewCount = data.views || 0;
 		readCount = data.reads || 0;
+		console.log(
+			`[DEBUG] PostCard: Final counts for ${entry.slug} - views: ${viewCount}, reads: ${readCount}`,
+		);
+	} else {
+		const errorText = await response.text();
+		console.error(
+			`[DEBUG] PostCard: API Error for ${entry.slug} - Status: ${response.status}, Body: ${errorText}`,
+		);
 	}
 } catch (error) {
-	console.error(`Error fetching views for ${entry.slug}:`, error);
+	console.error(`[DEBUG] PostCard: Fetch error for ${entry.slug}:`, error);
+	console.error(
+		`[DEBUG] PostCard: Error type for ${entry.slug}:`,
+		(error as Error)?.constructor?.name || "Unknown",
+	);
+	console.error(
+		`[DEBUG] PostCard: Error message for ${entry.slug}:`,
+		(error as Error)?.message || "Unknown error",
+	);
 }
 ---
 <div class:list={["card-base flex flex-col-reverse md:flex-col w-full rounded-[var(--radius-large)] overflow-hidden relative", className]} style={style}>

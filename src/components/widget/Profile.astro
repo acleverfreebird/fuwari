@@ -11,14 +11,36 @@ let totalReads = 0;
 
 if (import.meta.env.SSR) {
 	try {
+		console.log(
+			"[DEBUG] Profile: Fetching total counts from:",
+			`${Astro.url.origin}/api/views/total`,
+		);
 		const response = await fetch(`${Astro.url.origin}/api/views/total`);
+		console.log("[DEBUG] Profile: Response status:", response.status);
+		console.log("[DEBUG] Profile: Response ok:", response.ok);
+
 		if (response.ok) {
 			const data = await response.json();
+			console.log("[DEBUG] Profile: Response data:", data);
 			totalViews = data.totalViews;
 			totalReads = data.totalReads;
+			console.log(
+				"[DEBUG] Profile: Total views:",
+				totalViews,
+				"Total reads:",
+				totalReads,
+			);
+		} else {
+			const errorText = await response.text();
+			console.error(
+				"[DEBUG] Profile: API Error - Status:",
+				response.status,
+				"Body:",
+				errorText,
+			);
 		}
 	} catch (error) {
-		console.error("Error fetching total counts:", error);
+		console.error("[DEBUG] Profile: Fetch error:", error);
 	}
 }
 ---
@@ -59,24 +81,35 @@ if (import.meta.env.SSR) {
 <script>
   const fetchTotalCounts = async () => {
     try {
+      console.log("[DEBUG] Profile Client: Fetching total counts from /api/views/total");
       const response = await fetch("/api/views/total");
+      console.log("[DEBUG] Profile Client: Response status:", response.status);
+      console.log("[DEBUG] Profile Client: Response ok:", response.ok);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log("[DEBUG] Profile Client: Response data:", data);
         const totalViewsElement = document.getElementById("total-views");
         const totalReadsElement = document.getElementById("total-reads");
         if (totalViewsElement) {
+          console.log("[DEBUG] Profile Client: Updating total views to:", data.totalViews);
           totalViewsElement.textContent = data.totalViews;
         }
         if (totalReadsElement) {
+          console.log("[DEBUG] Profile Client: Updating total reads to:", data.totalReads);
           totalReadsElement.textContent = data.totalReads;
         }
+      } else {
+        const errorText = await response.text();
+        console.error("[DEBUG] Profile Client: API Error - Status:", response.status, "Body:", errorText);
       }
     } catch (error) {
-      console.error("Error fetching total counts:", error);
+      console.error("[DEBUG] Profile Client: Fetch error:", error);
     }
   };
 
   document.addEventListener("DOMContentLoaded", () => {
+    console.log("[DEBUG] Profile Client: DOM loaded, fetching total counts");
     fetchTotalCounts();
   });
 </script>
