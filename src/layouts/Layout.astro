@@ -113,31 +113,68 @@ const bannerOffset =
 
 		<!-- Set the theme before the page is rendered to avoid a flash -->
 		<script is:inline define:vars={{DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE, BANNER_HEIGHT_EXTEND, PAGE_WIDTH, configHue}}>
-			// Load the theme from local storage
-			const theme = localStorage.getItem('theme') || DEFAULT_THEME;
-			switch (theme) {
-				case LIGHT_MODE:
-					document.documentElement.classList.remove('dark');
-					break
-				case DARK_MODE:
-					document.documentElement.classList.add('dark');
-					break
-				case AUTO_MODE:
-					if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-						document.documentElement.classList.add('dark');
-					} else {
-						document.documentElement.classList.remove('dark');
+			// 阻止初始渲染闪烁的快速主题应用
+			(function() {
+				try {
+					// Load the theme from local storage with better fallback handling
+					let theme = localStorage.getItem('theme') || DEFAULT_THEME;
+					
+					// 确保主题值有效
+					if (![LIGHT_MODE, DARK_MODE, AUTO_MODE].includes(theme)) {
+						theme = DEFAULT_THEME;
+						localStorage.setItem('theme', theme);
 					}
-			}
 
-			// Load the hue from local storage
-			const hue = localStorage.getItem('hue') || configHue;
-			document.documentElement.style.setProperty('--hue', hue);
+					// 移除可能存在的过渡类，防止闪烁
+					document.documentElement.classList.add('no-transition');
 
-			// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
-			let offset = Math.floor(window.innerHeight * (BANNER_HEIGHT_EXTEND / 100));
-			offset = offset - offset % 4;
-			document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
+					// 应用主题类
+					switch (theme) {
+						case LIGHT_MODE:
+							document.documentElement.classList.remove('dark');
+							break;
+						case DARK_MODE:
+							document.documentElement.classList.add('dark');
+							break;
+						case AUTO_MODE:
+							const isDarkPreferred = window.matchMedia('(prefers-color-scheme: dark)').matches;
+							if (isDarkPreferred) {
+								document.documentElement.classList.add('dark');
+							} else {
+								document.documentElement.classList.remove('dark');
+							}
+							break;
+					}
+
+					// 存储当前实际主题状态，供评论组件使用
+					const actualTheme = document.documentElement.classList.contains('dark') ? DARK_MODE : LIGHT_MODE;
+					sessionStorage.setItem('current-theme-state', actualTheme);
+
+					// Load the hue from local storage with validation
+					let hue = localStorage.getItem('hue') || configHue;
+					hue = parseInt(hue);
+					if (isNaN(hue) || hue < 0 || hue > 360) {
+						hue = configHue;
+						localStorage.setItem('hue', hue);
+					}
+					document.documentElement.style.setProperty('--hue', hue);
+
+					// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
+					let offset = Math.floor(window.innerHeight * (BANNER_HEIGHT_EXTEND / 100));
+					offset = offset - offset % 4;
+					document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
+
+					// 在下一帧重新启用过渡效果
+					requestAnimationFrame(() => {
+						document.documentElement.classList.remove('no-transition');
+					});
+				} catch (error) {
+					console.warn('Theme initialization error:', error);
+					// 发生错误时的兜底处理
+					document.documentElement.classList.remove('dark');
+					localStorage.setItem('theme', LIGHT_MODE);
+				}
+			})();
 		</script>
 		<style define:vars={{
 			configHue,

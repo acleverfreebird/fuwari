@@ -30,6 +30,28 @@
         @apply bg-transparent text-[var(--primary)]
     }
 
+    /* 防止主题切换时的闪烁 */
+    .no-transition,
+    .no-transition *,
+    .no-transition *:before,
+    .no-transition *:after {
+        transition: none !important;
+        transition-delay: 0 !important;
+        transition-duration: 0 !important;
+        animation-delay: 0 !important;
+        animation-duration: 0 !important;
+    }
+
+    /* Giscus 容器的主题过渡 */
+    .giscus {
+        @apply transition-colors duration-300;
+    }
+
+    /* 确保评论区在主题切换时的平滑过渡 */
+    iframe.giscus-frame {
+        @apply transition-opacity duration-200;
+    }
+
     .btn-card {
         @apply transition flex items-center justify-center bg-[var(--card-bg)] hover:bg-[var(--btn-card-bg-hover)]
         active:bg-[var(--btn-card-bg-active)]

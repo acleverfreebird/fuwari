@@ -1,17 +1,163 @@
-<section class="giscus mx-auto mt-10 w-full"></section>
+<section class="giscus mx-auto mt-10 w-full transition-colors duration-300"></section>
 
-<script src="https://giscus.app/client.js"
-        data-repo="acleverfreebird/fuwari"
-        data-repo-id="R_kgDOPbwShw"
-        data-category="Announcements"
-        data-category-id="DIC_kwDOPbwSh84CuH7I"
-        data-mapping="og:title"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="bottom"
-        data-theme="preferred_color_scheme"
-        data-lang="zh-CN"
-        crossorigin="anonymous"
-        async>
+<script is:inline>
+  // 常量定义 - 与主题系统保持一致
+  const LIGHT_MODE = "light";
+  const DARK_MODE = "dark";
+  const AUTO_MODE = "auto";
+  const DEFAULT_THEME = AUTO_MODE;
+
+  // 获取当前实际主题状态（考虑自动模式）
+  function getCurrentActualTheme() {
+    const storedTheme = localStorage.getItem("theme") || DEFAULT_THEME;
+    
+    if (storedTheme === AUTO_MODE) {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? DARK_MODE : LIGHT_MODE;
+    }
+    return storedTheme;
+  }
+
+  // 获取 Giscus 主题配置
+  function getGiscusTheme() {
+    const storedTheme = localStorage.getItem("theme") || DEFAULT_THEME;
+    
+    switch (storedTheme) {
+      case DARK_MODE:
+        return "dark";
+      case LIGHT_MODE:
+        return "light";
+      case AUTO_MODE:
+      default:
+        return "preferred_color_scheme";
+    }
+  }
+
+  // 更新已加载的 Giscus 主题
+  function updateGiscusTheme(retryCount = 0) {
+    const maxRetries = 10;
+    const retryDelay = 500;
+
+    const giscusFrame = document.querySelector("iframe.giscus-frame");
+    
+    if (giscusFrame && giscusFrame.contentWindow) {
+      const giscusTheme = getGiscusTheme();
+      
+      try {
+        giscusFrame.contentWindow.postMessage(
+          {
+            giscus: {
+              setConfig: {
+                theme: giscusTheme,
+              },
+            },
+          },
+          "https://giscus.app"
+        );
+        console.log(`Giscus theme updated to: ${giscusTheme}`);
+      } catch (error) {
+        console.warn("Failed to update Giscus theme:", error);
+      }
+    } else if (retryCount < maxRetries) {
+      // 如果 iframe 还未加载完成，延迟重试
+      setTimeout(() => updateGiscusTheme(retryCount + 1), retryDelay);
+    }
+  }
+
+  // 加载 Giscus 评论组件
+  function loadGiscus() {
+    // 防止重复加载
+    if (document.querySelector("section.giscus script")) {
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.setAttribute("data-repo", "acleverfreebird/fuwari");
+    script.setAttribute("data-repo-id", "R_kgDOPbwShw");
+    script.setAttribute("data-category", "Announcements");
+    script.setAttribute("data-category-id", "DIC_kwDOPbwSh84CuH7I");
+    script.setAttribute("data-mapping", "og:title");
+    script.setAttribute("data-strict", "0");
+    script.setAttribute("data-reactions-enabled", "1");
+    script.setAttribute("data-emit-metadata", "0");
+    script.setAttribute("data-input-position", "bottom");
+    script.setAttribute("data-theme", getGiscusTheme());
+    script.setAttribute("data-lang", "zh-CN");
+    script.setAttribute("crossorigin", "anonymous");
+    script.async = true;
+
+    // 监听 Giscus 加载完成事件
+    script.onload = () => {
+      console.log("Giscus script loaded");
+      // 延迟更新主题以确保 iframe 完全初始化
+      setTimeout(() => updateGiscusTheme(), 1000);
+    };
+
+    const giscusSection = document.querySelector("section.giscus");
+    if (giscusSection) {
+      giscusSection.appendChild(script);
+    }
+  }
+
+  // 监听主题变化事件
+  function setupThemeChangeListener() {
+    // 监听存储变化（主要用于多标签页同步）
+    window.addEventListener("storage", (event) => {
+      if (event.key === "theme") {
+        updateGiscusTheme();
+      }
+    });
+
+    // 监听系统主题偏好变化（用于自动模式）
+    const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleSystemThemeChange = () => {
+      const storedTheme = localStorage.getItem("theme") || DEFAULT_THEME;
+      if (storedTheme === AUTO_MODE) {
+        updateGiscusTheme();
+      }
+    };
+    
+    if (darkModeMediaQuery.addEventListener) {
+      darkModeMediaQuery.addEventListener("change", handleSystemThemeChange);
+    } else {
+      // 兼容老版本浏览器
+      darkModeMediaQuery.addListener(handleSystemThemeChange);
+    }
+
+    // 监听自定义主题变化事件（与主题切换组件配合）
+    document.addEventListener("themeChanged", () => {
+      setTimeout(() => updateGiscusTheme(), 100);
+    });
+  }
+
+  // 初始化函数
+  function initGiscusComments() {
+    // 确保主题状态在页面刷新后正确应用
+    const currentTheme = getCurrentActualTheme();
+    const documentHasDarkClass = document.documentElement.classList.contains("dark");
+    const shouldBeDark = currentTheme === DARK_MODE;
+
+    // 修复可能的主题状态不一致
+    if (shouldBeDark && !documentHasDarkClass) {
+      document.documentElement.classList.add("dark");
+    } else if (!shouldBeDark && documentHasDarkClass) {
+      document.documentElement.classList.remove("dark");
+    }
+
+    // 设置主题监听器
+    setupThemeChangeListener();
+
+    // 加载 Giscus
+    loadGiscus();
+  }
+
+  // 页面加载时初始化
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initGiscusComments);
+  } else {
+    initGiscusComments();
+  }
+
+  // 导出全局函数供外部调用
+  window.updateGiscusTheme = updateGiscusTheme;
 </script>

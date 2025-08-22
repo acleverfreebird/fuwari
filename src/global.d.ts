@@ -11,6 +11,8 @@ declare global {
 				}>;
 			}>;
 		};
+		// 添加 Giscus 主题更新函数类型
+		updateGiscusTheme?: () => void;
 	}
 }
 
