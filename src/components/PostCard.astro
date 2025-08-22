@@ -45,33 +45,43 @@ const { remarkPluginFrontmatter } = await entry.render();
 let viewCount = 0;
 let readCount = 0;
 
-console.log(`[DEBUG] PostCard: Attempting to fetch views for ${entry.slug}`);
-console.log(`[DEBUG] PostCard: Astro.url.origin = ${Astro.url.origin}`);
-console.log(
-	`[DEBUG] PostCard: Full API URL = ${Astro.url.origin}/api/views/${entry.slug}`,
-);
+console.log(`[DEBUG] PostCard: Attempting to fetch counts for ${entry.slug}`);
 
 try {
-	const apiUrl = `${Astro.url.origin}/api/views/${entry.slug}`;
-	console.log(`[DEBUG] PostCard: Fetching from ${apiUrl}`);
-	const response = await fetch(apiUrl);
-	console.log(`[DEBUG] PostCard: Response status = ${response.status}`);
-	console.log(`[DEBUG] PostCard: Response ok = ${response.ok}`);
+	// 并行获取views和reads数据
+	const viewsUrl = `${Astro.url.origin}/api/views/${entry.slug}?type=views`;
+	const readsUrl = `${Astro.url.origin}/api/views/${entry.slug}?type=reads`;
 
-	if (response.ok) {
-		const data = await response.json();
-		console.log(`[DEBUG] PostCard: Response data for ${entry.slug} =`, data);
-		viewCount = data.views || 0;
-		readCount = data.reads || 0;
-		console.log(
-			`[DEBUG] PostCard: Final counts for ${entry.slug} - views: ${viewCount}, reads: ${readCount}`,
-		);
-	} else {
-		const errorText = await response.text();
-		console.error(
-			`[DEBUG] PostCard: API Error for ${entry.slug} - Status: ${response.status}, Body: ${errorText}`,
-		);
+	console.log(`[DEBUG] PostCard: Fetching views from ${viewsUrl}`);
+	console.log(`[DEBUG] PostCard: Fetching reads from ${readsUrl}`);
+
+	const [viewsResponse, readsResponse] = await Promise.all([
+		fetch(viewsUrl),
+		fetch(readsUrl),
+	]);
+
+	console.log(
+		`[DEBUG] PostCard: Views response status = ${viewsResponse.status}`,
+	);
+	console.log(
+		`[DEBUG] PostCard: Reads response status = ${readsResponse.status}`,
+	);
+
+	if (viewsResponse.ok) {
+		const viewsData = await viewsResponse.json();
+		viewCount = viewsData.views || 0;
+		console.log(`[DEBUG] PostCard: Views for ${entry.slug} = ${viewCount}`);
 	}
+
+	if (readsResponse.ok) {
+		const readsData = await readsResponse.json();
+		readCount = readsData.reads || 0;
+		console.log(`[DEBUG] PostCard: Reads for ${entry.slug} = ${readCount}`);
+	}
+
+	console.log(
+		`[DEBUG] PostCard: Final counts for ${entry.slug} - views: ${viewCount}, reads: ${readCount}`,
+	);
 } catch (error) {
 	console.error(`[DEBUG] PostCard: Fetch error for ${entry.slug}:`, error);
 	console.error(
