@@ -201,8 +201,6 @@ if (import.meta.env.SSR) {
         
         if (response.ok) {
           sessionStorage.setItem(`${type}-${slug}`, "true");
-          // After incrementing, fetch and update counts immediately
-          fetchCounts();
         } else {
           console.error(`Failed to increment ${type}:`, response.status, response.statusText);
         }
@@ -239,13 +237,13 @@ if (import.meta.env.SSR) {
     }
   };
 
-  // Increment view count on page load
+  // 等待DOM加载完成后更新显示的计数和设置阅读量监听
   document.addEventListener("DOMContentLoaded", () => {
-    console.log(`[DEBUG] Page loaded, starting count operations for ${slug}`);
-    incrementCount("views");
+    console.log(`[DEBUG] Page loaded, fetching updated counts for ${slug}`);
+    // 获取最新的计数用于显示
     fetchCounts();
 
-    // Increment read count when scrolled to bottom
+    // 监听滚动事件来增加阅读量
     let readCountTriggered = false;
     window.addEventListener("scroll", () => {
       if (readCountTriggered) return;
@@ -254,13 +252,13 @@ if (import.meta.env.SSR) {
       const viewportHeight = window.innerHeight;
       const scrollY = window.scrollY;
 
-      // Trigger when scrolled to 50% of the page for easier testing
+      // 滚动到50%时触发阅读量增加
       if (scrollY + viewportHeight >= documentHeight * 0.5) {
         console.log(`[DEBUG] Scroll trigger reached, incrementing read count for ${slug}`);
         incrementCount("reads");
         readCountTriggered = true;
-        // Optionally, remove the event listener after triggering to prevent multiple increments
-        // window.removeEventListener("scroll", arguments.callee);
+        // 增加阅读量后更新显示
+        setTimeout(() => fetchCounts(), 100);
       }
     });
   });
