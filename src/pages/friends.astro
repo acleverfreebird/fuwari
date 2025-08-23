@@ -1,0 +1,67 @@
+---
+import { getCollection } from "astro:content";
+import FriendCard from "@components/FriendCard.astro";
+import I18nKey from "../i18n/i18nKey";
+import { i18n } from "../i18n/translation";
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+
+const friends = await getCollection("friends" as any);
+
+// 按分类分组友链
+const friendsByCategory = friends.reduce(
+	(acc, friend) => {
+		const category = friend.data.category || "其他";
+		if (!acc[category]) {
+			acc[category] = [];
+		}
+		acc[category].push(friend);
+		return acc;
+	},
+	{} as Record<string, typeof friends>,
+);
+---
+
+<MainGridLayout title={i18n(I18nKey.friends)} description={i18n(I18nKey.friendsDescription)}>
+	<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+		<div class="card-base z-10 px-9 py-6 relative w-full">
+			<div class="relative">
+				<div class="flex items-center mb-6">
+					<h1 class="text-3xl font-bold text-[var(--primary)]">
+						{i18n(I18nKey.friends)}
+					</h1>
+				</div>
+				
+				<p class="text-[var(--card-text-color-main)] mb-8">
+					{i18n(I18nKey.friendsDescription)}
+				</p>
+
+				{Object.entries(friendsByCategory).map(([category, categoryFriends]) => (
+					<div class="mb-8">
+						<h2 class="text-xl font-semibold mb-4 text-[var(--card-text-color-main)]">
+							{category}
+						</h2>
+						<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+							{categoryFriends.map((friend) => (
+								<FriendCard
+									title={friend.data.title}
+									url={friend.data.url}
+									avatar={friend.data.avatar}
+									description={friend.data.description}
+									category={friend.data.category}
+								/>
+							))}
+						</div>
+					</div>
+				))}
+
+				{friends.length === 0 && (
+					<div class="text-center py-12">
+						<p class="text-[var(--card-text-color-main)] text-lg">
+							暂无友链，敬请期待！
+						</p>
+					</div>
+				)}
+			</div>
+		</div>
+	</div>
+</MainGridLayout>
