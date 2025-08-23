@@ -8,6 +8,9 @@ interface Props {
 	modifiedTime?: Date;
 	tags?: string[];
 	category?: string;
+	readingTime?: number;
+	excerpt?: string;
+	noindex?: boolean;
 }
 
 const {
@@ -19,6 +22,9 @@ const {
 	modifiedTime,
 	tags = [],
 	category,
+	readingTime,
+	excerpt,
+	noindex = false,
 } = Astro.props;
 
 import { siteConfig } from "@/config";
@@ -48,7 +54,7 @@ if (!ogImage.startsWith("http")) {
 	ogImage = new URL(ogImage, Astro.site).href;
 }
 
-// 结构化数据
+// 增强的结构化数据
 const structuredData: any = {
 	"@context": "https://schema.org",
 	"@type": article ? "BlogPosting" : "WebPage",
@@ -58,6 +64,10 @@ const structuredData: any = {
 		"@type": "Person",
 		name: "freebird2913",
 		url: "https://freebird2913.tech",
+		sameAs: [
+			"https://github.com/acleverfreebird",
+			"https://linux.do/u/freebird2913/summary",
+		],
 	},
 	publisher: {
 		"@type": "Organization",
@@ -65,14 +75,22 @@ const structuredData: any = {
 		logo: {
 			"@type": "ImageObject",
 			url: new URL("/assets/images/avatar.png", Astro.site).href,
+			width: 512,
+			height: 512,
 		},
+		sameAs: ["https://github.com/acleverfreebird"],
 	},
 	mainEntityOfPage: {
 		"@type": "WebPage",
 		"@id": Astro.url.href,
 	},
 	url: Astro.url.href,
-	image: ogImage,
+	image: {
+		"@type": "ImageObject",
+		url: ogImage,
+		width: 1200,
+		height: 630,
+	},
 	inLanguage: "zh-CN",
 };
 
@@ -82,6 +100,8 @@ if (article && publishedTime) {
 
 if (article && modifiedTime) {
 	structuredData.dateModified = modifiedTime.toISOString();
+} else if (article && publishedTime) {
+	structuredData.dateModified = publishedTime.toISOString();
 }
 
 if (article && tags.length > 0) {
@@ -91,6 +111,42 @@ if (article && tags.length > 0) {
 if (article && category) {
 	structuredData.articleSection = category;
 }
+
+if (article && readingTime) {
+	structuredData.timeRequired = `PT${readingTime}M`;
+}
+
+// 添加面包屑导航结构化数据
+const breadcrumbData = {
+	"@context": "https://schema.org",
+	"@type": "BreadcrumbList",
+	itemListElement: [
+		{
+			"@type": "ListItem",
+			position: 1,
+			name: "首页",
+			item: new URL("/", Astro.site).href,
+		},
+	],
+};
+
+if (article) {
+	breadcrumbData.itemListElement.push({
+		"@type": "ListItem",
+		position: 2,
+		name: "文章",
+		item: new URL("/archive", Astro.site).href,
+	});
+
+	if (category) {
+		breadcrumbData.itemListElement.push({
+			"@type": "ListItem",
+			position: 3,
+			name: category,
+			item: Astro.url.href,
+		});
+	}
+}
 ---
 
 <!-- 基础SEO Meta标签 -->
@@ -98,8 +154,16 @@ if (article && category) {
 <meta name="description" content={pageDescription} />
 <meta name="keywords" content={keywords.join(', ')} />
 <meta name="author" content="freebird2913" />
-<meta name="robots" content="index, follow" />
-<meta name="googlebot" content="index, follow" />
+<meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
+<meta name="googlebot" content={noindex ? "noindex, nofollow" : "index, follow"} />
+
+<!-- 增强的SEO Meta标签 -->
+<meta name="theme-color" content="#2563eb" />
+<meta name="language" content="zh-CN" />
+<meta name="revisit-after" content="7 days" />
+<meta name="rating" content="General" />
+<meta name="distribution" content="Global" />
+{article && readingTime && <meta name="reading-time" content={`${readingTime} min`} />}
 
 <!-- Open Graph 标签 -->
 <meta property="og:title" content={pageTitle} />
@@ -137,14 +201,53 @@ if (article && category) {
 
 <!-- 结构化数据 -->
 <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+<script type="application/ld+json" set:html={JSON.stringify(breadcrumbData)} />
+
+<!-- 网站配置结构化数据 -->
+{!article && (
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "freebird2913技术博客",
+    "url": new URL("/", Astro.site).href,
+    "description": "freebird2913的个人技术博客，专注编程学习、数码科技分享",
+    "inLanguage": "zh-CN",
+    "author": {
+      "@type": "Person",
+      "name": "freebird2913"
+    },
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": new URL("/search?q={search_term_string}", Astro.site).href,
+      "query-input": "required name=search_term_string"
+    }
+  })} />
+)}
 
 <!-- 百度站长验证和其他搜索引擎优化 -->
 <meta name="baidu-site-verification" content="" />
 <meta name="google-site-verification" content="" />
 <meta name="msvalidate.01" content="" />
 
+<!-- DNS预解析 -->
+<link rel="dns-prefetch" href="//fonts.googleapis.com" />
+<link rel="dns-prefetch" href="//www.google-analytics.com" />
+
+<!-- 预连接 -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
 <!-- RSS 订阅链接 -->
 <link rel="alternate" type="application/rss+xml" title="freebird2913技术博客 RSS订阅" href={new URL('/rss.xml', Astro.site).href} />
 
+<!-- Sitemap -->
+<link rel="sitemap" type="application/xml" href={new URL('/sitemap.xml', Astro.site).href} />
+
 <!-- Canonical URL -->
 <link rel="canonical" href={Astro.url} />
+
+<!-- 移动端优化 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="format-detection" content="telephone=no" />

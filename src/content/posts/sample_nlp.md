@@ -1,12 +1,17 @@
 ---
-title: 简单NLP的使用
+title: 'Python 自然语言处理入门：从零开始的 NLP 之旅'
 published: 2025-08-13
-description: ''
+description: 'Python 自然语言处理入门教程，从基础概念到实战项目，学习 NLTK 和 spaCy 库，实现情感分析和文本处理。'
 image: ''
-tags: ['Python','AI','NLP']
+tags: ['Python', 'AI', 'NLP', '自然语言处理', 'NLTK', 'spaCy', '情感分析', '机器学习']
 category: 'Python'
-draft: false 
-lang: ''
+draft: false
+lang: 'zh-CN'
+excerpt: '自然语言处理（NLP）让计算机能够理解、分析和生成人类语言。本教程将带你从零开始学习 Python NLP，包括 NLTK 和 spaCy 的使用，并实现一个完整的情感分析项目。'
+keywords: ['自然语言处理', 'Python NLP', 'NLTK教程', 'spaCy使用', '情感分析', '文本挖掘', '分词算法']
+readingTime: 18
+series: 'AI与机器学习'
+seriesOrder: 1
 ---
 # Python自然语言处理入门：从零开始的NLP之旅
 

@@ -1,12 +1,17 @@
 ---
 title: '如何使用 free.ctw.ink 公益API模型站点'
 published: 2025-08-23
-description: '详细介绍如何注册和使用 free.ctw.ink 公益API模型站点，支持多种AI模型包括GPT、Gemini等'
+description: '详细介绍如何注册和使用 free.ctw.ink 公益API模型站点，支持多种AI模型包括GPT、Gemini等，完全免费的AI API服务。'
 image: ''
-tags: ['API', 'AI模型', 'GPT', 'Gemini', '公益服务']
+tags: ['API', 'AI模型', 'GPT', 'Gemini', '公益服务', 'ChatGPT', 'AI开发', '机器学习']
 category: 'AI工具'
 draft: false
 lang: 'zh-CN'
+excerpt: 'free.ctw.ink 是一个优秀的公益API模型服务站点，为开发者和AI爱好者提供了多种主流AI模型的免费访问服务，包括GPT-4o、Gemini 2.0等最新模型。'
+keywords: ['免费AI API', 'GPT API', 'Gemini API', 'AI开发工具', '公益AI服务', '人工智能接口']
+readingTime: 8
+series: 'AI工具使用指南'
+seriesOrder: 1
 ---
 
 # 如何使用 free.ctw.ink 公益API模型站点
