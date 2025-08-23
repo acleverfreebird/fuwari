@@ -22,7 +22,7 @@ export const siteConfig: SiteConfig = {
 		credit: {
 			enable: false, // Display the credit text of the banner image
 			text: "", // Credit text to be displayed
-			url: "https://www.freebird.asia", // (Optional) URL link to the original artwork or artist's page
+			url: "https://freebird2913.tech", // (Optional) URL link to the original artwork or artist's page
 		},
 	},
 	toc: {
@@ -42,6 +42,7 @@ export const siteConfig: SiteConfig = {
 export const navBarConfig: NavBarConfig = {
 	links: [
 		LinkPreset.Home,
+		LinkPreset.Friends,
 		LinkPreset.Archive,
 		LinkPreset.About,
 		{
