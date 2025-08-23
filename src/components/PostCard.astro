@@ -49,8 +49,9 @@ console.log(`[DEBUG] PostCard: Attempting to fetch counts for ${entry.slug}`);
 
 try {
 	// 并行获取views和reads数据
-	const viewsUrl = `${Astro.url.origin}/api/views/${entry.slug}?type=views`;
-	const readsUrl = `${Astro.url.origin}/api/views/${entry.slug}?type=reads`;
+	const baseUrl = Astro.url.origin || "http://localhost:4321";
+	const viewsUrl = `${baseUrl}/api/views/${entry.slug}?type=views`;
+	const readsUrl = `${baseUrl}/api/views/${entry.slug}?type=reads`;
 
 	console.log(`[DEBUG] PostCard: Fetching views from ${viewsUrl}`);
 	console.log(`[DEBUG] PostCard: Fetching reads from ${readsUrl}`);

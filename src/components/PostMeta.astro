@@ -90,7 +90,7 @@ const className = Astro.props.class;
             <Icon name="material-symbols:visibility-rounded" class="text-xl"></Icon>
         </div>
         <span id="view-count" class="text-50 text-sm font-medium">
-            {viewCount > 0 ? `${viewCount} 阅读` : '暂无阅读量'}
+            {viewCount && viewCount > 0 ? `${viewCount} 阅读` : '暂无阅读量'}
         </span>
     </div>
 </div>
