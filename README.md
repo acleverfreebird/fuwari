@@ -6,6 +6,8 @@
 
 A static blog template built with [Astro](https://astro.build).
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/9a4f07ab-a952-45b8-a145-7dc91ddcbafe/deploy-status)](https://app.netlify.com/projects/freebirdblog/deploys)
+
 [**🖥️ Live Demo (Vercel)**](https://fuwari.vercel.app)
 
 ![Preview Image](https://raw.githubusercontent.com/saicaca/resource/main/fuwari/home.png)

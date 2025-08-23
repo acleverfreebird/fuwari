@@ -40,6 +40,13 @@ freebird2913的博客主要包含以下内容：
 当前定制版本：
 ::github{repo="acleverfreebird/fuwari"}
 
+
+### 🛠️ 站点状态
+
+使用Netlify进行部署
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/9a4f07ab-a952-45b8-a145-7dc91ddcbafe/deploy-status)](https://app.netlify.com/projects/freebirdblog/deploys)
+
 ### 🎨 致谢
 
 > #### 关于本站点的图片素材
