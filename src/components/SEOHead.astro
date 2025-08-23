@@ -1,0 +1,150 @@
+---
+interface Props {
+	title?: string;
+	description?: string;
+	image?: string;
+	article?: boolean;
+	publishedTime?: Date;
+	modifiedTime?: Date;
+	tags?: string[];
+	category?: string;
+}
+
+const {
+	title,
+	description,
+	image,
+	article = false,
+	publishedTime,
+	modifiedTime,
+	tags = [],
+	category,
+} = Astro.props;
+
+import { siteConfig } from "@/config";
+
+// 构建页面标题
+let pageTitle = title
+	? `${title} | freebird2913技术博客`
+	: "freebird2913技术博客 - 专注编程学习与数码科技分享";
+
+// 构建页面描述
+let pageDescription =
+	description ||
+	"freebird2913的个人技术博客，专注编程学习、数码科技分享。记录技术成长历程，分享实用编程技巧和数码设备使用心得。";
+
+// 构建关键词
+let keywords = ["freebird2913", "技术博客", "编程学习", "数码科技"];
+if (tags.length > 0) {
+	keywords = [...keywords, ...tags];
+}
+if (category) {
+	keywords.push(category);
+}
+
+// 构建图片URL
+let ogImage = image || "/assets/images/banner.png";
+if (!ogImage.startsWith("http")) {
+	ogImage = new URL(ogImage, Astro.site).href;
+}
+
+// 结构化数据
+const structuredData: any = {
+	"@context": "https://schema.org",
+	"@type": article ? "BlogPosting" : "WebPage",
+	headline: title || pageTitle,
+	description: pageDescription,
+	author: {
+		"@type": "Person",
+		name: "freebird2913",
+		url: "https://freebird2913.tech",
+	},
+	publisher: {
+		"@type": "Organization",
+		name: "freebird2913技术博客",
+		logo: {
+			"@type": "ImageObject",
+			url: new URL("/assets/images/avatar.png", Astro.site).href,
+		},
+	},
+	mainEntityOfPage: {
+		"@type": "WebPage",
+		"@id": Astro.url.href,
+	},
+	url: Astro.url.href,
+	image: ogImage,
+	inLanguage: "zh-CN",
+};
+
+if (article && publishedTime) {
+	structuredData.datePublished = publishedTime.toISOString();
+}
+
+if (article && modifiedTime) {
+	structuredData.dateModified = modifiedTime.toISOString();
+}
+
+if (article && tags.length > 0) {
+	structuredData.keywords = tags.join(", ");
+}
+
+if (article && category) {
+	structuredData.articleSection = category;
+}
+---
+
+<!-- 基础SEO Meta标签 -->
+<title>{pageTitle}</title>
+<meta name="description" content={pageDescription} />
+<meta name="keywords" content={keywords.join(', ')} />
+<meta name="author" content="freebird2913" />
+<meta name="robots" content="index, follow" />
+<meta name="googlebot" content="index, follow" />
+
+<!-- Open Graph 标签 -->
+<meta property="og:title" content={pageTitle} />
+<meta property="og:description" content={pageDescription} />
+<meta property="og:type" content={article ? "article" : "website"} />
+<meta property="og:url" content={Astro.url} />
+<meta property="og:site_name" content="freebird2913技术博客" />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="freebird2913技术博客" />
+<meta property="og:locale" content="zh_CN" />
+
+{article && publishedTime && (
+  <meta property="article:published_time" content={publishedTime.toISOString()} />
+)}
+{article && modifiedTime && (
+  <meta property="article:modified_time" content={modifiedTime.toISOString()} />
+)}
+{article && category && (
+  <meta property="article:section" content={category} />
+)}
+{article && tags.map(tag => (
+  <meta property="article:tag" content={tag} />
+))}
+
+<!-- Twitter Card 标签 -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={pageTitle} />
+<meta name="twitter:description" content={pageDescription} />
+<meta name="twitter:image" content={ogImage} />
+<meta name="twitter:image:alt" content="freebird2913技术博客" />
+<meta name="twitter:creator" content="@freebird2913" />
+<meta name="twitter:site" content="@freebird2913" />
+
+<!-- 结构化数据 -->
+<script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+
+<!-- 百度站长验证和其他搜索引擎优化 -->
+<meta name="baidu-site-verification" content="" />
+<meta name="google-site-verification" content="" />
+<meta name="msvalidate.01" content="" />
+
+<!-- RSS 订阅链接 -->
+<link rel="alternate" type="application/rss+xml" title="freebird2913技术博客 RSS订阅" href={new URL('/rss.xml', Astro.site).href} />
+
+<!-- Canonical URL -->
+<link rel="canonical" href={Astro.url} />

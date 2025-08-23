@@ -83,8 +83,11 @@ const bannerOffset =
 		<title>{pageTitle}</title>
 
 		<meta charset="UTF-8" />
-		<meta name="description" content={description || pageTitle}>
+		<meta name="description" content={description || `freebird2913的个人技术博客，专注编程学习、数码科技分享。记录技术成长历程，分享实用编程技巧和数码设备使用心得。`}>
+		<meta name="keywords" content="freebird2913,个人博客,技术博客,编程学习,数码科技,Astro,前端开发,Python,JavaScript">
 		<meta name="author" content={profileConfig.name}>
+		<meta name="robots" content="index, follow">
+		<meta name="googlebot" content="index, follow">
 
 		<meta property="og:site_name" content={siteConfig.title}>
 		<meta property="og:url" content={Astro.url}>
@@ -185,6 +188,46 @@ const bannerOffset =
 		<slot name="head"></slot>
 
 		<link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`}/>
+		
+		<!-- JSON-LD Structured Data -->
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "Person",
+			"name": "freebird2913",
+			"url": "https://freebird2913.tech",
+			"description": "热爱技术的高中生，专注于编程学习和数码科技分享",
+			"sameAs": [
+				"https://github.com/acleverfreebird"
+			],
+			"knowsAbout": ["编程", "前端开发", "Python", "JavaScript", "数码科技", "Astro"],
+			"jobTitle": "学生",
+			"worksFor": {
+				"@type": "Organization",
+				"name": "高中生"
+			}
+		}
+		</script>
+		
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "Blog",
+			"name": "freebird2913技术博客",
+			"url": "https://freebird2913.tech",
+			"description": "freebird2913的个人技术博客，专注编程学习、数码科技分享",
+			"author": {
+				"@type": "Person",
+				"name": "freebird2913"
+			},
+			"publisher": {
+				"@type": "Person",
+				"name": "freebird2913"
+			},
+			"inLanguage": "zh-CN",
+			"keywords": ["技术博客", "编程学习", "数码科技", "freebird2913", "前端开发", "Python", "JavaScript"]
+		}
+		</script>
 
 	</head>
 	<body class=" min-h-screen transition " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
