@@ -188,40 +188,47 @@ if (import.meta.env.SSR) {
 
 <script define:vars={{ slug: entry.slug }}>
   const incrementCount = async (type) => {
-    const hasCounted = sessionStorage.getItem(`${type}-${slug}`);
-    if (!hasCounted) {
-      try {
-        const startTime = Date.now();
-        const response = await fetch(`/api/views/${slug}?type=${type}`, {
-          method: "POST",
-        });
-        const duration = Date.now() - startTime;
-        
-        console.log(`[DEBUG] Frontend increment ${type} for ${slug} took: ${duration}ms`);
-        
-        if (response.ok) {
-          sessionStorage.setItem(`${type}-${slug}`, "true");
-        } else {
-          console.error(`Failed to increment ${type}:`, response.status, response.statusText);
-        }
-      } catch (error) {
-        console.error(`Error incrementing ${type}:`, error);
+    try {
+      const startTime = Date.now();
+      const response = await fetch(`/api/views/${slug}?type=${type}`, {
+        method: "POST",
+      });
+      const duration = Date.now() - startTime;
+      
+      console.log(`[DEBUG] Frontend increment ${type} for ${slug} took: ${duration}ms`);
+      
+      if (!response.ok) {
+        console.error(`Failed to increment ${type}:`, response.status, response.statusText);
       }
+    } catch (error) {
+      console.error(`Error incrementing ${type}:`, error);
+    }
+  };
+
+  const incrementReadCount = async () => {
+    const hasCounted = sessionStorage.getItem(`reads-${slug}`);
+    if (!hasCounted) {
+      await incrementCount("reads");
+      sessionStorage.setItem(`reads-${slug}`, "true");
     }
   };
 
   const fetchCounts = async () => {
     try {
       const startTime = Date.now();
-      const viewResponse = await fetch(`/api/views/${slug}?type=views`);
-      const readResponse = await fetch(`/api/views/${slug}?type=reads`);
+      const [viewResponse, readResponse] = await Promise.all([
+        fetch(`/api/views/${slug}?type=views`),
+        fetch(`/api/views/${slug}?type=reads`)
+      ]);
       const duration = Date.now() - startTime;
 
       console.log(`[DEBUG] Frontend fetch counts for ${slug} took: ${duration}ms`);
 
       if (viewResponse.ok && readResponse.ok) {
-        const viewData = await viewResponse.json();
-        const readData = await readResponse.json();
+        const [viewData, readData] = await Promise.all([
+          viewResponse.json(),
+          readResponse.json()
+        ]);
 
         const viewCount = viewData.views || 0;
         const readCount = readData.reads || 0;
@@ -237,29 +244,17 @@ if (import.meta.env.SSR) {
     }
   };
 
-  // 等待DOM加载完成后更新显示的计数和设置阅读量监听
+  // 等待DOM加载完成后处理访问和阅读统计
   document.addEventListener("DOMContentLoaded", () => {
-    console.log(`[DEBUG] Page loaded, fetching updated counts for ${slug}`);
+    console.log(`[DEBUG] Page loaded, processing counts for ${slug}`);
+    
+    // 每次访问都增加访问量（views）
+    incrementCount("views");
+    
+    // 第一次访问增加阅读量（reads），使用sessionStorage防重复
+    incrementReadCount();
+    
     // 获取最新的计数用于显示
-    fetchCounts();
-
-    // 监听滚动事件来增加阅读量
-    let readCountTriggered = false;
-    window.addEventListener("scroll", () => {
-      if (readCountTriggered) return;
-
-      const documentHeight = document.documentElement.scrollHeight;
-      const viewportHeight = window.innerHeight;
-      const scrollY = window.scrollY;
-
-      // 滚动到50%时触发阅读量增加
-      if (scrollY + viewportHeight >= documentHeight * 0.5) {
-        console.log(`[DEBUG] Scroll trigger reached, incrementing read count for ${slug}`);
-        incrementCount("reads");
-        readCountTriggered = true;
-        // 增加阅读量后更新显示
-        setTimeout(() => fetchCounts(), 100);
-      }
-    });
+    setTimeout(() => fetchCounts(), 100);
   });
 </script>
