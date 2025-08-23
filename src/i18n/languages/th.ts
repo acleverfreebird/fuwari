@@ -23,6 +23,7 @@ export const th: Translation = {
 	[Key.minutesCount]: "นาที",
 	[Key.postCount]: "โพสต์",
 	[Key.postsCount]: "โพสต์",
+	[Key.viewsCount]: "การดู",
 
 	[Key.themeColor]: "สีของธีม",
 
@@ -35,4 +36,7 @@ export const th: Translation = {
 	[Key.author]: "ผู้เขียน",
 	[Key.publishedAt]: "เผยแพร่เมื่อ",
 	[Key.license]: "สัญญาอนุญาต",
+
+	[Key.friends]: "เพื่อน",
+	[Key.friendsDescription]: "นี่คือเพื่อน ๆ ของฉัน ขอเชิญเยี่ยมชมกัน!",
 };

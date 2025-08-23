@@ -117,12 +117,8 @@
       }
     };
     
-    if (darkModeMediaQuery.addEventListener) {
-      darkModeMediaQuery.addEventListener("change", handleSystemThemeChange);
-    } else {
-      // 兼容老版本浏览器
-      darkModeMediaQuery.addListener(handleSystemThemeChange);
-    }
+    // 使用现代 addEventListener 方法
+    darkModeMediaQuery.addEventListener("change", handleSystemThemeChange);
 
     // 监听自定义主题变化事件（与主题切换组件配合）
     document.addEventListener("themeChanged", () => {

@@ -1,15 +1,15 @@
 ---
-import { getCollection } from "astro:content";
+import { type CollectionEntry, getCollection } from "astro:content";
 import FriendCard from "@components/FriendCard.astro";
 import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 
-const friends = await getCollection("friends" as any);
+const friends = await getCollection("friends");
 
 // 按分类分组友链
 const friendsByCategory = friends.reduce(
-	(acc, friend) => {
+	(acc: Record<string, CollectionEntry<"friends">[]>, friend) => {
 		const category = friend.data.category || "其他";
 		if (!acc[category]) {
 			acc[category] = [];
@@ -17,7 +17,7 @@ const friendsByCategory = friends.reduce(
 		acc[category].push(friend);
 		return acc;
 	},
-	{} as Record<string, typeof friends>,
+	{} as Record<string, CollectionEntry<"friends">[]>,
 );
 ---
 
@@ -45,8 +45,8 @@ const friendsByCategory = friends.reduce(
 								<FriendCard
 									title={friend.data.title}
 									url={friend.data.url}
-									avatar={friend.data.avatar}
-									description={friend.data.description}
+									avatar={friend.data.avatar || ""}
+									description={friend.data.description || ""}
 									category={friend.data.category}
 								/>
 							))}

@@ -9,7 +9,6 @@ interface Props {
 	tags?: string[];
 	category?: string;
 	readingTime?: number;
-	excerpt?: string;
 	noindex?: boolean;
 }
 
@@ -23,11 +22,8 @@ const {
 	tags = [],
 	category,
 	readingTime,
-	excerpt,
 	noindex = false,
 } = Astro.props;
-
-import { siteConfig } from "@/config";
 
 // 构建页面标题
 let pageTitle = title
@@ -200,12 +196,12 @@ if (article) {
 <meta name="twitter:site" content="@freebird2913" />
 
 <!-- 结构化数据 -->
-<script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
-<script type="application/ld+json" set:html={JSON.stringify(breadcrumbData)} />
+<script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+<script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbData)} />
 
 <!-- 网站配置结构化数据 -->
 {!article && (
-  <script type="application/ld+json" set:html={JSON.stringify({
+  <script is:inline type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "freebird2913技术博客",

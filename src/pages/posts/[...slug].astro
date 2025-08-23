@@ -145,7 +145,7 @@ if (import.meta.env.SSR) {
 
 
     <div class="card-base p-6 rounded-[var(--radius-large)] mb-4">
-        <script src="https://giscus.app/client.js"
+        <script is:inline src="https://giscus.app/client.js"
                 data-repo="acleverfreebird/fuwari"
                 data-repo-id="R_kgDOPbwShw"
                 data-category="General"
@@ -186,7 +186,7 @@ if (import.meta.env.SSR) {
 
 </MainGridLayout>
 
-<script define:vars={{ slug: entry.slug }}>
+<script is:inline define:vars={{ slug: entry.slug }}>
   const incrementCount = async (type) => {
     try {
       const startTime = Date.now();
