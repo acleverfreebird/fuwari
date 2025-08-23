@@ -1,10 +1,10 @@
 ---
-title: 'freebird2913博客重新上线 - 从Typecho到Astro的技术升级'
+title: 'freebird2913博客重新上线'
 published: 2025-08-12
 description: 'freebird2913技术博客重新上线！分享从Typecho迁移到Astro框架的经历，以及未来的技术内容规划。'
 image: ''
-tags: ['freebird2913', 'Astro', 'Typecho', '博客搭建', '技术分享']
-category: '技术分享'
+tags: ['Astro', 'Typecho']
+category: 'Astro'
 draft: false
 lang: 'zh-CN'
 ---
