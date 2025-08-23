@@ -235,7 +235,7 @@ if (import.meta.env.SSR) {
 
         const viewCountElement = document.getElementById("view-count");
         if (viewCountElement) {
-          viewCountElement.textContent = `${viewCount} 阅读`;
+          viewCountElement.textContent = `${readCount} 阅读 / ${viewCount} 访问`;
           viewCountElement.classList.remove("hidden");
         }
       }
