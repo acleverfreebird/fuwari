@@ -4,15 +4,17 @@ const robotsTxt = `
 User-agent: *
 Disallow: /_astro/
 Disallow: /api/
+Disallow: /.netlify/
 Allow: /
 
 # 允许搜索引擎抓取主要内容
 Allow: /posts/
 Allow: /about/
 Allow: /archive/
+Allow: /sitemap.xml
 
 # 网站地图
-Sitemap: ${new URL("sitemap-index.xml", import.meta.env.SITE).href}
+Sitemap: ${new URL("sitemap.xml", import.meta.env.SITE).href}
 
 # 抓取延迟设置
 Crawl-delay: 1
