@@ -150,8 +150,8 @@ if (article) {
 <meta name="description" content={pageDescription} />
 <meta name="keywords" content={keywords.join(', ')} />
 <meta name="author" content="freebird2913" />
-<meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
-<meta name="googlebot" content={noindex ? "noindex, nofollow" : "index, follow"} />
+<meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"} />
+<meta name="googlebot" content={noindex ? "noindex, nofollow" : "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"} />
 
 <!-- 增强的SEO Meta标签 -->
 <meta name="theme-color" content="#2563eb" />
@@ -159,6 +159,8 @@ if (article) {
 <meta name="revisit-after" content="7 days" />
 <meta name="rating" content="General" />
 <meta name="distribution" content="Global" />
+<meta name="copyright" content="© 2024 freebird2913技术博客" />
+<meta name="generator" content="Astro" />
 {article && readingTime && <meta name="reading-time" content={`${readingTime} min`} />}
 
 <!-- Open Graph 标签 -->

@@ -1,0 +1,52 @@
+---
+// 必应搜索引擎专用优化组件
+interface Props {
+	url?: string;
+	title?: string;
+}
+
+const { url = Astro.url.href, title } = Astro.props;
+---
+
+<!-- 必应专用优化标签 -->
+<meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large" />
+<meta name="slurp" content="index, follow" />
+
+<!-- 必应内容预览设置 -->
+<meta name="robots" content="max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+
+<!-- 必应特定的结构化数据 -->
+<script is:inline type="application/ld+json" set:html={JSON.stringify({
+	"@context": "https://schema.org",
+	"@type": "WebSite",
+	"name": "freebird2913技术博客",
+	"url": "https://freebird2913.tech/",
+	"potentialAction": {
+		"@type": "SearchAction",
+		"target": {
+			"@type": "EntryPoint",
+			"urlTemplate": "https://freebird2913.tech/search?q={search_term_string}"
+		},
+		"query-input": "required name=search_term_string"
+	},
+	"sameAs": [
+		"https://github.com/acleverfreebird"
+	]
+})} />
+
+<!-- 必应地理位置信息 -->
+<meta name="geo.region" content="CN" />
+<meta name="geo.country" content="China" />
+<meta name="ICBM" content="39.9042, 116.4074" />
+
+<!-- 必应内容分类 -->
+<meta name="classification" content="Technology, Programming, Blog" />
+<meta name="category" content="Technology" />
+<meta name="coverage" content="Worldwide" />
+<meta name="target" content="all" />
+<meta name="HandheldFriendly" content="True" />
+<meta name="MobileOptimized" content="320" />
+
+<!-- 必应索引提示 -->
+<meta name="revisit-after" content="3 days" />
+<meta name="expires" content="never" />

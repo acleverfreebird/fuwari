@@ -86,8 +86,17 @@ const bannerOffset =
 		<meta name="description" content={description || `freebird2913的个人技术博客，专注编程学习、数码科技分享。记录技术成长历程，分享实用编程技巧和数码设备使用心得。`}>
 		<meta name="keywords" content="freebird2913,个人博客,技术博客,编程学习,数码科技,Astro,前端开发,Python,JavaScript">
 		<meta name="author" content={profileConfig.name}>
-		<meta name="robots" content="index, follow">
-		<meta name="googlebot" content="index, follow">
+		<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+		<meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+		
+		<!-- 必应搜索引擎优化 -->
+		<meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large">
+		<meta name="slurp" content="index, follow">
+		<meta name="msvalidate.01" content="请替换为您的必应验证码">
+		
+		<!-- 其他搜索引擎优化 -->
+		<meta name="360-site-verification" content="请替换为您的360验证码">
+		<meta name="sogou_site_verification" content="请替换为您的搜狗验证码">
 
 		<meta property="og:site_name" content={siteConfig.title}>
 		<meta property="og:url" content={Astro.url}>
