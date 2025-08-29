@@ -16,7 +16,13 @@ const { Content } = await render(aboutPost);
 ---
 <MainGridLayout title={i18n(I18nKey.about)} description={i18n(I18nKey.about)}>
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
-        <div class="card-base z-10 px-9 py-6 relative w-full ">
+        <div class="card-base z-10 px-9 py-6 relative w-full">
+            <!-- 关于页面标题 - 必应SEO要求的h1标签 -->
+            <h1 class="text-3xl md:text-4xl font-bold text-black/90 dark:text-white/90 mb-6
+                       before:w-1 before:h-8 before:rounded-md before:bg-[var(--primary)]
+                       before:absolute before:left-[-1.125rem] before:top-[0.5rem] relative">
+                关于 freebird2913
+            </h1>
             <Markdown class="mt-2">
                 <Content />
             </Markdown>
