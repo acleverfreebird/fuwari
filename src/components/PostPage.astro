@@ -8,21 +8,10 @@ const { page } = Astro.props;
 let delay = 0;
 const interval = 50;
 ---
-<!-- 主页标题 - 必应SEO要求的h1标签 -->
-<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
-    <div class="card-base z-10 px-9 py-6 relative w-full">
-        <h1 class="text-3xl md:text-4xl font-bold text-black/90 dark:text-white/90 mb-6
-                   before:w-1 before:h-8 before:rounded-md before:bg-[var(--primary)]
-                   before:absolute before:left-[-1.125rem] before:top-[0.5rem] relative">
-            {page.currentPage === 1 ? "freebird2913技术博客" : `文章列表 - 第 ${page.currentPage} 页`}
-        </h1>
-        <p class="text-lg text-black/70 dark:text-white/70 mb-2">
-            {page.currentPage === 1
-                ? "专注编程学习与数码科技分享，记录技术成长历程"
-                : `共 ${page.total} 篇文章，当前显示第 ${page.currentPage} 页`}
-        </p>
-    </div>
-</div>
+<!-- 隐藏的h1标签，仅用于SEO，不影响视觉效果 -->
+<h1 class="sr-only">
+    {page.currentPage === 1 ? "freebird2913技术博客 - 专注编程学习与数码科技分享" : `文章列表 - 第 ${page.currentPage} 页`}
+</h1>
 
 <div class="transition flex flex-col rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent md:gap-4 mb-4">
     {page.data.map((entry: CollectionEntry<"posts">) => (
