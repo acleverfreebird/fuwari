@@ -161,6 +161,7 @@ export default defineConfig({
 	vite: {
 		build: {
 			rollupOptions: {
+				external: ["@upstash/redis"], // 外部化Upstash Redis依赖，避免构建时解析错误
 				onwarn(warning, warn) {
 					// temporarily suppress this warning
 					if (
@@ -173,6 +174,21 @@ export default defineConfig({
 				},
 			},
 		},
+		// 添加构建后IndexNow推送钩子
+		plugins: [
+			{
+				name: "indexnow-submit",
+				buildEnd() {
+					// 仅在生产构建时提示
+					if (process.env.NODE_ENV === "production") {
+						console.log("[IndexNow] 构建完成，自动推送功能已准备就绪");
+						console.log(
+							'[IndexNow] 使用 "npm run indexnow:submit" 来手动推送所有页面到搜索引擎',
+						);
+					}
+				},
+			},
+		],
 	},
 
 	adapter: netlify(),
