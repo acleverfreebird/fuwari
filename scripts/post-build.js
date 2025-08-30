@@ -118,11 +118,19 @@ function scanPostPages(distDir) {
  */
 async function main() {
 	console.log("[IndexNow] 开始构建后推送...");
+	console.log("[IndexNow] NODE_ENV:", process.env.NODE_ENV);
 
-	// 检查环境
-	if (process.env.NODE_ENV !== "production") {
-		console.log("[IndexNow] 非生产环境，跳过推送");
+	// 检查环境 - 更宽松的条件，支持强制推送
+	const isProduction = process.env.NODE_ENV === "production";
+	const forceSubmit = process.argv.includes("--force");
+
+	if (!isProduction && !forceSubmit) {
+		console.log("[IndexNow] 非生产环境，跳过推送（使用 --force 参数强制推送）");
 		return;
+	}
+
+	if (forceSubmit) {
+		console.log("[IndexNow] 强制推送模式");
 	}
 
 	try {
