@@ -1,0 +1,45 @@
+---
+import SEOHead from "@components/SEOHead.astro";
+import Layout from "./Layout.astro";
+
+interface Props {
+	title?: string;
+	description?: string;
+	image?: string;
+	article?: boolean;
+	publishedTime?: Date;
+	modifiedTime?: Date;
+	tags?: string[];
+	category?: string;
+	readingTime?: number;
+	noindex?: boolean;
+	banner?: string;
+	lang?: string;
+	setOGTypeArticle?: boolean;
+}
+
+const props = Astro.props;
+---
+
+<Layout 
+	title={props.title}
+	banner={props.banner}
+	description={props.description}
+	lang={props.lang}
+	setOGTypeArticle={props.setOGTypeArticle}
+>
+	<SEOHead 
+		title={props.title}
+		description={props.description}
+		image={props.image}
+		article={props.article}
+		publishedTime={props.publishedTime}
+		modifiedTime={props.modifiedTime}
+		tags={props.tags}
+		category={props.category}
+		readingTime={props.readingTime}
+		noindex={props.noindex}
+		slot="head"
+	/>
+	<slot />
+</Layout>

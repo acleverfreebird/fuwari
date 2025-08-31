@@ -13,11 +13,18 @@ export const getStaticPaths = (async ({ paginate }) => {
 // https://github.com/withastro/astro/issues/6507#issuecomment-1489916992
 
 const { page } = Astro.props;
+const title = page.currentPage === 1 ? undefined : `第 ${page.currentPage} 页`;
+const description = "freebird2913的个人技术博客，专注编程学习、数码科技分享";
 
 const len = page.data.length;
 ---
 
-<MainGridLayout>
+<MainGridLayout
+	title={title}
+	description={description}
+	image="/assets/images/banner.png"
+	article={false}
+>
     <PostPage page={page}></PostPage>
     <Pagination class="mx-auto onload-animation" page={page} style={`animation-delay: calc(var(--content-delay) + ${(len)*50}ms)`}></Pagination>
 </MainGridLayout>

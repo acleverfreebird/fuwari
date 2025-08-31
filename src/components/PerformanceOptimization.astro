@@ -1,0 +1,94 @@
+---
+// 性能优化组件 - 专注于Core Web Vitals优化
+---
+
+<!-- Critical Resource Hints - 优化首屏渲染 -->
+<link rel="preload" href="/assets/images/banner.png" as="image" />
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+
+<!-- 优化字体加载 - 减少Layout Shift -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+<!-- 优化图片加载 -->
+<style>
+/* 图片懒加载优化 */
+img {
+	loading: lazy;
+	decoding: async;
+}
+
+/* 关键图片立即加载 */
+#banner img,
+.avatar img,
+.post-cover img {
+	loading: eager;
+	decoding: sync;
+}
+
+/* 字体显示策略优化 */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap; /* 减少字体加载时的闪烁 */
+}
+
+/* 减少累积布局偏移 (CLS) */
+.onload-animation {
+	animation-fill-mode: both;
+	will-change: opacity, transform;
+}
+
+/* 优化滚动性能 */
+.smooth-scroll {
+	scroll-behavior: smooth;
+}
+
+/* 优化CSS动画性能 */
+.transition-optimized {
+	transform: translateZ(0); /* 启用硬件加速 */
+	backface-visibility: hidden;
+	perspective: 1000;
+}
+</style>
+
+<!-- 预加载关键页面 -->
+<script>
+// 预加载重要页面以提升导航速度
+const criticalPages = ['/about/', '/archive/', '/friends/'];
+const observer = new IntersectionObserver((entries) => {
+	entries.forEach(entry => {
+		if (entry.isIntersecting) {
+			criticalPages.forEach(page => {
+				const link = document.createElement('link');
+				link.rel = 'prefetch';
+				link.href = page;
+				document.head.appendChild(link);
+			});
+			observer.disconnect();
+		}
+	});
+});
+
+// 当主要内容区域进入视口时开始预加载
+document.addEventListener('DOMContentLoaded', () => {
+	const mainContent = document.querySelector('main');
+	if (mainContent) observer.observe(mainContent);
+});
+</script>
+
+<!-- Service Worker注册 - 缓存策略优化 -->
+<script>
+if ('serviceWorker' in navigator) {
+	window.addEventListener('load', () => {
+		navigator.serviceWorker.register('/sw.js')
+			.then(registration => {
+				console.log('SW registered: ', registration);
+			})
+			.catch(registrationError => {
+				console.log('SW registration failed: ', registrationError);
+			});
+	});
+}
+</script>

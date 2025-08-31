@@ -2,6 +2,7 @@
 import BackToTop from "@components/control/BackToTop.astro";
 import Footer from "@components/Footer.astro";
 import Navbar from "@components/Navbar.astro";
+import SEOHead from "@components/SEOHead.astro";
 import SideBar from "@components/widget/SideBar.astro";
 import type { MarkdownHeading } from "astro";
 import { Icon } from "astro-icon/components";
@@ -22,6 +23,15 @@ interface Props {
 	lang?: string;
 	setOGTypeArticle?: boolean;
 	headings?: MarkdownHeading[];
+	// SEO相关属性
+	image?: string;
+	article?: boolean;
+	publishedTime?: Date;
+	modifiedTime?: Date;
+	tags?: string[];
+	category?: string;
+	readingTime?: number;
+	noindex?: boolean;
 }
 
 const {
@@ -31,6 +41,15 @@ const {
 	lang,
 	setOGTypeArticle,
 	headings = [],
+	// SEO相关属性
+	image,
+	article,
+	publishedTime,
+	modifiedTime,
+	tags,
+	category,
+	readingTime,
+	noindex,
 } = Astro.props;
 const hasBannerCredit =
 	siteConfig.banner.enable && siteConfig.banner.credit.enable;
@@ -42,9 +61,23 @@ const mainPanelTop = siteConfig.banner.enable
 ---
 
 <Layout title={title} banner={banner} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle}>
+	<!-- 集成SEO优化组件 -->
+	<SEOHead
+		title={title}
+		description={description}
+		image={image}
+		article={article}
+		publishedTime={publishedTime}
+		modifiedTime={modifiedTime}
+		tags={tags}
+		category={category}
+		readingTime={readingTime}
+		noindex={noindex}
+		slot="head"
+	/>
+	<slot slot="head" name="head"></slot>
 
 <!-- Navbar -->
-<slot slot="head" name="head"></slot>
 <div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-0 md:px-4 mx-auto" class:list={[""]}>
     <div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all">
         <Navbar></Navbar>

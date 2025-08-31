@@ -31,6 +31,9 @@ export default defineConfig({
 	base: "/",
 	trailingSlash: "always",
 
+	// 确保manifest.json被复制到构建目录
+	publicDir: "./public",
+
 	integrations: [
 		tailwind({
 			nesting: true,

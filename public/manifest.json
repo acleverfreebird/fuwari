@@ -1,0 +1,48 @@
+{
+	"name": "freebird2913技术博客",
+	"short_name": "freebird博客",
+	"description": "freebird2913的个人技术博客，专注编程学习、数码科技分享",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#ffffff",
+	"theme_color": "#2563eb",
+	"orientation": "portrait-primary",
+	"categories": ["technology", "blog", "programming"],
+	"lang": "zh-CN",
+	"dir": "ltr",
+	"icons": [
+		{
+			"src": "/favicon/favicon-light-192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any maskable"
+		},
+		{
+			"src": "/favicon/favicon-light-128.png",
+			"sizes": "128x128",
+			"type": "image/png"
+		},
+		{
+			"src": "/favicon/favicon-light-32.png",
+			"sizes": "32x32",
+			"type": "image/png"
+		}
+	],
+	"shortcuts": [
+		{
+			"name": "最新文章",
+			"short_name": "文章",
+			"description": "查看最新的技术文章",
+			"url": "/archive/",
+			"icons": [{ "src": "/favicon/favicon-light-32.png", "sizes": "32x32" }]
+		},
+		{
+			"name": "关于作者",
+			"short_name": "关于",
+			"description": "了解作者信息",
+			"url": "/about/",
+			"icons": [{ "src": "/favicon/favicon-light-32.png", "sizes": "32x32" }]
+		}
+	],
+	"prefer_related_applications": false
+}

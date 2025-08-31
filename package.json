@@ -10,6 +10,8 @@
 		"build:prod": "NODE_ENV=production astro build && pagefind --site dist && NODE_ENV=production node scripts/post-build.js",
 		"indexnow:submit": "NODE_ENV=production node scripts/post-build.js",
 		"indexnow:submit-force": "node scripts/post-build.js --force",
+		"seo:check": "node scripts/seo-check.js",
+		"seo:build": "npm run build:prod && npm run seo:check",
 		"preview": "astro preview",
 		"astro": "astro",
 		"type-check": "tsc --noEmit --isolatedDeclarations",

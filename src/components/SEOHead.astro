@@ -156,12 +156,20 @@ if (article) {
 <!-- 增强的SEO Meta标签 -->
 <meta name="theme-color" content="#2563eb" />
 <meta name="language" content="zh-CN" />
-<meta name="revisit-after" content="7 days" />
+<meta name="revisit-after" content="3 days" />
 <meta name="rating" content="General" />
 <meta name="distribution" content="Global" />
-<meta name="copyright" content="© 2024 freebird2913技术博客" />
+<meta name="copyright" content="© 2025 freebird2913技术博客" />
 <meta name="generator" content="Astro" />
 {article && readingTime && <meta name="reading-time" content={`${readingTime} min`} />}
+
+<!-- 性能优化标签 -->
+<meta name="preload" content="font" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="color-scheme" content="light dark" />
+
+<!-- Core Web Vitals优化提示 -->
+<meta name="resource-loading" content="async" />
 
 <!-- Open Graph 标签 -->
 <meta property="og:title" content={pageTitle} />
@@ -253,3 +261,19 @@ if (article) {
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="format-detection" content="telephone=no" />
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="/manifest.json" />
+
+<!-- 性能优化 - 关键资源预加载 -->
+<link rel="preload" href="/assets/images/banner.png" as="image" />
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+
+<!-- 图片优化提示 -->
+<meta name="image-loading" content="lazy" />
+<meta name="image-decoding" content="async" />
+
+<!-- 预取重要页面 -->
+<link rel="prefetch" href="/about/" />
+<link rel="prefetch" href="/archive/" />
+<link rel="prefetch" href="/friends/" />
