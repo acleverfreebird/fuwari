@@ -21,48 +21,56 @@ const redis = new Redis({
 export const GET: APIRoute = async () => {
 	try {
 		const startTime = Date.now();
-
 		console.log("[DEBUG] Starting total count calculation...");
-
-		const keysStartTime = Date.now();
-		const viewKeys = await redis.keys("views:*");
-		const readKeys = await redis.keys("reads:*");
-		const keysDuration = Date.now() - keysStartTime;
-
-		console.log(
-			`[DEBUG] Found keys - Views: ${viewKeys.length}, Reads: ${readKeys.length}, Keys query took: ${keysDuration}ms`,
-		);
 
 		let totalViews = 0;
 		let totalReads = 0;
 
-		if (viewKeys.length > 0) {
-			const viewsStartTime = Date.now();
-			const views = await redis.mget(...viewKeys);
-			const viewsDuration = Date.now() - viewsStartTime;
-
-			totalViews = (views as (string | null)[]).reduce(
-				(sum: number, current: string | null) => sum + (Number(current) || 0),
-				0,
-			);
+		if (redis) {
+			const keysStartTime = Date.now();
+			const viewKeys = await redis.keys("views:*");
+			const readKeys = await redis.keys("reads:*");
+			const keysDuration = Date.now() - keysStartTime;
 
 			console.log(
-				`[DEBUG] Views calculation took: ${viewsDuration}ms, Total views: ${totalViews}`,
-			);
-		}
-
-		if (readKeys.length > 0) {
-			const readsStartTime = Date.now();
-			const reads = await redis.mget(...readKeys);
-			const readsDuration = Date.now() - readsStartTime;
-
-			totalReads = (reads as (string | null)[]).reduce(
-				(sum: number, current: string | null) => sum + (Number(current) || 0),
-				0,
+				`[DEBUG] Found keys - Views: ${viewKeys.length}, Reads: ${readKeys.length}, Keys query took: ${keysDuration}ms`,
 			);
 
+			if (viewKeys.length > 0) {
+				const viewsStartTime = Date.now();
+				const views = await redis.mget(...viewKeys);
+				const viewsDuration = Date.now() - viewsStartTime;
+
+				totalViews = (views as (string | null)[]).reduce(
+					(sum: number, current: string | null) => sum + (Number(current) || 0),
+					0,
+				);
+
+				console.log(
+					`[DEBUG] Views calculation took: ${viewsDuration}ms, Total views: ${totalViews}`,
+				);
+			}
+
+			if (readKeys.length > 0) {
+				const readsStartTime = Date.now();
+				const reads = await redis.mget(...readKeys);
+				const readsDuration = Date.now() - readsStartTime;
+
+				totalReads = (reads as (string | null)[]).reduce(
+					(sum: number, current: string | null) => sum + (Number(current) || 0),
+					0,
+				);
+
+				console.log(
+					`[DEBUG] Reads calculation took: ${readsDuration}ms, Total reads: ${totalReads}`,
+				);
+			}
+		} else {
+			// 当Redis未配置时返回模拟数据
+			totalViews = 1234;
+			totalReads = 567;
 			console.log(
-				`[DEBUG] Reads calculation took: ${readsDuration}ms, Total reads: ${totalReads}`,
+				`[DEBUG] No Redis config - returning mock totals: views=${totalViews}, reads=${totalReads}`,
 			);
 		}
 
