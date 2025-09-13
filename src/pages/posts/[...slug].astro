@@ -247,16 +247,23 @@ if (import.meta.env.SSR) {
   };
 
   // 等待DOM加载完成后处理访问和阅读统计
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     console.log(`[DEBUG] Page loaded, processing counts for ${slug}`);
     
     // 每次访问都增加访问量（views）
-    incrementCount("views");
+    await incrementCount("views");
     
     // 第一次访问增加阅读量（reads），使用sessionStorage防重复
-    incrementReadCount();
+    await incrementReadCount();
     
     // 获取最新的计数用于显示
-    setTimeout(() => fetchCounts(), 100);
+    setTimeout(() => fetchCounts(), 500);
+  });
+
+  // 页面可见性变化时也更新计数
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      setTimeout(() => fetchCounts(), 300);
+    }
   });
 </script>
