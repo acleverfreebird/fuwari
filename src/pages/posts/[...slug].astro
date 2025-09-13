@@ -189,81 +189,110 @@ if (import.meta.env.SSR) {
 </MainGridLayout>
 
 <script is:inline define:vars={{ slug: entry.slug }}>
-  const incrementCount = async (type) => {
-    try {
-      const startTime = Date.now();
-      const response = await fetch(`/api/views/${slug}?type=${type}`, {
-        method: "POST",
-      });
-      const duration = Date.now() - startTime;
+  // 统计管理器
+  class ViewsManager {
+    constructor(slug) {
+      this.slug = slug;
+      this.hasIncrementedViews = false;
+      this.hasIncrementedReads = false;
+    }
+
+    async incrementViews() {
+      if (this.hasIncrementedViews) return;
       
-      console.log(`[DEBUG] Frontend increment ${type} for ${slug} took: ${duration}ms`);
-      
-      if (!response.ok) {
-        console.error(`Failed to increment ${type}:`, response.status, response.statusText);
+      try {
+        const response = await fetch(`/api/views/${this.slug}?type=views`, {
+          method: "POST",
+        });
+        
+        if (response.ok) {
+          this.hasIncrementedViews = true;
+          console.log(`[VIEWS] Incremented views for ${this.slug}`);
+        } else {
+          console.error(`[VIEWS] Failed to increment: ${response.status}`);
+        }
+      } catch (error) {
+        console.error(`[VIEWS] Error incrementing views:`, error);
       }
-    } catch (error) {
-      console.error(`Error incrementing ${type}:`, error);
     }
-  };
 
-  const incrementReadCount = async () => {
-    const hasCounted = sessionStorage.getItem(`reads-${slug}`);
-    if (!hasCounted) {
-      await incrementCount("reads");
-      sessionStorage.setItem(`reads-${slug}`, "true");
+    async incrementReads() {
+      // 使用sessionStorage防止同一会话重复计算阅读量
+      const sessionKey = `reads-${this.slug}`;
+      if (this.hasIncrementedReads || sessionStorage.getItem(sessionKey)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/views/${this.slug}?type=reads`, {
+          method: "POST",
+        });
+        
+        if (response.ok) {
+          this.hasIncrementedReads = true;
+          sessionStorage.setItem(sessionKey, "true");
+          console.log(`[READS] Incremented reads for ${this.slug}`);
+        } else {
+          console.error(`[READS] Failed to increment: ${response.status}`);
+        }
+      } catch (error) {
+        console.error(`[READS] Error incrementing reads:`, error);
+      }
     }
-  };
 
-  const fetchCounts = async () => {
-    try {
-      const startTime = Date.now();
-      const [viewResponse, readResponse] = await Promise.all([
-        fetch(`/api/views/${slug}?type=views`),
-        fetch(`/api/views/${slug}?type=reads`)
-      ]);
-      const duration = Date.now() - startTime;
-
-      console.log(`[DEBUG] Frontend fetch counts for ${slug} took: ${duration}ms`);
-
-      if (viewResponse.ok && readResponse.ok) {
-        const [viewData, readData] = await Promise.all([
-          viewResponse.json(),
-          readResponse.json()
+    async updateDisplayCounts() {
+      try {
+        const [viewResponse, readResponse] = await Promise.all([
+          fetch(`/api/views/${this.slug}?type=views`),
+          fetch(`/api/views/${this.slug}?type=reads`)
         ]);
 
-        const viewCount = viewData.views || 0;
-        const readCount = readData.reads || 0;
+        if (viewResponse.ok && readResponse.ok) {
+          const [viewData, readData] = await Promise.all([
+            viewResponse.json(),
+            readResponse.json()
+          ]);
 
-        const viewCountElement = document.getElementById("view-count");
-        if (viewCountElement) {
-          viewCountElement.textContent = `${readCount} 阅读 / ${viewCount} 访问`;
-          viewCountElement.classList.remove("hidden");
+          const viewCount = viewData.views || 0;
+          const readCount = readData.reads || 0;
+
+          const viewCountElement = document.getElementById("view-count");
+          if (viewCountElement) {
+            viewCountElement.textContent = `${readCount} 阅读 / ${viewCount} 访问`;
+          }
+          
+          console.log(`[DISPLAY] Updated counts: ${readCount} reads / ${viewCount} views`);
         }
+      } catch (error) {
+        console.error("[DISPLAY] Error updating display counts:", error);
       }
-    } catch (error) {
-      console.error("Error fetching counts:", error);
     }
-  };
+  }
 
-  // 等待DOM加载完成后处理访问和阅读统计
+  const viewsManager = new ViewsManager(slug);
+
+  // 页面加载完成后处理统计
   document.addEventListener("DOMContentLoaded", async () => {
-    console.log(`[DEBUG] Page loaded, processing counts for ${slug}`);
+    console.log(`[PAGE] Loading ${slug}`);
     
-    // 每次访问都增加访问量（views）
-    await incrementCount("views");
+    // 立即增加访问量
+    await viewsManager.incrementViews();
     
-    // 第一次访问增加阅读量（reads），使用sessionStorage防重复
-    await incrementReadCount();
+    // 延迟增加阅读量（假设用户开始阅读）
+    setTimeout(() => {
+      viewsManager.incrementReads();
+    }, 2000); // 2秒后认为用户开始阅读
     
-    // 获取最新的计数用于显示
-    setTimeout(() => fetchCounts(), 500);
+    // 更新显示的计数
+    setTimeout(() => {
+      viewsManager.updateDisplayCounts();
+    }, 500);
   });
 
-  // 页面可见性变化时也更新计数
+  // 页面重新获得焦点时更新显示计数
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
-      setTimeout(() => fetchCounts(), 300);
+      setTimeout(() => viewsManager.updateDisplayCounts(), 100);
     }
   });
 </script>

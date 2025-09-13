@@ -51,12 +51,19 @@ export const GET: APIRoute = async ({ params, request }) => {
 };
 
 export const POST: APIRoute = async ({ params, request }) => {
-	const { slug } = params;
+	let { slug } = params;
 	const url = new URL(request.url);
 	const type = url.searchParams.get("type") || "views"; // Default to 'views'
 
 	if (!slug) {
 		return new Response("Missing slug", { status: 400 });
+	}
+
+	// 清理 slug，移除尾部斜杠和多余的斜杠
+	slug = slug.replace(/\/+/g, "/").replace(/\/$/, "");
+
+	if (!slug) {
+		return new Response("Invalid slug", { status: 400 });
 	}
 
 	try {
