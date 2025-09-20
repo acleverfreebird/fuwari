@@ -1,4 +1,45 @@
 ---
+// Schema.org 结构化数据类型定义
+interface SchemaOrgData {
+	"@context": string;
+	"@type": string;
+	headline: string;
+	description: string;
+	author: {
+		"@type": string;
+		name: string;
+		url: string;
+		sameAs: string[];
+	};
+	publisher: {
+		"@type": string;
+		name: string;
+		logo: {
+			"@type": string;
+			url: string;
+			width: number;
+			height: number;
+		};
+		sameAs: string[];
+	};
+	mainEntityOfPage: {
+		"@type": string;
+		"@id": string;
+	};
+	url: string;
+	image: {
+		"@type": string;
+		url: string;
+		width: number;
+		height: number;
+	};
+	inLanguage: string;
+	datePublished?: string;
+	dateModified?: string;
+	keywords?: string;
+	articleSection?: string;
+	timeRequired?: string;
+}
 interface Props {
 	title?: string;
 	description?: string;
@@ -51,7 +92,7 @@ if (!ogImage.startsWith("http")) {
 }
 
 // 增强的结构化数据
-const structuredData: any = {
+const structuredData: SchemaOrgData = {
 	"@context": "https://schema.org",
 	"@type": article ? "BlogPosting" : "WebPage",
 	headline: title || pageTitle,

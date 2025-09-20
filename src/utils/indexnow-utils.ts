@@ -21,7 +21,7 @@ export interface IndexNowResponse {
 		endpoint?: string;
 		status?: number;
 		statusText?: string;
-		error?: any;
+		error?: unknown;
 	}>;
 }
 
@@ -194,7 +194,7 @@ export function isDevMode(): boolean {
 		return import.meta.env.DEV === true;
 	}
 	// 在Node.js中检查环境
-	if (typeof process !== "undefined" && process.env) {
+	if (typeof process !== "undefined" && process?.env) {
 		return process.env.NODE_ENV === "development";
 	}
 	// 默认返回false（生产环境）

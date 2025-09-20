@@ -1,5 +1,4 @@
 import { getSortedPosts } from "@utils/content-utils";
-import { getPostUrlBySlug } from "@utils/url-utils";
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async ({ site }) => {

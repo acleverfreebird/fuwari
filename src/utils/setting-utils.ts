@@ -10,12 +10,12 @@ import type { LIGHT_DARK_MODE } from "@/types/config";
 export function getDefaultHue(): number {
 	const fallback = "250";
 	const configCarrier = document.getElementById("config-carrier");
-	return Number.parseInt(configCarrier?.dataset.hue || fallback);
+	return Number.parseInt(configCarrier?.dataset?.hue || fallback, 10);
 }
 
 export function getHue(): number {
 	const stored = localStorage.getItem("hue");
-	return stored ? Number.parseInt(stored) : getDefaultHue();
+	return stored ? Number.parseInt(stored, 10) : getDefaultHue();
 }
 
 export function setHue(hue: number): void {
@@ -76,7 +76,7 @@ export function setTheme(theme: LIGHT_DARK_MODE): void {
 			"iframe.giscus-frame",
 		) as HTMLIFrameElement;
 
-		if (giscusFrame && giscusFrame.contentWindow) {
+		if (giscusFrame?.contentWindow) {
 			let giscusTheme: string;
 			switch (theme) {
 				case LIGHT_MODE:
@@ -85,7 +85,6 @@ export function setTheme(theme: LIGHT_DARK_MODE): void {
 				case DARK_MODE:
 					giscusTheme = "dark";
 					break;
-				case AUTO_MODE:
 				default:
 					giscusTheme = "preferred_color_scheme";
 					break;
