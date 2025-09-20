@@ -47,16 +47,23 @@ const getRedisClient = (): Redis | null => {
 export const incrementCount = async (key: string): Promise<number> => {
 	const redis = getRedisClient();
 	if (!redis) {
-		console.warn(`[REDIS] Cannot increment ${key} - Redis not available`);
+		console.warn(`[REDIS] ⚠️  Cannot increment ${key} - Redis not available`);
 		return 1; // 返回默认值
 	}
 
 	try {
+		const startTime = Date.now();
 		const count = await redis.incr(key);
-		console.log(`[REDIS] Incremented ${key} to ${count}`);
+		const duration = Date.now() - startTime;
+
+		console.log(`[REDIS] ✅ Incremented ${key} to ${count} (${duration}ms)`);
 		return count;
 	} catch (error) {
-		console.error(`[REDIS] Error incrementing ${key}:`, error);
+		console.error(`[REDIS] ❌ Error incrementing ${key}:`, error);
+
+		// 尝试重新初始化Redis连接
+		cachedRedisClient = undefined;
+
 		return 1;
 	}
 };
