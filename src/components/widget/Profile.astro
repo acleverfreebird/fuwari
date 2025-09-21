@@ -12,13 +12,6 @@ let totalReads = 0;
 let dailyQuote = { content: "加载中...", author: "" };
 
 if (import.meta.env.SSR) {
-	// 获取每日一言
-	try {
-		dailyQuote = await getDailyQuote();
-	} catch (error) {
-		console.error("[DEBUG] Profile: Failed to fetch daily quote:", error);
-	}
-
 	// 获取总阅读量和访问量
 	try {
 		console.log(
@@ -71,10 +64,8 @@ if (import.meta.env.SSR) {
         <div class="h-1 w-5 bg-[var(--primary)] mx-auto rounded-full mb-2 transition"></div>
         <div class="text-center text-neutral-400 mb-2.5 transition">{config.bio}</div>
         <div class="quote-container border-t border-neutral-200 dark:border-neutral-700 pt-2 mb-2.5">
-            <div class="text-center text-sm italic text-neutral-500 dark:text-neutral-400">{dailyQuote.content}</div>
-            {dailyQuote.author &&
-                <div class="text-center text-xs text-neutral-400 dark:text-neutral-500 mt-1">—— {dailyQuote.author}</div>
-            }
+            <div id="quote-content" class="text-center text-sm italic text-neutral-500 dark:text-neutral-400">{dailyQuote.content}</div>
+            <div id="quote-author" class="text-center text-xs text-neutral-400 dark:text-neutral-500 mt-1" style="display: none;"></div>
         </div>
         <div class="flex gap-2 justify-center mb-1">
             {config.links.length > 1 && config.links.map(item =>
@@ -95,6 +86,31 @@ if (import.meta.env.SSR) {
 </div>
 
 <script>
+  const fetchDailyQuote = async () => {
+    try {
+      const response = await fetch("https://v1.hitokoto.cn/");
+      if (response.ok) {
+        const data = await response.json();
+        const quoteContent = document.getElementById("quote-content");
+        const quoteAuthor = document.getElementById("quote-author");
+        if (quoteContent) {
+          quoteContent.textContent = data.hitokoto;
+        }
+        if (quoteAuthor) {
+          const author = data.from_who || data.from;
+          if (author) {
+            quoteAuthor.textContent = `—— ${author}`;
+            quoteAuthor.style.display = "block";
+          } else {
+            quoteAuthor.style.display = "none";
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching daily quote:", error);
+    }
+  };
+
   const fetchTotalCounts = async () => {
     try {
       console.log("[DEBUG] Profile Client: Fetching total counts from /api/views/total");
@@ -123,10 +139,11 @@ if (import.meta.env.SSR) {
       console.error("[DEBUG] Profile Client: Fetch error:", error);
     }
   };
-
-  document.addEventListener("DOMContentLoaded", () => {
-    console.log("[DEBUG] Profile Client: DOM loaded, fetching total counts");
-    fetchTotalCounts();
-  });
+ 
+   document.addEventListener("DOMContentLoaded", () => {
+     console.log("[DEBUG] Profile Client: DOM loaded, fetching total counts");
+     fetchTotalCounts();
+     fetchDailyQuote();});
+</script>
 </script>
 
