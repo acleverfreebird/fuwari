@@ -1,4 +1,7 @@
 ---
+// 服务器端读取音乐数据
+import fs from "node:fs/promises";
+import path from "node:path";
 import { siteConfig } from "@/config";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import SEOLayout from "@/layouts/SEOLayout.astro";
@@ -10,10 +13,17 @@ import {
 	parseNeteaseMusicUrl,
 } from "@/utils/music-utils";
 
-// 获取音乐数据
-const response = await fetch(new URL("/data/music.json", Astro.url.origin));
-const musicData: MusicData = await response.json();
-const songs = musicData.songs;
+// 读取 JSON 文件
+const musicDataPath = path.resolve("./public/data/music.json");
+let songs: MusicItem[] = [];
+
+try {
+	const musicData = JSON.parse(await fs.readFile(musicDataPath, "utf-8"));
+	songs = musicData.songs;
+} catch (error) {
+	console.error("读取音乐数据文件失败:", error);
+	songs = [];
+}
 
 // 处理表单提交
 let message = "";

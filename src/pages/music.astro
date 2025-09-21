@@ -1,4 +1,7 @@
 ---
+// 服务器端读取音乐数据
+import fs from "node:fs/promises";
+import path from "node:path";
 import MusicCard from "@/components/MusicCard.astro";
 import MusicPlayer from "@/components/MusicPlayer.svelte";
 import { siteConfig } from "@/config";
@@ -6,10 +9,17 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import SEOLayout from "@/layouts/SEOLayout.astro";
 import type { MusicData, MusicItem } from "@/types/config";
 
-// 直接导入音乐数据
-import musicData from "../../public/data/music.json";
+// 读取 JSON 文件
+const musicDataPath = path.resolve("./public/data/music.json");
+let songs: MusicItem[] = [];
 
-const songs = musicData.songs;
+try {
+	const musicData = JSON.parse(await fs.readFile(musicDataPath, "utf-8"));
+	songs = musicData.songs;
+} catch (error) {
+	console.error("读取音乐数据文件失败:", error);
+	songs = [];
+}
 
 // 页面元数据
 const title = "音乐墙";
