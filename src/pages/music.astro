@@ -6,9 +6,9 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import SEOLayout from "@/layouts/SEOLayout.astro";
 import type { MusicData, MusicItem } from "@/types/config";
 
-// 获取音乐数据
-const response = await fetch(new URL("/data/music.json", Astro.url.origin));
-const musicData: MusicData = await response.json();
+// 直接导入音乐数据
+import musicData from "../../public/data/music.json";
+
 const songs = musicData.songs;
 
 // 页面元数据
@@ -47,14 +47,10 @@ const description = "我喜欢的音乐收藏，随时聆听美好旋律";
         </div>
       </div>
     </div>
-      
-      </div>
-    </div>
     
     <!-- 音乐播放器组件 -->
     <div class="onload-animation" style="animation-delay: calc(var(--content-delay) + 500ms)">
       <MusicPlayer client:load songs={songs} />
-    </div>
     </div>
   </MainGridLayout>
 </SEOLayout>
