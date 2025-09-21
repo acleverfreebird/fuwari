@@ -39,4 +39,7 @@ export const zh_CN: Translation = {
 
 	[Key.friends]: "友链",
 	[Key.friendsDescription]: "这些是我的朋友们，欢迎大家互相访问！",
+
+	[Key.music]: "音乐墙",
+	[Key.musicDescription]: "我收藏的音乐，随时聆听美好旋律",
 };

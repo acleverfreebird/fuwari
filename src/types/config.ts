@@ -49,6 +49,7 @@ export enum LinkPreset {
 	Archive = 1,
 	About = 2,
 	Friends = 3,
+	Music = 4,
 }
 
 export type NavBarLink = {
@@ -100,4 +101,19 @@ export type BlogPostData = {
 
 export type ExpressiveCodeConfig = {
 	theme: string;
+};
+
+export type MusicItem = {
+	id: string;
+	title: string;
+	artist: string;
+	album: string;
+	coverUrl: string;
+	musicUrl: string;
+	duration: string;
+	description?: string;
+};
+
+export type MusicData = {
+	songs: MusicItem[];
 };

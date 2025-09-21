@@ -1,0 +1,270 @@
+---
+import { siteConfig } from "@/config";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import SEOLayout from "@/layouts/SEOLayout.astro";
+import type { MusicData, MusicItem } from "@/types/config";
+import {
+	createNeteaseMusicItem,
+	isMusicExists,
+	parseMusicInfoFromHtml,
+	parseNeteaseMusicUrl,
+} from "@/utils/music-utils";
+
+// 获取音乐数据
+const response = await fetch(new URL("/data/music.json", Astro.url.origin));
+const musicData: MusicData = await response.json();
+const songs = musicData.songs;
+
+// 处理表单提交
+let message = "";
+let success = false;
+let newSong: MusicItem | null = null;
+
+if (Astro.request.method === "POST") {
+	try {
+		const formData = await Astro.request.formData();
+		const inputType = formData.get("inputType") as string;
+		const input = formData.get("input") as string;
+
+		if (!input) {
+			message = "请输入网易云音乐外链或HTML代码";
+		} else {
+			let musicInfo = null;
+
+			if (inputType === "url") {
+				const id = parseNeteaseMusicUrl(input);
+				if (!id) {
+					message = "无法从URL中提取音乐ID";
+				} else {
+					// 需要额外信息
+					const title = formData.get("title") as string;
+					const artist = formData.get("artist") as string;
+
+					if (!title || !artist) {
+						message = "请提供歌曲标题和艺术家";
+					} else {
+						musicInfo = { id, title, artist };
+					}
+				}
+			} else {
+				// HTML
+				musicInfo = parseMusicInfoFromHtml(input);
+				if (!musicInfo) {
+					message = "无法从HTML中提取音乐信息";
+				}
+			}
+
+			if (musicInfo) {
+				const { id, title, artist } = musicInfo;
+
+				// 检查是否已存在
+				if (isMusicExists(songs, id)) {
+					message = `歌曲《${title}》已存在于音乐列表中`;
+				} else {
+					// 创建音乐项
+					const album = (formData.get("album") as string) || "未知专辑";
+					const description =
+						(formData.get("description") as string) || `${title} - ${artist}`;
+
+					newSong = createNeteaseMusicItem(id, title, artist, {
+						album,
+						description,
+					});
+
+					message = `成功解析歌曲：《${title}》- ${artist}`;
+					success = true;
+
+					// 这里不会真正写入文件，因为这需要在服务器端实现
+					// 只会显示解析结果，供用户复制JSON数据
+				}
+			}
+		}
+	} catch (error) {
+		console.error("处理表单提交时出错:", error);
+		message = "处理表单时出错";
+	}
+}
+
+// 页面元数据
+const title = "音乐管理";
+const description = "添加网易云音乐到音乐墙";
+---
+
+<SEOLayout title={title} description={description}>
+  <MainGridLayout>
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
+      <div class="card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full">
+        <!-- 标题 -->
+        <div class="relative onload-animation">
+          <h1 class="transition w-full block font-bold mb-3
+                    text-3xl md:text-[2.25rem]/[2.75rem]
+                    text-black/90 dark:text-white/90
+                    md:before:w-1 before:h-5 before:rounded-md before:bg-[var(--primary)]
+                    before:absolute before:top-[0.75rem] before:left-[-1.125rem]">
+            音乐管理
+          </h1>
+        </div>
+        
+        <!-- 描述 -->
+        <div class="onload-animation mb-8">
+          <p class="text-black/70 dark:text-white/70">在这里可以添加网易云音乐到您的音乐墙中。输入网易云音乐外链或HTML代码，解析出音乐信息后添加到列表。</p>
+          <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mt-5"></div>
+        </div>
+        
+        <!-- 表单 -->
+        <div class="onload-animation">
+          <form method="POST" class="space-y-4">
+            <div class="mb-4">
+              <label class="block text-black/80 dark:text-white/80 mb-2">输入类型</label>
+              <div class="flex space-x-4">
+                <label class="flex items-center">
+                  <input type="radio" name="inputType" value="url" checked class="mr-2">
+                  <span class="text-black/70 dark:text-white/70">网易云音乐外链</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="radio" name="inputType" value="html" class="mr-2">
+                  <span class="text-black/70 dark:text-white/70">HTML代码</span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <label for="input" class="block text-black/80 dark:text-white/80 mb-2">输入内容</label>
+              <textarea id="input" name="input" rows="6" class="w-full p-2 rounded-md bg-black/5 dark:bg-white/10 text-black/90 dark:text-white/90 border border-black/10 dark:border-white/10" placeholder="粘贴网易云音乐外链URL或HTML代码"></textarea>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label for="title" class="block text-black/80 dark:text-white/80 mb-2">歌曲标题 (URL模式下必填)</label>
+                <input type="text" id="title" name="title" class="w-full p-2 rounded-md bg-black/5 dark:bg-white/10 text-black/90 dark:text-white/90 border border-black/10 dark:border-white/10">
+              </div>
+              
+              <div>
+                <label for="artist" class="block text-black/80 dark:text-white/80 mb-2">艺术家 (URL模式下必填)</label>
+                <input type="text" id="artist" name="artist" class="w-full p-2 rounded-md bg-black/5 dark:bg-white/10 text-black/90 dark:text-white/90 border border-black/10 dark:border-white/10">
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label for="album" class="block text-black/80 dark:text-white/80 mb-2">专辑 (可选)</label>
+                <input type="text" id="album" name="album" class="w-full p-2 rounded-md bg-black/5 dark:bg-white/10 text-black/90 dark:text-white/90 border border-black/10 dark:border-white/10">
+              </div>
+              
+              <div>
+                <label for="description" class="block text-black/80 dark:text-white/80 mb-2">描述 (可选)</label>
+                <input type="text" id="description" name="description" class="w-full p-2 rounded-md bg-black/5 dark:bg-white/10 text-black/90 dark:text-white/90 border border-black/10 dark:border-white/10">
+              </div>
+            </div>
+            
+            <div>
+              <button type="submit" class="px-6 py-2 bg-[var(--primary)] text-white rounded-md hover:bg-opacity-90 transition">解析音乐信息</button>
+            </div>
+          </form>
+        </div>
+        
+        <!-- 解析结果 -->
+        {message && (
+          <div class={`mt-6 p-4 rounded-md ${success ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200' : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200'}`}>
+            <p>{message}</p>
+          </div>
+        )}
+        
+        {newSong && (
+          <div class="mt-6">
+            <h2 class="text-xl font-bold text-black/90 dark:text-white/90 mb-2">解析结果</h2>
+            <p class="mb-2 text-black/70 dark:text-white/70">您可以将以下JSON数据添加到 <code>public/data/music.json</code> 文件中的 songs 数组：</p>
+            <pre class="p-4 rounded-md bg-black/5 dark:bg-white/10 text-black/90 dark:text-white/90 border border-black/10 dark:border-white/10 overflow-auto">
+{JSON.stringify(newSong, null, 2)}
+            </pre>
+            
+            <div class="mt-4">
+              <button id="copyJson" class="px-6 py-2 bg-[var(--primary)] text-white rounded-md hover:bg-opacity-90 transition">复制JSON</button>
+              <span id="copyMessage" class="ml-2 text-black/70 dark:text-white/70 hidden">已复制到剪贴板</span>
+            </div>
+          </div>
+        )}
+        
+        <!-- 现有音乐列表 -->
+        <div class="mt-10">
+          <h2 class="text-xl font-bold text-black/90 dark:text-white/90 mb-2">现有音乐列表</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+              <thead>
+                <tr class="bg-black/5 dark:bg-white/10">
+                  <th class="p-2 text-left text-black/80 dark:text-white/80 border border-black/10 dark:border-white/10">ID</th>
+                  <th class="p-2 text-left text-black/80 dark:text-white/80 border border-black/10 dark:border-white/10">标题</th>
+                  <th class="p-2 text-left text-black/80 dark:text-white/80 border border-black/10 dark:border-white/10">艺术家</th>
+                  <th class="p-2 text-left text-black/80 dark:text-white/80 border border-black/10 dark:border-white/10">专辑</th>
+                  <th class="p-2 text-left text-black/80 dark:text-white/80 border border-black/10 dark:border-white/10">时长</th>
+                </tr>
+              </thead>
+              <tbody>
+                {songs.map(song => (
+                  <tr class="hover:bg-black/5 hover:dark:bg-white/5">
+                    <td class="p-2 text-black/70 dark:text-white/70 border border-black/10 dark:border-white/10">{song.id}</td>
+                    <td class="p-2 text-black/70 dark:text-white/70 border border-black/10 dark:border-white/10">{song.title}</td>
+                    <td class="p-2 text-black/70 dark:text-white/70 border border-black/10 dark:border-white/10">{song.artist}</td>
+                    <td class="p-2 text-black/70 dark:text-white/70 border border-black/10 dark:border-white/10">{song.album}</td>
+                    <td class="p-2 text-black/70 dark:text-white/70 border border-black/10 dark:border-white/10">{song.duration}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </MainGridLayout>
+</SEOLayout>
+
+<script>
+  // 复制JSON数据的功能
+  document.addEventListener('DOMContentLoaded', () => {
+    const copyButton = document.getElementById('copyJson');
+    const copyMessage = document.getElementById('copyMessage');
+    const preElement = document.querySelector('pre');
+    
+    if (copyButton && copyMessage && preElement) {
+      copyButton.addEventListener('click', () => {
+        // 获取JSON文本
+        const jsonText = preElement.textContent;
+        
+        // 复制到剪贴板
+        navigator.clipboard.writeText(jsonText)
+          .then(() => {
+            // 显示成功消息
+            copyMessage.classList.remove('hidden');
+            setTimeout(() => {
+              copyMessage.classList.add('hidden');
+            }, 2000);
+          })
+          .catch(err => {
+            console.error('复制失败:', err);
+          });
+      });
+    }
+    
+    // 根据输入类型切换必填字段
+    const radioButtons = document.querySelectorAll('input[name="inputType"]');
+    const titleInput = document.getElementById('title');
+    const artistInput = document.getElementById('artist');
+    
+    if (radioButtons.length && titleInput && artistInput) {
+      radioButtons.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          const isUrl = (e.target as HTMLInputElement).value === 'url';
+          
+          if (isUrl) {
+            titleInput.setAttribute('required', '');
+            artistInput.setAttribute('required', '');
+          } else {
+            titleInput.removeAttribute('required');
+            artistInput.removeAttribute('required');
+          }
+        });
+      });
+    }
+  });
+</script>

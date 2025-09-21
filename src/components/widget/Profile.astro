@@ -1,6 +1,7 @@
 ---
 import { Icon } from "astro-icon/components";
 import { profileConfig } from "../../config";
+import { getDailyQuote } from "../../utils/quote-utils";
 import { url } from "../../utils/url-utils";
 import ImageWrapper from "../misc/ImageWrapper.astro";
 
@@ -8,8 +9,17 @@ const config = profileConfig;
 
 let totalViews = 0;
 let totalReads = 0;
+let dailyQuote = { content: "加载中...", author: "" };
 
 if (import.meta.env.SSR) {
+	// 获取每日一言
+	try {
+		dailyQuote = await getDailyQuote();
+	} catch (error) {
+		console.error("[DEBUG] Profile: Failed to fetch daily quote:", error);
+	}
+
+	// 获取总阅读量和访问量
 	try {
 		console.log(
 			"[DEBUG] Profile: Fetching total counts from:",
@@ -60,6 +70,12 @@ if (import.meta.env.SSR) {
         <div class="font-bold text-xl text-center mb-1 dark:text-neutral-50 transition">{config.name}</div>
         <div class="h-1 w-5 bg-[var(--primary)] mx-auto rounded-full mb-2 transition"></div>
         <div class="text-center text-neutral-400 mb-2.5 transition">{config.bio}</div>
+        <div class="quote-container border-t border-neutral-200 dark:border-neutral-700 pt-2 mb-2.5">
+            <div class="text-center text-sm italic text-neutral-500 dark:text-neutral-400">{dailyQuote.content}</div>
+            {dailyQuote.author &&
+                <div class="text-center text-xs text-neutral-400 dark:text-neutral-500 mt-1">—— {dailyQuote.author}</div>
+            }
+        </div>
         <div class="flex gap-2 justify-center mb-1">
             {config.links.length > 1 && config.links.map(item =>
                     <a rel="me" aria-label={item.name} href={item.url} target="_blank" class="btn-regular rounded-lg h-10 w-10 active:scale-90">

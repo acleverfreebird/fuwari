@@ -1,0 +1,210 @@
+---
+import MusicCard from "@/components/MusicCard.astro";
+import MusicPlayer from "@/components/MusicPlayer.svelte";
+import { siteConfig } from "@/config";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import SEOLayout from "@/layouts/SEOLayout.astro";
+import type { MusicData, MusicItem } from "@/types/config";
+
+// 获取音乐数据
+const response = await fetch(new URL("/data/music.json", Astro.url.origin));
+const musicData: MusicData = await response.json();
+const songs = musicData.songs;
+
+// 页面元数据
+const title = "音乐墙";
+const description = "我喜欢的音乐收藏，随时聆听美好旋律";
+---
+
+<SEOLayout title={title} description={description}>
+  <MainGridLayout>
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
+      <div class="card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full">
+        <!-- 标题 -->
+        <div class="relative onload-animation">
+          <h1 class="transition w-full block font-bold mb-3
+                    text-3xl md:text-[2.25rem]/[2.75rem]
+                    text-black/90 dark:text-white/90
+                    md:before:w-1 before:h-5 before:rounded-md before:bg-[var(--primary)]
+                    before:absolute before:top-[0.75rem] before:left-[-1.125rem]">
+            音乐墙
+          </h1>
+        </div>
+        
+        <!-- 描述 -->
+        <div class="onload-animation mb-8">
+          <p class="text-black/70 dark:text-white/70">这里收录了我喜欢的音乐，点击卡片可以播放。希望这些美妙的旋律也能带给你愉悦的心情！</p>
+          <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mt-5"></div>
+        </div>
+        
+        <!-- 音乐卡片网格 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 onload-animation">
+          {songs.map((song, index) => (
+            <div class="music-card-wrapper" data-song-id={song.id} style={`animation-delay: calc(var(--content-delay) + ${index * 50}ms)`}>
+              <MusicCard music={song} isPlaying={false} isActive={false} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+      
+      </div>
+    </div>
+    
+    <!-- 音乐播放器组件 -->
+    <div class="onload-animation" style="animation-delay: calc(var(--content-delay) + 500ms)">
+      <MusicPlayer client:load songs={songs} />
+    </div>
+    </div>
+  </MainGridLayout>
+</SEOLayout>
+
+<script>
+  import type { MusicItem } from '@/types/config';
+
+  // 等待 Svelte 组件加载完成
+  document.addEventListener('DOMContentLoaded', () => {
+    setupMusicCards();
+  });
+
+  function setupMusicCards() {
+    // 获取音乐播放器组件
+    const musicPlayerComponent = document.querySelector('music-player');
+    if (!musicPlayerComponent) {
+      console.error('音乐播放器组件未找到');
+      setTimeout(setupMusicCards, 500); // 尝试再次查找组件
+      return;
+    }
+
+    // 获取所有音乐卡片
+    const musicCards = document.querySelectorAll('.music-card-wrapper');
+    
+    // 为每个音乐卡片添加点击事件
+    musicCards.forEach(card => {
+      const musicId = card.getAttribute('data-song-id');
+      if (!musicId) return;
+      
+      const cardElement = card.querySelector('.music-card');
+      if (!cardElement) return;
+      
+      cardElement.addEventListener('click', () => {
+        // 调用播放器组件的方法来播放音乐
+        // @ts-ignore - 我们知道这个属性存在于我们的组件中
+        if (musicPlayerComponent.__svelte && typeof musicPlayerComponent.__svelte.playById === 'function') {
+          // @ts-ignore
+          musicPlayerComponent.__svelte.playById(musicId);
+          updateMusicCardStates();
+        }
+      });
+    });
+
+    // 监听播放状态变化
+    if (musicPlayerComponent) {
+      // @ts-ignore - 我们知道这个方法存在于组件中
+      musicPlayerComponent.addEventListener('playStateChange', (event) => {
+        updateMusicCardStates();
+      });
+    }
+  }
+
+  function updateMusicCardStates() {
+    const musicPlayerComponent = document.querySelector('music-player');
+    if (!musicPlayerComponent) return;
+    
+    // @ts-ignore - 我们知道这个方法存在于组件中
+    const playState = musicPlayerComponent.__svelte?.getCurrentPlayState?.();
+    if (!playState) return;
+    
+    const { id: currentId, isPlaying } = playState;
+    
+    // 更新所有卡片的状态
+    document.querySelectorAll('.music-card-wrapper').forEach(card => {
+      const cardId = card.getAttribute('data-song-id');
+      const musicCard = card.querySelector('.music-card');
+      const coverImg = musicCard?.querySelector('img');
+      const playPauseBtn = musicCard?.querySelector('.play-pause-btn');
+      const audioWaves = musicCard?.querySelector('.audio-waves');
+      
+      const isActive = cardId === currentId;
+      
+      // 更新活动状态
+      if (isActive) {
+        musicCard?.classList.add('active');
+      } else {
+        musicCard?.classList.remove('active');
+      }
+      
+      // 更新旋转动画
+      if (isActive && isPlaying && coverImg) {
+        coverImg.classList.add('spinning');
+      } else if (coverImg) {
+        coverImg.classList.remove('spinning');
+      }
+      
+      // 更新音频波形动画
+      if (isActive && audioWaves) {
+        audioWaves.querySelectorAll('.wave-bar').forEach(bar => {
+          if (isPlaying) {
+            bar.classList.add('animate-music-wave');
+          } else {
+            bar.classList.remove('animate-music-wave');
+          }
+        });
+      }
+      
+      // 更新播放/暂停按钮图标
+      if (isActive && playPauseBtn) {
+        if (isPlaying) {
+          playPauseBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>';
+        } else {
+          playPauseBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
+        }
+      }
+    });
+  }
+
+  // 窗口加载完成后再次尝试设置
+  window.addEventListener('load', () => {
+    setTimeout(setupMusicCards, 500);
+  });
+</script>
+
+<style>
+  /* 确保音乐卡片的容器有合适的高度 */
+  .music-card-wrapper {
+    height: 100%;
+    transition: transform 0.2s ease;
+  }
+  
+  /* 卡片悬停效果 */
+  .music-card-wrapper:hover {
+    transform: scale(1.02);
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .spinning {
+    animation: spin 8s linear infinite;
+    transform-origin: center center;
+  }
+
+  @keyframes music-wave {
+    0%, 100% {
+      height: 4px;
+    }
+    50% {
+      height: 16px;
+    }
+  }
+  
+  .animate-music-wave {
+    animation: music-wave 1s ease infinite;
+  }
+</style>
