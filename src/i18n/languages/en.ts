@@ -40,4 +40,7 @@ export const en: Translation = {
 	[Key.friends]: "Friends",
 	[Key.friendsDescription]:
 		"These are my friends, feel free to visit each other!",
+	[Key.music]: "Music",
+	[Key.musicDescription]:
+		"My favorite music collection, listen to beautiful melodies at any time",
 };

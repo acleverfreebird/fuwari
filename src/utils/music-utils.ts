@@ -46,7 +46,7 @@ export function createNeteaseMusicItem(
 	let musicUrl = "";
 
 	// 创建两种可能的URL格式
-	const apiUrl = `https://music.163.com/song/media/outer/url?id=${id}.mp3`;
+	// const apiUrl = `https://music.163.com/song/media/outer/url?id=${id}.mp3`;
 	const embedUrl = `https://music.163.com/outchain/player?type=2&id=${id}&auto=0&height=66`;
 
 	// 优先使用嵌入式播放器URL

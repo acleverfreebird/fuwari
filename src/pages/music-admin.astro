@@ -2,10 +2,9 @@
 // 服务器端读取音乐数据
 import fs from "node:fs/promises";
 import path from "node:path";
-import { siteConfig } from "@/config";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import SEOLayout from "@/layouts/SEOLayout.astro";
-import type { MusicData, MusicItem } from "@/types/config";
+import type { MusicItem } from "@/types/config";
 import {
 	createNeteaseMusicItem,
 	isMusicExists,

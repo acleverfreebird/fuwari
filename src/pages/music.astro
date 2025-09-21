@@ -4,10 +4,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import MusicCard from "@/components/MusicCard.astro";
 import MusicPlayer from "@/components/MusicPlayer.svelte";
-import { siteConfig } from "@/config";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import SEOLayout from "@/layouts/SEOLayout.astro";
-import type { MusicData, MusicItem } from "@/types/config";
+import type { MusicItem } from "@/types/config";
 
 // 读取 JSON 文件
 const musicDataPath = path.resolve("./public/data/music.json");

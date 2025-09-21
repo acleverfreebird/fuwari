@@ -35,4 +35,11 @@ export const id: Translation = {
 	[Key.author]: "Penulis",
 	[Key.publishedAt]: "Diterbitkan pada",
 	[Key.license]: "Lisensi",
+	[Key.viewsCount]: "dilihat",
+	[Key.friends]: "Teman",
+	[Key.friendsDescription]:
+		"Ini adalah teman-teman saya, jangan ragu untuk saling mengunjungi!",
+	[Key.music]: "Musik",
+	[Key.musicDescription]:
+		"Koleksi musik favorit saya, dengarkan melodi indah kapan saja",
 };

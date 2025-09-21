@@ -39,4 +39,6 @@ export const th: Translation = {
 
 	[Key.friends]: "เพื่อน",
 	[Key.friendsDescription]: "นี่คือเพื่อน ๆ ของฉัน ขอเชิญเยี่ยมชมกัน!",
+	[Key.music]: "เพลง",
+	[Key.musicDescription]: "คอลเลคชันเพลงโปรดของฉัน ฟังเพลงเพราะๆ ได้ตลอดเวลา",
 };
