@@ -203,5 +203,9 @@ export default defineConfig({
 		],
 	},
 
-	adapter: vercel(),
+	adapter: vercel({
+		// 生产环境优化配置
+		analytics: false, // 在生产环境中禁用分析以减少开销
+		imageService: true,
+	}),
 });
