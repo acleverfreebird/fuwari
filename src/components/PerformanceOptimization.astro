@@ -3,7 +3,8 @@
 ---
 
 <!-- Critical Resource Hints - 优化首屏渲染 -->
-<link rel="preload" href="/assets/images/banner.png" as="image" />
+<!-- Banner图片预加载使用动态路径避免404 -->
+<link rel="preload" href="/_astro/banner.png" as="image" />
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" as="style" />
 
 <!-- 优化字体加载 - 减少Layout Shift -->
@@ -26,12 +27,14 @@ img {
 	decoding: sync;
 }
 
-/* 字体显示策略优化 */
-@font-face {
-  font-family: 'Roboto';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap; /* 减少字体加载时的闪烁 */
+/* 字体显示策略优化 - 使用Google Fonts避免本地字体问题 */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+/* 移除可能导致CSS解析错误的属性 */
+@supports (font-display: swap) {
+  .font-roboto {
+    font-family: 'Roboto', sans-serif;
+  }
 }
 
 /* 减少累积布局偏移 (CLS) */
@@ -81,14 +84,62 @@ document.addEventListener('DOMContentLoaded', () => {
 <!-- Service Worker注册 - 缓存策略优化 -->
 <script>
 if ('serviceWorker' in navigator) {
-	window.addEventListener('load', () => {
-		navigator.serviceWorker.register('/sw.js')
-			.then(registration => {
-				console.log('SW registered: ', registration);
-			})
-			.catch(registrationError => {
-				console.log('SW registration failed: ', registrationError);
-			});
-	});
+ 	window.addEventListener('load', () => {
+ 		navigator.serviceWorker.register('/sw.js')
+ 			.then(registration => {
+ 				console.log('SW registered: ', registration);
+ 			})
+ 			.catch(registrationError => {
+ 				console.log('SW registration failed: ', registrationError);
+ 			});
+ 	});
 }
+</script>
+
+<!-- 性能监控 -->
+<script is:inline>
+(function() {
+  // 性能指标收集
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      const perfData = performance.getEntriesByType('navigation')[0];
+
+      if (perfData) {
+        const metrics = {
+          dns: perfData.domainLookupEnd - perfData.domainLookupStart,
+          tcp: perfData.connectEnd - perfData.connectStart,
+          response: perfData.responseEnd - perfData.requestStart,
+          dom: perfData.domContentLoadedEventEnd - perfData.navigationStart,
+          load: perfData.loadEventEnd - perfData.navigationStart,
+          fcp: performance.getEntriesByName('first-contentful-paint')[0]?.startTime || 0,
+          lcp: performance.getEntriesByName('largest-contentful-paint')[0]?.startTime || 0
+        };
+
+        console.log('🚀 Performance Metrics:', metrics);
+
+        // 发送到分析服务（如果需要）
+        // fetch('/api/performance', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify(metrics)
+        // });
+      }
+    }, 1000);
+  });
+
+  // 错误监控
+  window.addEventListener('error', function(event) {
+    console.error('🚨 Global Error:', {
+      message: event.message,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+      error: event.error
+    });
+  });
+
+  window.addEventListener('unhandledrejection', function(event) {
+    console.error('🚨 Unhandled Promise Rejection:', event.reason);
+  });
+})();
 </script>

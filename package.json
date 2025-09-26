@@ -6,7 +6,7 @@
 		"dev": "astro dev",
 		"start": "astro dev",
 		"check": "astro check",
-		"build": "astro build && pagefind --site dist",
+		"build": "astro build && pagefind --site dist --verbose",
 		"build:prod": "NODE_ENV=production astro build && pagefind --site dist && NODE_ENV=production node scripts/post-build.js",
 		"indexnow:submit": "NODE_ENV=production node scripts/post-build.js",
 		"indexnow:submit-force": "node scripts/post-build.js --force",

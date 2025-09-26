@@ -1,8 +1,5 @@
 ---
-// 字体在<head>中使用preload加载
-// import "@fontsource/roboto/400.css";
-// import "@fontsource/roboto/500.css";
-// import "@fontsource/roboto/700.css";
+// 使用Google Fonts CDN优化字体加载性能
 
 import ConfigCarrier from "@components/ConfigCarrier.astro";
 import { profileConfig, siteConfig } from "@/config";
@@ -86,10 +83,11 @@ const bannerOffset =
 
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<!-- Preload Roboto字体 -->
-		<link rel="preload" href="/fonts/roboto/files/roboto-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-		<link rel="preload" href="/fonts/roboto/files/roboto-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
-		<link rel="preload" href="/fonts/roboto/files/roboto-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+		<!-- 使用Google Fonts CDN代替本地字体文件 -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+		<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"></noscript>
 		
 		{favicons.map(favicon => (
 			<link rel="icon"
@@ -214,13 +212,26 @@ const bannerOffset =
 		}
 		</script>
 
-		<!-- Microsoft Clarity tracking code for https://freebird2913.tech/ -->
+		<!-- Microsoft Clarity tracking - 延迟加载避免阻塞 -->
 		<script is:inline>
-			(function(c,l,a,r,i,t,y){
-				c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-				t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i+"?ref=bwt";
-				y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-			})(window, document, "clarity", "script", "tdtze87osu");
+			// 延迟加载Clarity避免首屏阻塞
+			if (document.readyState === 'loading') {
+				document.addEventListener('DOMContentLoaded', function() {
+					setTimeout(function() {
+						const script = document.createElement('script');
+						script.src = 'https://www.clarity.ms/tag/tdtze87osu?ref=bwt';
+						script.async = true;
+						document.head.appendChild(script);
+					}, 2000);
+				});
+			} else {
+				setTimeout(function() {
+					const script = document.createElement('script');
+					script.src = 'https://www.clarity.ms/tag/tdtze87osu?ref=bwt';
+					script.async = true;
+					document.head.appendChild(script);
+				}, 2000);
+			}
 		</script>
 	</head>
 	<body class=" min-h-screen transition " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}

@@ -72,13 +72,13 @@ const search = async (keyword: string, isDesktop: boolean): Promise<void> => {
 			searchResults = fakeResult;
 		} else {
 			searchResults = [];
-			console.error("Pagefind is not available in production environment.");
+			console.warn("Pagefind not available - search functionality limited");
 		}
 
 		result = searchResults;
 		setPanelVisibility(result.length > 0, isDesktop);
 	} catch (error) {
-		console.error("Search error:", error);
+		console.warn("Search error:", error);
 		result = [];
 		setPanelVisibility(false, isDesktop);
 	} finally {
