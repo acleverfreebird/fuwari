@@ -2,7 +2,7 @@
 import type { CollectionEntry } from "astro:content";
 
 // 网站URL - 硬编码站点URL
-const SITE_URL = "https://freebird2913.tech";
+const SITE_URL = "https://www.freebird2913.tech";
 
 // IndexNow API 密钥
 const INDEXNOW_KEY = "f494d9ef355649f38fb34bf5740376c8";

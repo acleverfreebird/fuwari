@@ -28,7 +28,7 @@ freebird2913的博客主要包含以下内容：
 ### 🔗 找到我
 
 - **GitHub**: [acleverfreebird](https://github.com/acleverfreebird)
-- **博客**: [freebird2913.tech](https://freebird2913.tech)
+- **博客**: [freebird2913.tech](https://www.freebird2913.tech)
 
 ### 📖 项目信息
 

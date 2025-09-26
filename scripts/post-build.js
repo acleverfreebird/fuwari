@@ -13,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // IndexNow 配置
-const SITE_URL = "https://freebird2913.tech";
+const SITE_URL = "https://www.freebird2913.tech";
 const INDEXNOW_KEY = "f494d9ef355649f38fb34bf5740376c8";
 const INDEXNOW_ENDPOINTS = [
 	"https://api.indexnow.org/indexnow",

@@ -3,7 +3,7 @@ import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async ({ site }) => {
 	const posts = await getSortedPosts();
-	const baseUrl = site?.href || "https://freebird2913.tech/";
+	const baseUrl = site?.href || "https://www.freebird2913.tech/";
 	const currentDate = new Date().toISOString();
 
 	// 根据文章发布时间动态调整优先级和更新频率

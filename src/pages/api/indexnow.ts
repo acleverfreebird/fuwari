@@ -22,10 +22,10 @@ export const POST: APIRoute = async ({ request }) => {
 		}
 
 		const payload = {
-			host: "freebird2913.tech",
+			host: "www.freebird2913.tech",
 			key: INDEXNOW_KEY,
 			keyLocation:
-				"https://freebird2913.tech/f494d9ef355649f38fb34bf5740376c8.txt",
+				"https://www.freebird2913.tech/f494d9ef355649f38fb34bf5740376c8.txt",
 			...(url ? { url } : { urlList: urls }),
 		};
 
