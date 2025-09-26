@@ -2,6 +2,7 @@
 // 使用Google Fonts CDN优化字体加载性能
 
 import ConfigCarrier from "@components/ConfigCarrier.astro";
+import SpeedInsights from "@vercel/speed-insights/astro";
 import { profileConfig, siteConfig } from "@/config";
 import {
 	AUTO_MODE,
@@ -238,6 +239,7 @@ const bannerOffset =
 		  data-overlayscrollbars-initialize
 	>
 		<ConfigCarrier></ConfigCarrier>
+		<SpeedInsights />
 		<slot />
 
 		<!-- increase the page height during page transition to prevent the scrolling animation from jumping -->
