@@ -75,8 +75,32 @@ export default defineConfig({
 					shellsession: {
 						showLineNumbers: false,
 					},
+					// 将自定义语言映射到现有语言
+					sudoers: {
+						showLineNumbers: true,
+					},
+					conf: {
+						showLineNumbers: true,
+					},
+					environment: {
+						showLineNumbers: true,
+					},
 				},
 			},
+			// 包含支持的语言
+			langs: [
+				'bash',
+				'shell',
+				'ini',
+				'properties',
+				'json',
+				'yaml',
+				'toml',
+				'txt',
+				// 添加常用的配置文件语言
+				'diff',
+				'log'
+			],
 			styleOverrides: {
 				codeBackground: "var(--codeblock-bg)",
 				borderRadius: "0.75rem",

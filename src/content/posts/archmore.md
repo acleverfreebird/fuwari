@@ -77,7 +77,7 @@ EDITOR=vim visudo
 
 找到如下一行，去掉前面的注释符号 `#`：
 
-```sudoers
+```ini
 #%wheel ALL=(ALL:ALL) ALL
 ```
 
@@ -99,7 +99,7 @@ vim /etc/pacman.conf
 
 在文档结尾处加入下面的文字，添加 archlinuxcn 源：
 
-```conf
+```ini
 [archlinuxcn]
 Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch  # 中国科学技术大学开源镜像站
 # Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch  # 清华大学开源软件镜像站
@@ -247,7 +247,7 @@ vim ~/.config/environment.d/im.conf
 
 加入以下内容：
 
-```environment
+```properties
 # fix fcitx problem
 GTK_IM_MODULE=fcitx
 QT_IM_MODULE=fcitx

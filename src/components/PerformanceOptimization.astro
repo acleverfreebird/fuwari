@@ -13,6 +13,9 @@
 
 <!-- 优化图片加载 -->
 <style>
+/* 字体显示策略优化 - 使用Google Fonts避免本地字体问题 */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
 /* 图片懒加载优化 */
 img {
 	loading: lazy;
@@ -26,9 +29,6 @@ img {
 	loading: eager;
 	decoding: sync;
 }
-
-/* 字体显示策略优化 - 使用Google Fonts避免本地字体问题 */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
 /* 移除可能导致CSS解析错误的属性 */
 @supports (font-display: swap) {
