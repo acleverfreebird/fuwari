@@ -195,24 +195,62 @@ if (import.meta.env.SSR) {
       this.slug = slug;
       this.hasIncrementedViews = false;
       this.hasIncrementedReads = false;
+      this.scrollHandler = null;
+      this.isListening = false;
     }
 
     async incrementViews() {
-      if (this.hasIncrementedViews) return;
-      
+      // 使用sessionStorage防止同一会话重复计算访问量
+      const sessionKey = `views-${this.slug}`;
+      if (this.hasIncrementedViews || sessionStorage.getItem(sessionKey)) {
+        this.hasIncrementedViews = true; // 标记为已处理，避免重复检查
+        return;
+      }
+
       try {
         const response = await fetch(`/api/views/${this.slug}?type=views`, {
           method: "POST",
         });
-        
+
         if (response.ok) {
           this.hasIncrementedViews = true;
+          sessionStorage.setItem(sessionKey, "true");
           console.log(`[VIEWS] Incremented views for ${this.slug}`);
+
+          // 只有在成功统计访问量后才开始监听滚动
+          this.startScrollListening();
         } else {
           console.error(`[VIEWS] Failed to increment: ${response.status}`);
         }
       } catch (error) {
         console.error(`[VIEWS] Error incrementing views:`, error);
+      }
+    }
+
+    // 计算滚动进度
+    getScrollProgress() {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      return docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    }
+
+    // 防抖的滚动处理函数
+    handleScroll() {
+      if (this.scrollTimer) {
+        clearTimeout(this.scrollTimer);
+      }
+
+      this.scrollTimer = setTimeout(() => {
+        this.checkScrollProgress();
+      }, 100); // 100ms防抖
+    }
+
+    // 检查滚动进度并触发阅读统计
+    checkScrollProgress() {
+      const progress = this.getScrollProgress();
+
+      if (progress >= 75 && !this.hasIncrementedReads) {
+        this.incrementReads();
       }
     }
 
@@ -227,17 +265,42 @@ if (import.meta.env.SSR) {
         const response = await fetch(`/api/views/${this.slug}?type=reads`, {
           method: "POST",
         });
-        
+
         if (response.ok) {
           this.hasIncrementedReads = true;
           sessionStorage.setItem(sessionKey, "true");
-          console.log(`[READS] Incremented reads for ${this.slug}`);
+          console.log(`[READS] Incremented reads for ${this.slug} (75% scroll reached)`);
+
+          // 统计成功后可以停止监听
+          this.stopScrollListening();
         } else {
           console.error(`[READS] Failed to increment: ${response.status}`);
         }
       } catch (error) {
         console.error(`[READS] Error incrementing reads:`, error);
       }
+    }
+
+    // 开始监听滚动事件
+    startScrollListening() {
+      if (this.isListening) return;
+
+      this.isListening = true;
+      this.scrollHandler = this.handleScroll.bind(this);
+
+      // 使用passive监听器提高性能
+      window.addEventListener('scroll', this.scrollHandler, { passive: true });
+      console.log(`[SCROLL] Started listening for scroll events on ${this.slug}`);
+    }
+
+    // 停止监听滚动事件
+    stopScrollListening() {
+      if (!this.isListening || !this.scrollHandler) return;
+
+      this.isListening = false;
+      window.removeEventListener('scroll', this.scrollHandler);
+      this.scrollHandler = null;
+      console.log(`[SCROLL] Stopped listening for scroll events on ${this.slug}`);
     }
 
     async updateDisplayCounts() {
@@ -274,15 +337,10 @@ if (import.meta.env.SSR) {
   // 页面加载完成后处理统计
   document.addEventListener("DOMContentLoaded", async () => {
     console.log(`[PAGE] Loading ${slug}`);
-    
-    // 立即增加访问量
+
+    // 立即增加访问量（用户访问页面）
     await viewsManager.incrementViews();
-    
-    // 延迟增加阅读量（假设用户开始阅读）
-    setTimeout(() => {
-      viewsManager.incrementReads();
-    }, 2000); // 2秒后认为用户开始阅读
-    
+
     // 更新显示的计数
     setTimeout(() => {
       viewsManager.updateDisplayCounts();
@@ -294,5 +352,10 @@ if (import.meta.env.SSR) {
     if (!document.hidden) {
       setTimeout(() => viewsManager.updateDisplayCounts(), 100);
     }
+  });
+
+  // 页面卸载时清理滚动监听器
+  window.addEventListener("beforeunload", () => {
+    viewsManager.stopScrollListening();
   });
 </script>
