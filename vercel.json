@@ -1,12 +1,4 @@
 {
-	"functions": {
-		"src/pages/api/*.ts": {
-			"maxDuration": 10
-		},
-		"src/pages/api/**/*.ts": {
-			"maxDuration": 10
-		}
-	},
 	"headers": [
 		{
 			"source": "/_astro/:path*",
