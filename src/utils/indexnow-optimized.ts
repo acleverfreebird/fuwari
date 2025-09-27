@@ -312,7 +312,7 @@ export class OptimizedIndexNowClient {
 			result.status === "fulfilled" ? result.value : { error: result.reason }
 		);
 
-		const failures = processedResults.filter(r => r.error).length;
+		const failures = processedResults.filter(r => 'error' in r).length;
 		const success = failures < this.config.endpoints.length;
 
 		// 如果至少有一个成功，则缓存URL
@@ -392,7 +392,7 @@ export class OptimizedIndexNowClient {
 				result.status === "fulfilled" ? result.value : { error: result.reason }
 			);
 
-			const batchFailures = processedResults.filter(r => r.error).length;
+			const batchFailures = processedResults.filter(r => 'error' in r).length;
 			totalFailures += batchFailures;
 
 			// 如果至少有一个端点成功，则缓存这批URL

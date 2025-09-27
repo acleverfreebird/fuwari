@@ -42,4 +42,7 @@ export const tr: Translation = {
 	[Key.music]: "Müzik",
 	[Key.musicDescription]:
 		"En sevdiğim müzik koleksiyonu, istediğiniz zaman güzel melodiler dinleyin",
+	[Key.gallery]: "Galeri",
+	[Key.galleryDescription]:
+		"Unutulmaz anları ve güzel manzaraları gösteren fotoğraf galerisi",
 };

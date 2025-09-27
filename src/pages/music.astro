@@ -65,7 +65,6 @@ const description = "我喜欢的音乐收藏，随时聆听美好旋律";
 </SEOLayout>
 
 <script>
-  import type { MusicItem } from '@/types/config';
 
   // 等待 Svelte 组件加载完成
   document.addEventListener('DOMContentLoaded', () => {
@@ -106,7 +105,7 @@ const description = "我喜欢的音乐收藏，随时聆听美好旋律";
     // 监听播放状态变化
     if (musicPlayerComponent) {
       // @ts-ignore - 我们知道这个方法存在于组件中
-      musicPlayerComponent.addEventListener('playStateChange', (event) => {
+      musicPlayerComponent.addEventListener('playStateChange', () => {
         updateMusicCardStates();
       });
     }

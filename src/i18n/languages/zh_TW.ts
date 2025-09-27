@@ -40,4 +40,6 @@ export const zh_TW: Translation = {
 	[Key.friendsDescription]: "這些是我的朋友們，歡迎大家互相訪問！",
 	[Key.music]: "音樂牆",
 	[Key.musicDescription]: "我收藏的音樂，隨時聆聽美好旋律",
+	[Key.gallery]: "相簿",
+	[Key.galleryDescription]: "展示難忘時刻和美麗風景的照片相簿",
 };

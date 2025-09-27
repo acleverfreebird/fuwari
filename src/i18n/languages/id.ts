@@ -42,4 +42,7 @@ export const id: Translation = {
 	[Key.music]: "Musik",
 	[Key.musicDescription]:
 		"Koleksi musik favorit saya, dengarkan melodi indah kapan saja",
+	[Key.gallery]: "Galeri",
+	[Key.galleryDescription]:
+		"Galeri foto yang menampilkan momen berkesan dan pemandangan indah",
 };

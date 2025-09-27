@@ -43,4 +43,7 @@ export const es: Translation = {
 	[Key.music]: "Música",
 	[Key.musicDescription]:
 		"Mi colección de música favorita, escucha hermosas melodías en cualquier momento",
+	[Key.gallery]: "Galería",
+	[Key.galleryDescription]:
+		"Galería de fotos que muestra momentos memorables y hermosas escenas",
 };

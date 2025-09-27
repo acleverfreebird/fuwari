@@ -41,4 +41,7 @@ export const ko: Translation = {
 	[Key.music]: "음악",
 	[Key.musicDescription]:
 		"제가 좋아하는 음악 컬렉션, 언제든지 아름다운 멜로디를 들어보세요",
+	[Key.gallery]: "갤러리",
+	[Key.galleryDescription]:
+		"기억에 남는 순간과 아름다운 풍경을 보여주는 사진 갤러리",
 };
