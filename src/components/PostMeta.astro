@@ -23,7 +23,8 @@ const {
 	category,
 	hideTagsForMobile = false,
 	hideUpdateDate = false,
-	// viewCount and readCount are in Props but not used in the component yet
+	viewCount = 0,
+	readCount = 0,
 } = Astro.props;
 const className = Astro.props.class;
 ---
@@ -80,6 +81,29 @@ const className = Astro.props.class;
                 </a>
             ))}
             {!(tags && tags.length > 0) && <div class="transition text-50 text-sm font-medium">{i18n(I18nKey.noTags)}</div>}
+        </div>
+    </div>
+
+    <!-- 访问量和阅读量 -->
+    <div class="flex items-center gap-4">
+        <!-- 浏览量 -->
+        <div class="flex items-center">
+            <div class="meta-icon">
+                <Icon name="material-symbols:visibility-outline" class="text-xl"></Icon>
+            </div>
+            <span class="text-50 text-sm font-medium">
+                <span id="view-count">{viewCount}</span> 次浏览
+            </span>
+        </div>
+        
+        <!-- 阅读量 -->
+        <div class="flex items-center">
+            <div class="meta-icon">
+                <Icon name="material-symbols:menu-book-outline-rounded" class="text-xl"></Icon>
+            </div>
+            <span class="text-50 text-sm font-medium">
+                <span id="read-count">{readCount}</span> 次阅读
+            </span>
         </div>
     </div>
 
