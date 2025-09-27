@@ -41,75 +41,6 @@ const hasCover = image !== undefined && image !== null && image !== "";
 const coverWidth = "28%";
 
 const { remarkPluginFrontmatter } = await entry.render();
-
-let viewCount = 0;
-let readCount = 0;
-
-console.log(`[DEBUG] PostCard: Attempting to fetch counts for ${entry.slug}`);
-
-try {
-	// 检查是否为构建时环境
-	const isBuildTime = typeof process !== "undefined" && process.env.NODE_ENV === "production" && !Astro.url.host.includes("localhost");
-
-	if (isBuildTime) {
-		// 构建时使用基于slug的模拟数据
-		const hash = entry.slug.split("").reduce((acc, char) => {
-			const newAcc = (acc << 5) - acc + char.charCodeAt(0);
-			return newAcc & newAcc;
-		}, 0);
-		const baseCount = (Math.abs(hash) % 100) + 10;
-		viewCount = baseCount;
-		readCount = Math.floor(baseCount * 0.7); // 阅读量通常比访问量少一些
-
-		console.log(`[DEBUG] PostCard: Using build-time mock data for ${entry.slug} - views: ${viewCount}, reads: ${readCount}`);
-	} else {
-		// 运行时获取真实数据
-		const baseUrl = Astro.url.origin || "http://localhost:4321";
-		const viewsUrl = `${baseUrl}/api/views/${entry.slug}?type=views`;
-		const readsUrl = `${baseUrl}/api/views/${entry.slug}?type=reads`;
-
-		console.log(`[DEBUG] PostCard: Fetching views from ${viewsUrl}`);
-		console.log(`[DEBUG] PostCard: Fetching reads from ${readsUrl}`);
-
-		const [viewsResponse, readsResponse] = await Promise.all([
-			fetch(viewsUrl),
-			fetch(readsUrl),
-		]);
-
-		console.log(
-			`[DEBUG] PostCard: Views response status = ${viewsResponse.status}`,
-		);
-		console.log(
-			`[DEBUG] PostCard: Reads response status = ${readsResponse.status}`,
-		);
-
-		if (viewsResponse.ok) {
-			const viewsData = await viewsResponse.json();
-			viewCount = viewsData.views || 0;
-			console.log(`[DEBUG] PostCard: Views for ${entry.slug} = ${viewCount}`);
-		}
-
-		if (readsResponse.ok) {
-			const readsData = await readsResponse.json();
-			readCount = readsData.reads || 0;
-			console.log(`[DEBUG] PostCard: Reads for ${entry.slug} = ${readCount}`);
-		}
-	}
-
-	console.log(
-		`[DEBUG] PostCard: Final counts for ${entry.slug} - views: ${viewCount}, reads: ${readCount}`,
-	);
-} catch (error) {
-	console.error(`[DEBUG] PostCard: Fetch error for ${entry.slug}:`, error);
-	console.error(
-		`[DEBUG] PostCard: Error type for ${entry.slug}:`,
-		(error as Error)?.constructor?.name || "Unknown",
-	);
-	console.error(
-		`[DEBUG] PostCard: Error message for ${entry.slug}:`,
-		(error as Error)?.message || "Unknown error",
-	);
-}
 ---
 <div class:list={["card-base flex flex-col-reverse md:flex-col w-full rounded-[var(--radius-large)] overflow-hidden relative", className]} style={style}>
     <div class:list={["pl-6 md:pl-9 pr-6 md:pr-2 pt-6 md:pt-7 pb-6 relative", {"w-full md:w-[calc(100%_-_52px_-_12px)]": !hasCover, "w-full md:w-[calc(100%_-_var(--coverWidth)_-_12px)]": hasCover}]}>
@@ -126,7 +57,7 @@ try {
         </a>
 
         <!-- metadata -->
-        <PostMetadata published={published} updated={updated} tags={tags} category={category} hideTagsForMobile={true} hideUpdateDate={true} viewCount={viewCount} readCount={readCount} class="mb-4"></PostMetadata>
+        <PostMetadata published={published} updated={updated} tags={tags} category={category} hideTagsForMobile={true} hideUpdateDate={true} class="mb-4"></PostMetadata>
 
         <!-- description -->
         <div class:list={["transition text-75 mb-3.5 pr-4", {"line-clamp-2 md:line-clamp-1": !description}]}>
