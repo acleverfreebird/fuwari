@@ -1,14 +1,5 @@
 import type { APIRoute } from "astro";
-
-// IndexNow API 密钥
-const INDEXNOW_KEY = "f494d9ef355649f38fb34bf5740376c8";
-
-// IndexNow API 端点
-const INDEXNOW_ENDPOINTS = [
-	"https://api.indexnow.org/indexnow",
-	"https://www.bing.com/indexnow",
-	"https://yandex.com/indexnow",
-];
+import { getIndexNowClient, isDevMode } from "../../utils/indexnow-optimized.js";
 
 export const POST: APIRoute = async ({ request }) => {
 	try {
@@ -21,52 +12,47 @@ export const POST: APIRoute = async ({ request }) => {
 			});
 		}
 
-		const payload = {
-			host: "www.freebird2913.tech",
-			key: INDEXNOW_KEY,
-			keyLocation:
-				"https://www.freebird2913.tech/f494d9ef355649f38fb34bf5740376c8.txt",
-			...(url ? { url } : { urlList: urls }),
-		};
+		// 在开发模式下直接返回模拟结果
+		if (isDevMode()) {
+			console.log(`[IndexNow API Dev] 模拟推送: ${url || urls.length + ' URLs'}`);
+			return new Response(
+				JSON.stringify({
+					success: true,
+					submitted: url || urls,
+					results: [
+						{
+							endpoint: "https://api.indexnow.org/indexnow",
+							status: 200,
+							statusText: "OK (Simulated)",
+							retries: 0,
+						},
+					],
+					totalProcessed: url ? 1 : urls.length,
+					failures: 0,
+					cached: 0,
+				}),
+				{
+					status: 200,
+					headers: { "Content-Type": "application/json" },
+				},
+			);
+		}
 
-		// 向多个搜索引擎提交
-		const results = await Promise.allSettled(
-			INDEXNOW_ENDPOINTS.map(async (endpoint) => {
-				const response = await fetch(endpoint, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(payload),
-				});
+		// 使用优化的IndexNow客户端
+		const client = getIndexNowClient();
+		const result = url
+			? await client.submitUrl(url)
+			: await client.submitUrls(urls);
 
-				return {
-					endpoint,
-					status: response.status,
-					statusText: response.statusText,
-				};
-			}),
-		);
-
-		return new Response(
-			JSON.stringify({
-				success: true,
-				submitted: url || urls,
-				results: results.map((result) =>
-					result.status === "fulfilled"
-						? result.value
-						: { error: result.reason },
-				),
-			}),
-			{
-				status: 200,
-				headers: { "Content-Type": "application/json" },
-			},
-		);
+		return new Response(JSON.stringify(result), {
+			status: 200,
+			headers: { "Content-Type": "application/json" },
+		});
 	} catch (error) {
 		console.error("IndexNow API错误:", error);
 		return new Response(
 			JSON.stringify({
+				success: false,
 				error: "IndexNow提交失败",
 				details: error instanceof Error ? error.message : "未知错误",
 			}),
