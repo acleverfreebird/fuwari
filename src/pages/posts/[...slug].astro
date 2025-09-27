@@ -208,7 +208,7 @@ if (import.meta.env.SSR) {
       }
 
       try {
-        const response = await fetch(`/api/views/${this.slug}?type=views`, {
+        const response = await fetch(`/api/views/${this.slug}/?type=views`, {
           method: "POST",
         });
 
@@ -262,7 +262,7 @@ if (import.meta.env.SSR) {
       }
 
       try {
-        const response = await fetch(`/api/views/${this.slug}?type=reads`, {
+        const response = await fetch(`/api/views/${this.slug}/?type=reads`, {
           method: "POST",
         });
 
@@ -306,8 +306,8 @@ if (import.meta.env.SSR) {
     async updateDisplayCounts() {
       try {
         const [viewResponse, readResponse] = await Promise.all([
-          fetch(`/api/views/${this.slug}?type=views`),
-          fetch(`/api/views/${this.slug}?type=reads`)
+          fetch(`/api/views/${this.slug}/?type=views`),
+          fetch(`/api/views/${this.slug}/?type=reads`)
         ]);
 
         if (viewResponse.ok && readResponse.ok) {
