@@ -42,4 +42,7 @@ export const zh_CN: Translation = {
 
 	[Key.music]: "音乐墙",
 	[Key.musicDescription]: "我收藏的音乐，随时聆听美好旋律",
+
+	[Key.gallery]: "图片墙",
+	[Key.galleryDescription]: "我收藏的精美图片，记录生活中的美好瞬间",
 };

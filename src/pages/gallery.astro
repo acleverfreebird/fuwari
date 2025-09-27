@@ -1,0 +1,199 @@
+---
+// 服务器端读取图片数据
+import fs from "node:fs/promises";
+import path from "node:path";
+import GalleryCard from "@/components/GalleryCard.astro";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import SEOLayout from "@/layouts/SEOLayout.astro";
+import type { GalleryItem } from "@/types/config";
+
+// 读取 JSON 文件
+const galleryDataPath = path.resolve("./public/data/gallery.json");
+let images: GalleryItem[] = [];
+
+try {
+	const galleryData = JSON.parse(await fs.readFile(galleryDataPath, "utf-8"));
+	images = galleryData.images;
+} catch (error) {
+	console.error("读取图片数据文件失败:", error);
+	images = [];
+}
+
+// 页面元数据
+const title = "图片墙";
+const description = "我收藏的精美图片，记录生活中的美好瞬间";
+---
+
+<SEOLayout title={title} description={description}>
+  <MainGridLayout>
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
+      <div class="card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full">
+        <!-- 标题 -->
+        <div class="relative onload-animation">
+          <h1 class="transition w-full block font-bold mb-3
+                    text-3xl md:text-[2.25rem]/[2.75rem]
+                    text-black/90 dark:text-white/90
+                    md:before:w-1 before:h-5 before:rounded-md before:bg-[var(--primary)]
+                    before:absolute before:top-[0.75rem] before:left-[-1.125rem]">
+            图片墙
+          </h1>
+        </div>
+
+        <!-- 描述 -->
+        <div class="onload-animation mb-8">
+          <p class="text-black/70 dark:text-white/70">这里收录了我喜欢的图片，记录着生活中的美好瞬间。点击图片可以查看详情。希望这些美丽的画面也能带给你视觉的享受！</p>
+          <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mt-5"></div>
+        </div>
+
+        <!-- 图片卡片网格 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 onload-animation">
+          {images.map((image, index) => (
+            <div class="gallery-card-wrapper" data-image-id={image.id} style={`animation-delay: calc(var(--content-delay) + ${index * 50}ms)`}>
+              <GalleryCard image={image} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- 图片模态框 -->
+    <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex items-center justify-center p-4">
+      <div class="relative max-w-4xl max-h-full">
+        <button id="close-modal" class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 transition-colors z-10">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <img id="modal-image" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
+        <div id="modal-info" class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-4 rounded-b-lg">
+          <h3 id="modal-title" class="text-lg font-bold mb-2"></h3>
+          <p id="modal-description" class="text-sm mb-2"></p>
+          <div class="flex justify-between items-center text-xs text-gray-300">
+            <span id="modal-photographer"></span>
+            <span id="modal-date"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </MainGridLayout>
+</SEOLayout>
+
+<script>
+  import type { GalleryItem } from '@/types/config';
+
+  // 等待页面加载完成
+  document.addEventListener('DOMContentLoaded', () => {
+    setupGalleryCards();
+    setupModal();
+  });
+
+  function setupGalleryCards() {
+    // 获取所有图片卡片
+    const galleryCards = document.querySelectorAll('.gallery-card-wrapper');
+
+    // 为每个图片卡片添加点击事件
+    galleryCards.forEach(card => {
+      const imageId = card.getAttribute('data-image-id');
+      if (!imageId) return;
+
+      const cardElement = card.querySelector('.gallery-card');
+      if (!cardElement) return;
+
+      cardElement.addEventListener('click', () => {
+        openImageModal(imageId);
+      });
+    });
+  }
+
+  function setupModal() {
+    const modal = document.getElementById('image-modal');
+    const closeBtn = document.getElementById('close-modal');
+
+    if (closeBtn && modal) {
+      closeBtn.addEventListener('click', closeImageModal);
+    }
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          closeImageModal();
+        }
+      });
+    }
+
+    // ESC键关闭模态框
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeImageModal();
+      }
+    });
+  }
+
+  async function openImageModal(imageId: string) {
+    try {
+      // 从JSON文件加载图片数据
+      const response = await fetch('/data/gallery.json');
+      const data = await response.json();
+      const image = data.images.find((img: GalleryItem) => img.id === imageId);
+
+      if (!image) return;
+
+      const modal = document.getElementById('image-modal');
+      const modalImage = document.getElementById('modal-image') as HTMLImageElement;
+      const modalTitle = document.getElementById('modal-title');
+      const modalDescription = document.getElementById('modal-description');
+      const modalPhotographer = document.getElementById('modal-photographer');
+      const modalDate = document.getElementById('modal-date');
+
+      if (modal && modalImage && modalTitle && modalDescription && modalPhotographer && modalDate) {
+        modalImage.src = image.imageUrl;
+        modalImage.alt = image.title;
+        modalTitle.textContent = image.title;
+        modalDescription.textContent = image.description;
+        modalPhotographer.textContent = `摄影师: ${image.photographer}`;
+        modalDate.textContent = image.date;
+
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+    } catch (error) {
+      console.error('加载图片数据失败:', error);
+    }
+  }
+
+  function closeImageModal() {
+    const modal = document.getElementById('image-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+  }
+
+  // 窗口加载完成后再次尝试设置
+  window.addEventListener('load', () => {
+    setTimeout(setupGalleryCards, 500);
+  });
+</script>
+
+<style>
+  /* 确保图片卡片的容器有合适的高度 */
+  .gallery-card-wrapper {
+    height: 100%;
+    transition: transform 0.2s ease;
+  }
+
+  /* 卡片悬停效果 */
+  .gallery-card-wrapper:hover {
+    transform: scale(1.02);
+  }
+
+  /* 模态框样式 */
+  #image-modal {
+    backdrop-filter: blur(5px);
+  }
+
+  #modal-image {
+    max-height: calc(100vh - 8rem);
+  }
+</style>

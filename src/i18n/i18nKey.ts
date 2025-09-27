@@ -39,6 +39,9 @@ enum I18nKey {
 
 	music = "music",
 	musicDescription = "musicDescription",
+
+	gallery = "gallery",
+	galleryDescription = "galleryDescription",
 }
 
 export default I18nKey;

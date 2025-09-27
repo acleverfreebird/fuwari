@@ -1,0 +1,31 @@
+{
+	"images": [
+		{
+			"id": "sample-1",
+			"title": "示例图片1",
+			"description": "这是一张示例图片的描述",
+			"imageUrl": "https://picsum.photos/400/300?random=1",
+			"tags": ["自然", "风景"],
+			"date": "2024-01-15",
+			"photographer": "Free Bird"
+		},
+		{
+			"id": "sample-2",
+			"title": "示例图片2",
+			"description": "另一张美丽的示例图片",
+			"imageUrl": "https://picsum.photos/400/300?random=2",
+			"tags": ["城市", "建筑"],
+			"date": "2024-01-20",
+			"photographer": "Free Bird"
+		},
+		{
+			"id": "sample-3",
+			"title": "示例图片3",
+			"description": "第三张精美的示例图片",
+			"imageUrl": "https://picsum.photos/400/300?random=3",
+			"tags": ["人物", "生活"],
+			"date": "2024-01-25",
+			"photographer": "Free Bird"
+		}
+	]
+}

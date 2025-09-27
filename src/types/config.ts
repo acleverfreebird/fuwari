@@ -50,6 +50,7 @@ export enum LinkPreset {
 	About = 2,
 	Friends = 3,
 	Music = 4,
+	Gallery = 5,
 }
 
 export type NavBarLink = {
@@ -116,4 +117,18 @@ export type MusicItem = {
 
 export type MusicData = {
 	songs: MusicItem[];
+};
+
+export type GalleryItem = {
+	id: string;
+	title: string;
+	description: string;
+	imageUrl: string;
+	tags: string[];
+	date: string;
+	photographer: string;
+};
+
+export type GalleryData = {
+	images: GalleryItem[];
 };
