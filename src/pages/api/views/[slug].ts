@@ -1,6 +1,8 @@
 import type { APIRoute } from "astro";
 import { kvGet, kvIncr, kvSet } from "../../../utils/redis";
 
+export const prerender = false;
+
 // 生成用户会话标识
 function getSessionId(request: Request): string {
 	const userAgent = request.headers.get("user-agent") || "";
