@@ -42,7 +42,7 @@ const coverWidth = "28%";
 
 const { remarkPluginFrontmatter } = await entry.render();
 ---
-<div class:list={["card-base flex flex-col-reverse md:flex-col w-full rounded-[var(--radius-large)] overflow-hidden relative", className]} style={style}>
+<div class:list={["card-base flex flex-col-reverse md:flex-col w-full rounded-[var(--radius-large)] overflow-hidden relative", className]} style={style} data-post-slug={entry.slug}>
     <div class:list={["pl-6 md:pl-9 pr-6 md:pr-2 pt-6 md:pt-7 pb-6 relative", {"w-full md:w-[calc(100%_-_52px_-_12px)]": !hasCover, "w-full md:w-[calc(100%_-_var(--coverWidth)_-_12px)]": hasCover}]}>
         <a href={url}
            class="transition group w-full block font-bold mb-3 text-3xl text-90
@@ -57,7 +57,7 @@ const { remarkPluginFrontmatter } = await entry.render();
         </a>
 
         <!-- metadata -->
-        <PostMetadata published={published} updated={updated} tags={tags} category={category} hideTagsForMobile={true} hideUpdateDate={true} class="mb-4"></PostMetadata>
+        <PostMetadata published={published} updated={updated} tags={tags} category={category} hideTagsForMobile={true} hideUpdateDate={true} class="mb-4" viewCount={0} readCount={0}></PostMetadata>
 
         <!-- description -->
         <div class:list={["transition text-75 mb-3.5 pr-4", {"line-clamp-2 md:line-clamp-1": !description}]}>
@@ -104,6 +104,37 @@ const { remarkPluginFrontmatter } = await entry.render();
         </a>
     }
 </div>
+
+<!-- 客户端脚本：动态加载统计数据 -->
+<script define:vars={{ slug: entry.slug }}>
+    // 在页面加载后获取统计数据
+    (function() {
+        // 获取当前卡片的统计元素
+        const viewCountElement = document.querySelector(`[data-post-slug="${slug}"] #view-count`);
+        const readCountElement = document.querySelector(`[data-post-slug="${slug}"] #read-count`);
+        
+        if (!viewCountElement || !readCountElement) {
+            return;
+        }
+        
+        // 从 API 获取统计数据
+        fetch(`/api/stats/${slug}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // 更新显示
+                viewCountElement.textContent = data.views || 0;
+                readCountElement.textContent = data.reads || 0;
+            })
+            .catch(error => {
+                console.error(`获取文章 ${slug} 统计数据失败:`, error);
+            });
+    })();
+</script>
 <div class="transition border-t-[1px] border-dashed mx-6 border-black/10 dark:border-white/[0.15] last:border-t-0 md:hidden"></div>
 
 <style define:vars={{coverWidth}}>
