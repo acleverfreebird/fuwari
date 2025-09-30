@@ -1,6 +1,8 @@
 import type { APIRoute } from "astro";
 import { kvGet } from "../../../utils/redis";
 
+export const prerender = false;
+
 // 获取文章统计数据
 export const GET: APIRoute = async ({ params, request }) => {
 	const { slug } = params;
