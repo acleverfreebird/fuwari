@@ -60,7 +60,9 @@ class URLCache {
 	addBatch(urls: string[]): void {
 		if (this.config.caching.enabled) {
 			const timestamp = Date.now();
-			urls.forEach((url) => this.cache.set(url, timestamp));
+			for (const url of urls) {
+				this.cache.set(url, timestamp);
+			}
 		}
 	}
 
@@ -411,7 +413,13 @@ export class OptimizedIndexNowClient {
 			`[IndexNow] 分 ${chunks.length} 批推送 ${newUrls.length} 个新URL`,
 		);
 
-		const allResults: any[] = [];
+		const allResults: Array<{
+			endpoint?: string;
+			status?: number;
+			statusText?: string;
+			error?: unknown;
+			retries?: number;
+		}> = [];
 		let totalFailures = 0;
 
 		for (let i = 0; i < chunks.length; i++) {

@@ -35,9 +35,9 @@ class URLCache {
 	addBatch(urls) {
 		if (this.config.caching.enabled) {
 			const timestamp = Date.now();
-			urls.forEach((url) => {
+			for (const url of urls) {
 				this.cache.set(url, timestamp);
-			});
+			}
 		}
 	}
 
@@ -356,7 +356,7 @@ export class OptimizedIndexNowClient {
 		}
 
 		if (newUrls.length === 0) {
-			console.log("[IndexNow] 没有新的URL需要推送");
+			console.log("没有新的URL需要推送");
 			return {
 				success: true,
 				submitted: urls,
