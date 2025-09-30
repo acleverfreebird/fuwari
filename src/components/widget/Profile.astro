@@ -43,6 +43,23 @@ let dailyQuote = { content: "加载中...", author: "" };
     </div>
 </div>
 
+<div class="card-base p-4 mt-4">
+    <div class="text-center">
+        <div class="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-3">站点统计</div>
+        <div class="flex justify-around gap-4">
+            <div class="flex-1">
+                <div class="text-2xl font-bold text-[var(--primary)] transition" id="total-views">--</div>
+                <div class="text-xs text-neutral-400 dark:text-neutral-500 mt-1">总浏览量</div>
+            </div>
+            <div class="w-px bg-neutral-200 dark:bg-neutral-700"></div>
+            <div class="flex-1">
+                <div class="text-2xl font-bold text-[var(--primary)] transition" id="total-reads">--</div>
+                <div class="text-xs text-neutral-400 dark:text-neutral-500 mt-1">总阅读量</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
   const fetchDailyQuote = async () => {
     try {
@@ -69,9 +86,34 @@ let dailyQuote = { content: "加载中...", author: "" };
     }
   };
 
+  const fetchTotalStats = async () => {
+    try {
+      const response = await fetch("/api/stats/total");
+      if (response.ok) {
+        const data = await response.json();
+        const totalViewsElement = document.getElementById("total-views");
+        const totalReadsElement = document.getElementById("total-reads");
+        
+        if (totalViewsElement) {
+          totalViewsElement.textContent = data.totalViews.toLocaleString();
+        }
+        if (totalReadsElement) {
+          totalReadsElement.textContent = data.totalReads.toLocaleString();
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching total stats:", error);
+      const totalViewsElement = document.getElementById("total-views");
+      const totalReadsElement = document.getElementById("total-reads");
+      if (totalViewsElement) totalViewsElement.textContent = "0";
+      if (totalReadsElement) totalReadsElement.textContent = "0";
+    }
+  };
+
  
    document.addEventListener("DOMContentLoaded", () => {
      fetchDailyQuote();
+     fetchTotalStats();
    });
 </script>
 
