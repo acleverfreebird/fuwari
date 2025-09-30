@@ -4,7 +4,8 @@
 export const DEFAULT_INDEXNOW_CONFIG = {
 	siteUrl: "https://www.freebird2913.tech",
 	apiKey: "f494d9ef355649f38fb34bf5740376c8",
-	keyLocation: "https://www.freebird2913.tech/f494d9ef355649f38fb34bf5740376c8.txt",
+	keyLocation:
+		"https://www.freebird2913.tech/f494d9ef355649f38fb34bf5740376c8.txt",
 	endpoints: [
 		"https://api.indexnow.org/indexnow",
 		"https://www.bing.com/indexnow",
@@ -32,7 +33,7 @@ export function getIndexNowConfig() {
 	const config = { ...DEFAULT_INDEXNOW_CONFIG };
 
 	// 从环境变量读取配置（如果存在）
-	if (typeof process !== "undefined" && process.env) {
+	if (process?.env) {
 		if (process.env.INDEXNOW_SITE_URL) {
 			config.siteUrl = process.env.INDEXNOW_SITE_URL;
 		}
@@ -43,10 +44,16 @@ export function getIndexNowConfig() {
 			config.keyLocation = process.env.INDEXNOW_KEY_LOCATION;
 		}
 		if (process.env.INDEXNOW_MAX_RETRIES) {
-			config.retryConfig.maxRetries = parseInt(process.env.INDEXNOW_MAX_RETRIES, 10);
+			config.retryConfig.maxRetries = Number.parseInt(
+				process.env.INDEXNOW_MAX_RETRIES,
+				10,
+			);
 		}
 		if (process.env.INDEXNOW_BATCH_SIZE) {
-			config.rateLimiting.batchSize = parseInt(process.env.INDEXNOW_BATCH_SIZE, 10);
+			config.rateLimiting.batchSize = Number.parseInt(
+				process.env.INDEXNOW_BATCH_SIZE,
+				10,
+			);
 		}
 	}
 

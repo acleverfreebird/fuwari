@@ -1,5 +1,8 @@
 import type { APIRoute } from "astro";
-import { getIndexNowClient, isDevMode } from "../../utils/indexnow-optimized.js";
+import {
+	getIndexNowClient,
+	isDevMode,
+} from "../../utils/indexnow-optimized.js";
 
 export const POST: APIRoute = async ({ request }) => {
 	try {
@@ -14,7 +17,9 @@ export const POST: APIRoute = async ({ request }) => {
 
 		// 在开发模式下直接返回模拟结果
 		if (isDevMode()) {
-			console.log(`[IndexNow API Dev] 模拟推送: ${url || urls.length + ' URLs'}`);
+			console.log(
+				`[IndexNow API Dev] 模拟推送: ${url || `${urls.length} URLs`}`,
+			);
 			return new Response(
 				JSON.stringify({
 					success: true,

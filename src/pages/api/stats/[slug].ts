@@ -4,7 +4,7 @@ import { kvGet } from "../../../utils/redis";
 export const prerender = false;
 
 // 获取文章统计数据
-export const GET: APIRoute = async ({ params, request }) => {
+export const GET: APIRoute = async ({ params }) => {
 	const { slug } = params;
 
 	if (!slug) {

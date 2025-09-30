@@ -1,5 +1,8 @@
 // 优化的 IndexNow 推送工具
-import { getIndexNowConfig, validateConfig } from "../config/indexnow-config.js";
+import {
+	getIndexNowConfig,
+	validateConfig,
+} from "../config/indexnow-config.js";
 
 // URL缓存管理
 class URLCache {
@@ -32,7 +35,9 @@ class URLCache {
 	addBatch(urls) {
 		if (this.config.caching.enabled) {
 			const timestamp = Date.now();
-			urls.forEach(url => this.cache.set(url, timestamp));
+			urls.forEach((url) => {
+				this.cache.set(url, timestamp);
+			});
 		}
 	}
 
@@ -57,15 +62,17 @@ class RateLimiter {
 		const oneMinuteAgo = now - 60000;
 
 		// 清理一分钟前的请求记录
-		this.requests = this.requests.filter(time => time > oneMinuteAgo);
+		this.requests = this.requests.filter((time) => time > oneMinuteAgo);
 
 		if (this.requests.length >= this.config.rateLimiting.maxRequestsPerMinute) {
 			const oldestRequest = Math.min(...this.requests);
 			const waitTime = 60000 - (now - oldestRequest);
 
 			if (waitTime > 0) {
-				console.log(`[IndexNow] 达到频率限制，等待 ${Math.ceil(waitTime / 1000)} 秒...`);
-				await new Promise(resolve => setTimeout(resolve, waitTime));
+				console.log(
+					`[IndexNow] 达到频率限制，等待 ${Math.ceil(waitTime / 1000)} 秒...`,
+				);
+				await new Promise((resolve) => setTimeout(resolve, waitTime));
 			}
 		}
 
@@ -90,15 +97,16 @@ export class OptimizedIndexNowClient {
 	 * 延迟函数
 	 */
 	async delay(ms) {
-		return new Promise(resolve => setTimeout(resolve, ms));
+		return new Promise((resolve) => setTimeout(resolve, ms));
 	}
 
 	/**
 	 * 计算重试延迟时间（指数退避）
 	 */
 	calculateRetryDelay(attempt) {
-		const delay = this.config.retryConfig.initialDelay *
-			Math.pow(this.config.retryConfig.backoffFactor, attempt);
+		const delay =
+			this.config.retryConfig.initialDelay *
+			this.config.retryConfig.backoffFactor ** attempt;
 		return Math.min(delay, this.config.retryConfig.maxDelay);
 	}
 
@@ -107,7 +115,11 @@ export class OptimizedIndexNowClient {
 	 */
 	isRetryableError(error) {
 		// 网络错误通常可重试
-		if (error.code === 'ENOTFOUND' || error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') {
+		if (
+			error.code === "ENOTFOUND" ||
+			error.code === "ECONNRESET" ||
+			error.code === "ETIMEDOUT"
+		) {
 			return true;
 		}
 
@@ -127,7 +139,11 @@ export class OptimizedIndexNowClient {
 	/**
 	 * 带重试的HTTP请求
 	 */
-	async fetchWithRetry(endpoint, payload, maxRetries = this.config.retryConfig.maxRetries) {
+	async fetchWithRetry(
+		endpoint,
+		payload,
+		maxRetries = this.config.retryConfig.maxRetries,
+	) {
 		let lastError;
 
 		for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -136,7 +152,8 @@ export class OptimizedIndexNowClient {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
-						"User-Agent": "IndexNow-Client/1.0 (+https://www.freebird2913.tech/)",
+						"User-Agent":
+							"IndexNow-Client/1.0 (+https://www.freebird2913.tech/)",
 					},
 					body: JSON.stringify(payload),
 					// 添加超时
@@ -147,7 +164,9 @@ export class OptimizedIndexNowClient {
 				if (!response.ok) {
 					// 对于IndexNow，某些"错误"状态码实际上是可接受的
 					if (isAcceptableIndexNowResponse(response.status)) {
-						console.log(`[IndexNow] ${endpoint}: ${response.status} ${response.statusText} (可接受的响应)`);
+						console.log(
+							`[IndexNow] ${endpoint}: ${response.status} ${response.statusText} (可接受的响应)`,
+						);
 						return {
 							endpoint,
 							status: response.status,
@@ -156,7 +175,9 @@ export class OptimizedIndexNowClient {
 						};
 					}
 
-					const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
+					const error = new Error(
+						`HTTP ${response.status}: ${response.statusText}`,
+					);
 					error.status = response.status;
 					error.statusText = response.statusText;
 					error.endpoint = endpoint;
@@ -165,7 +186,9 @@ export class OptimizedIndexNowClient {
 						throw error;
 					}
 
-					console.warn(`[IndexNow] ${endpoint} 请求失败 (尝试 ${attempt + 1}/${maxRetries + 1}): ${error.message}`);
+					console.warn(
+						`[IndexNow] ${endpoint} 请求失败 (尝试 ${attempt + 1}/${maxRetries + 1}): ${error.message}`,
+					);
 					lastError = error;
 
 					// 等待后重试
@@ -190,7 +213,10 @@ export class OptimizedIndexNowClient {
 					throw error;
 				}
 
-				console.warn(`[IndexNow] ${endpoint} 请求失败 (尝试 ${attempt + 1}/${maxRetries + 1}):`, error.message);
+				console.warn(
+					`[IndexNow] ${endpoint} 请求失败 (尝试 ${attempt + 1}/${maxRetries + 1}):`,
+					error.message,
+				);
 
 				if (attempt < maxRetries) {
 					const delayMs = this.calculateRetryDelay(attempt);
@@ -282,14 +308,16 @@ export class OptimizedIndexNowClient {
 
 		// 向多个搜索引擎提交
 		const results = await Promise.allSettled(
-			this.config.endpoints.map(endpoint => this.fetchWithRetry(endpoint, payload))
+			this.config.endpoints.map((endpoint) =>
+				this.fetchWithRetry(endpoint, payload),
+			),
 		);
 
 		const processedResults = results.map((result) =>
-			result.status === "fulfilled" ? result.value : { error: result.reason }
+			result.status === "fulfilled" ? result.value : { error: result.reason },
 		);
 
-		const failures = processedResults.filter(r => r.error).length;
+		const failures = processedResults.filter((r) => r.error).length;
 		const success = failures < this.config.endpoints.length;
 
 		// 如果至少有一个成功，则缓存URL
@@ -328,7 +356,7 @@ export class OptimizedIndexNowClient {
 		}
 
 		if (newUrls.length === 0) {
-			console.log(`[IndexNow] 没有新的URL需要推送`);
+			console.log("[IndexNow] 没有新的URL需要推送");
 			return {
 				success: true,
 				submitted: urls,
@@ -341,14 +369,18 @@ export class OptimizedIndexNowClient {
 
 		// 分批处理
 		const chunks = this.chunkUrls(newUrls, this.config.rateLimiting.batchSize);
-		console.log(`[IndexNow] 分 ${chunks.length} 批推送 ${newUrls.length} 个新URL`);
+		console.log(
+			`[IndexNow] 分 ${chunks.length} 批推送 ${newUrls.length} 个新URL`,
+		);
 
-		let allResults = [];
+		const allResults = [];
 		let totalFailures = 0;
 
 		for (let i = 0; i < chunks.length; i++) {
 			const chunk = chunks[i];
-			console.log(`[IndexNow] 处理第 ${i + 1}/${chunks.length} 批 (${chunk.length} 个URL)`);
+			console.log(
+				`[IndexNow] 处理第 ${i + 1}/${chunks.length} 批 (${chunk.length} 个URL)`,
+			);
 
 			const payload = {
 				host: new URL(this.config.siteUrl).hostname,
@@ -362,14 +394,16 @@ export class OptimizedIndexNowClient {
 
 			// 向多个搜索引擎提交
 			const results = await Promise.allSettled(
-				this.config.endpoints.map(endpoint => this.fetchWithRetry(endpoint, payload))
+				this.config.endpoints.map((endpoint) =>
+					this.fetchWithRetry(endpoint, payload),
+				),
 			);
 
 			const processedResults = results.map((result) =>
-				result.status === "fulfilled" ? result.value : { error: result.reason }
+				result.status === "fulfilled" ? result.value : { error: result.reason },
 			);
 
-			const batchFailures = processedResults.filter(r => r.error).length;
+			const batchFailures = processedResults.filter((r) => r.error).length;
 			totalFailures += batchFailures;
 
 			// 如果至少有一个端点成功，则缓存这批URL
@@ -409,8 +443,8 @@ export class OptimizedIndexNowClient {
 	 * 批量推送文章到搜索引擎
 	 */
 	async submitPosts(entries) {
-		const urls = entries.map(entry =>
-			new URL(`posts/${entry.slug}/`, this.config.siteUrl).href
+		const urls = entries.map(
+			(entry) => new URL(`posts/${entry.slug}/`, this.config.siteUrl).href,
 		);
 		return await this.submitUrls(urls);
 	}
@@ -488,7 +522,7 @@ export function isDevMode() {
 	if (typeof import.meta !== "undefined" && import.meta.env) {
 		return import.meta.env.DEV === true;
 	}
-	if (typeof process !== "undefined" && process?.env) {
+	if (process?.env) {
 		return process.env.NODE_ENV === "development";
 	}
 	return false;
@@ -512,7 +546,7 @@ export async function smartSubmitUrl(url) {
 		return {
 			success: true,
 			submitted: url,
-			results: getIndexNowConfig().endpoints.map(endpoint => ({
+			results: getIndexNowConfig().endpoints.map((endpoint) => ({
 				endpoint,
 				status: 200,
 				statusText: "OK (Simulated)",
