@@ -188,7 +188,7 @@ export default defineConfig({
 
 	vite: {
 		build: {
-			cssMinify: "lightningcss",
+			cssMinify: true, // 使用默认的esbuild，更稳定
 			minify: "terser",
 			terserOptions: {
 				compress: {
@@ -200,21 +200,10 @@ export default defineConfig({
 				external: ["@upstash/redis"], // 外部化Upstash Redis依赖，避免构建时解析错误
 				output: {
 					// 优化代码分割，解决Swup模块加载问题
-					manualChunks(id) {
-						// 第三方库单独打包
-						if (id.includes("node_modules")) {
-							if (id.includes("@swup/astro")) {
-								return "swup-core";
-							}
-							if (id.includes("svelte") || id.includes("photoswipe")) {
-								return "vendor";
-							}
-							if (id.includes("@iconify/svelte")) {
-								return "iconify";
-							}
-							// 其他node_modules统一打包
-							return "vendor-other";
-						}
+					manualChunks: {
+						"swup-core": ["@swup/astro"],
+						vendor: ["svelte", "photoswipe"],
+						iconify: ["@iconify/svelte"],
 					},
 				},
 				onwarn(warning, warn) {
