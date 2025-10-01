@@ -4,7 +4,7 @@ import {
 	getIndexNowConfig,
 	type IndexNowConfig,
 	validateConfig,
-} from "../config/indexnow-config.js";
+} from "../config/indexnow-config.ts";
 
 export interface IndexNowResponse {
 	success: boolean;
