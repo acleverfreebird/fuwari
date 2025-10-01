@@ -26,7 +26,7 @@ let IndexNowClient;
 
 async function loadIndexNowClient() {
 	if (!IndexNowClient) {
-		const module = await import("../src/utils/indexnow-optimized.js");
+		const module = await import("../src/utils/indexnow-optimized.ts");
 		IndexNowClient = module.OptimizedIndexNowClient;
 	}
 	return IndexNowClient;
@@ -152,8 +152,12 @@ function mergeAndDeduplicateUrls(...urlArrays) {
 		for (const url of urls) {
 			// 标准化URL格式
 			let normalizedUrl = url.trim();
-			if (!normalizedUrl.endsWith('/') && !normalizedUrl.includes('?') && !normalizedUrl.includes('#')) {
-				normalizedUrl += '/';
+			if (
+				!normalizedUrl.endsWith("/") &&
+				!normalizedUrl.includes("?") &&
+				!normalizedUrl.includes("#")
+			) {
+				normalizedUrl += "/";
 			}
 
 			if (!seen.has(normalizedUrl)) {
@@ -203,7 +207,9 @@ async function main() {
 	const dryRun = process.argv.includes("--dry-run");
 
 	if (!isProduction && !forceSubmit && !dryRun) {
-		console.log("[IndexNow] 非生产环境，跳过推送（使用 --force 参数强制推送，--dry-run 查看将推送的URL）");
+		console.log(
+			"[IndexNow] 非生产环境，跳过推送（使用 --force 参数强制推送，--dry-run 查看将推送的URL）",
+		);
 		return;
 	}
 
@@ -227,7 +233,10 @@ async function main() {
 
 		// 多种方式发现URL
 		const discoveryMethods = [
-			{ name: "sitemap.xml", fn: () => parseSitemapUrls(path.join(distDir, "client")) },
+			{
+				name: "sitemap.xml",
+				fn: () => parseSitemapUrls(path.join(distDir, "client")),
+			},
 			{ name: "构建目录扫描", fn: () => scanAllPages(distDir) },
 			{ name: "重要页面备用", fn: () => getImportantPages() },
 		];
@@ -321,5 +330,5 @@ export {
 	scanHtmlFiles,
 	getImportantPages,
 	mergeAndDeduplicateUrls,
-	sortUrlsByPriority
+	sortUrlsByPriority,
 };

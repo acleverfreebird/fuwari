@@ -5,16 +5,16 @@
  * 提供命令行接口来管理IndexNow推送和缓存
  */
 
-import { fileURLToPath } from "url";
-import path from "path";
 import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // 动态导入优化的IndexNow客户端
 async function getIndexNowClient() {
-	const module = await import("../src/utils/indexnow-optimized.js");
+	const module = await import("../src/utils/indexnow-optimized.ts");
 	return new module.OptimizedIndexNowClient();
 }
 
@@ -59,10 +59,10 @@ function parseArgs() {
 
 	for (let i = 1; i < args.length; i++) {
 		const arg = args[i];
-		if (arg.startsWith('--')) {
+		if (arg.startsWith("--")) {
 			const key = arg.slice(2);
 			options[key] = true;
-		} else if (arg.startsWith('-')) {
+		} else if (arg.startsWith("-")) {
 			const key = arg.slice(1);
 			options[key] = true;
 		} else {
@@ -94,8 +94,10 @@ async function handleSubmit(url, options) {
 
 		if (result.results.length > 0) {
 			console.log("\n详细结果:");
-			result.results.forEach(r => {
-				console.log(`  ${r.endpoint}: ${r.status || 'Error'} ${r.statusText || r.error}`);
+			result.results.forEach((r) => {
+				console.log(
+					`  ${r.endpoint}: ${r.status || "Error"} ${r.statusText || r.error}`,
+				);
 			});
 		}
 	} catch (error) {
@@ -176,14 +178,16 @@ async function handleSubmitAll(options) {
 		}
 
 		// 使用post-build的页面发现逻辑
-		const sitemapUrls = postBuildModule.parseSitemapUrls(path.join(distDir, "client"));
+		const sitemapUrls = postBuildModule.parseSitemapUrls(
+			path.join(distDir, "client"),
+		);
 		const scannedUrls = postBuildModule.scanAllPages(distDir);
 		const importantUrls = postBuildModule.getImportantPages();
 
 		const allUrls = postBuildModule.mergeAndDeduplicateUrls(
 			sitemapUrls,
 			scannedUrls,
-			importantUrls
+			importantUrls,
 		);
 
 		const sortedUrls = postBuildModule.sortUrlsByPriority(allUrls);
@@ -230,7 +234,7 @@ async function handleCache(options) {
 		if (options.stats || options.s) {
 			const stats = client.getCacheStats();
 			console.log("缓存统计:");
-			console.log(`  状态: ${stats.enabled ? '启用' : '禁用'}`);
+			console.log(`  状态: ${stats.enabled ? "启用" : "禁用"}`);
 			console.log(`  大小: ${stats.size} 个URL`);
 			return;
 		}
@@ -244,7 +248,7 @@ async function handleCache(options) {
 
 async function handleConfig() {
 	try {
-		const module = await import("../src/config/indexnow-config.js");
+		const module = await import("../src/config/indexnow-config.ts");
 		const config = module.getIndexNowConfig();
 		const isValid = module.validateConfig(config);
 
@@ -254,8 +258,8 @@ async function handleConfig() {
 		console.log(`  端点数量: ${config.endpoints.length}`);
 		console.log(`  最大重试: ${config.retryConfig.maxRetries}`);
 		console.log(`  批次大小: ${config.rateLimiting.batchSize}`);
-		console.log(`  缓存状态: ${config.caching.enabled ? '启用' : '禁用'}`);
-		console.log(`  配置有效: ${isValid ? '是' : '否'}`);
+		console.log(`  缓存状态: ${config.caching.enabled ? "启用" : "禁用"}`);
+		console.log(`  配置有效: ${isValid ? "是" : "否"}`);
 
 		if (!isValid) {
 			process.exit(1);
@@ -268,7 +272,7 @@ async function handleConfig() {
 
 async function handleTest() {
 	try {
-		const module = await import("../src/config/indexnow-config.js");
+		const module = await import("../src/config/indexnow-config.ts");
 		const config = module.getIndexNowConfig();
 
 		console.log("测试IndexNow端点连接...");
@@ -285,7 +289,9 @@ async function handleTest() {
 
 				clearTimeout(timeoutId);
 
-				console.log(`  ${endpoint}: ${response.status === 200 ? '✓' : '✗'} (${response.status})`);
+				console.log(
+					`  ${endpoint}: ${response.status === 200 ? "✓" : "✗"} (${response.status})`,
+				);
 			} catch (error) {
 				console.log(`  ${endpoint}: ✗ (${error.message})`);
 			}
@@ -300,13 +306,13 @@ async function handleTest() {
 async function main() {
 	const { command, options, params } = parseArgs();
 
-	if (!command || command === 'help') {
+	if (!command || command === "help") {
 		showHelp();
 		return;
 	}
 
 	switch (command) {
-		case 'submit':
+		case "submit":
 			if (params.length === 0) {
 				console.error("错误: 需要提供URL参数");
 				process.exit(1);
@@ -314,7 +320,7 @@ async function main() {
 			await handleSubmit(params[0], options);
 			break;
 
-		case 'submit-batch':
+		case "submit-batch":
 			if (params.length === 0) {
 				console.error("错误: 需要提供至少一个URL参数");
 				process.exit(1);
@@ -322,23 +328,23 @@ async function main() {
 			await handleSubmitBatch(params, options);
 			break;
 
-		case 'submit-site':
+		case "submit-site":
 			await handleSubmitSite(options);
 			break;
 
-		case 'submit-all':
+		case "submit-all":
 			await handleSubmitAll(options);
 			break;
 
-		case 'cache':
+		case "cache":
 			await handleCache(options);
 			break;
 
-		case 'config':
+		case "config":
 			await handleConfig();
 			break;
 
-		case 'test':
+		case "test":
 			await handleTest();
 			break;
 
@@ -350,7 +356,7 @@ async function main() {
 }
 
 // 运行CLI
-main().catch(error => {
+main().catch((error) => {
 	console.error("CLI运行失败:", error.message);
 	process.exit(1);
 });

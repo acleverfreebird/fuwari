@@ -4,7 +4,7 @@ const robotsTxt = `
 User-agent: *
 Disallow: /_astro/
 Disallow: /api/
-Disallow: /.netlify/
+Disallow: /.vercel/
 Disallow: /scripts/
 Allow: /
 
