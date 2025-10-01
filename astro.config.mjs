@@ -89,17 +89,17 @@ export default defineConfig({
 			},
 			// 包含支持的语言
 			langs: [
-				'bash',
-				'shell',
-				'ini',
-				'properties',
-				'json',
-				'yaml',
-				'toml',
-				'txt',
+				"bash",
+				"shell",
+				"ini",
+				"properties",
+				"json",
+				"yaml",
+				"toml",
+				"txt",
 				// 添加常用的配置文件语言
-				'diff',
-				'log'
+				"diff",
+				"log",
 			],
 			styleOverrides: {
 				codeBackground: "var(--codeblock-bg)",
@@ -188,14 +188,33 @@ export default defineConfig({
 
 	vite: {
 		build: {
+			cssMinify: "lightningcss",
+			minify: "terser",
+			terserOptions: {
+				compress: {
+					drop_console: true,
+					drop_debugger: true,
+				},
+			},
 			rollupOptions: {
 				external: ["@upstash/redis"], // 外部化Upstash Redis依赖，避免构建时解析错误
 				output: {
 					// 优化代码分割，解决Swup模块加载问题
-					manualChunks: {
-						"swup-core": ["@swup/astro"],
-						vendor: ["svelte", "photoswipe"],
-						utils: ["@iconify/svelte"],
+					manualChunks(id) {
+						// 第三方库单独打包
+						if (id.includes("node_modules")) {
+							if (id.includes("@swup/astro")) {
+								return "swup-core";
+							}
+							if (id.includes("svelte") || id.includes("photoswipe")) {
+								return "vendor";
+							}
+							if (id.includes("@iconify/svelte")) {
+								return "iconify";
+							}
+							// 其他node_modules统一打包
+							return "vendor-other";
+						}
 					},
 				},
 				onwarn(warning, warn) {
@@ -209,6 +228,9 @@ export default defineConfig({
 					warn(warning);
 				},
 			},
+		},
+		optimizeDeps: {
+			exclude: ["@upstash/redis"],
 		},
 		// 添加构建后IndexNow推送钩子
 		plugins: [
@@ -231,5 +253,29 @@ export default defineConfig({
 		// 生产环境优化配置
 		analytics: false, // 在生产环境中禁用分析以减少开销
 		imageService: true,
+		webAnalytics: {
+			enabled: false,
+		},
+		speedInsights: {
+			enabled: false,
+		},
+		isr: {
+			// 增量静态再生成配置
+			expiration: 60,
+		},
 	}),
+
+	// 图片优化配置
+	image: {
+		service: {
+			entrypoint: "astro/assets/services/sharp",
+		},
+		domains: ["www.freebird2913.tech"],
+	},
+
+	// 输出优化
+	compressHTML: true,
+	build: {
+		inlineStylesheets: "auto",
+	},
 });

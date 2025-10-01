@@ -1,0 +1,203 @@
+---
+/**
+ * 性能监控组件
+ * 监控 Core Web Vitals 和其他关键性能指标
+ */
+const isProduction = import.meta.env.PROD;
+---
+
+{isProduction && (
+  <script>
+    // 性能监控脚本
+    (function() {
+      // 检查是否支持 Performance API
+      if (!('performance' in window)) {
+        return;
+      }
+
+      const vitals = {
+        lcp: 0,
+        fid: 0,
+        cls: 0,
+        fcp: 0,
+        ttfb: 0,
+      };
+
+      // 监控 Largest Contentful Paint (LCP)
+      function observeLCP() {
+        if ('PerformanceObserver' in window) {
+          try {
+            const observer = new PerformanceObserver((list) => {
+              const entries = list.getEntries();
+              const lastEntry = entries[entries.length - 1] as any;
+              vitals.lcp = lastEntry.renderTime || lastEntry.loadTime;
+              console.log(`[Perf] LCP: ${vitals.lcp.toFixed(2)}ms`);
+            });
+            observer.observe({ entryTypes: ['largest-contentful-paint'] });
+          } catch (e) {
+            console.error('LCP observation failed:', e);
+          }
+        }
+      }
+
+      // 监控 First Input Delay (FID)
+      function observeFID() {
+        if ('PerformanceObserver' in window) {
+          try {
+            const observer = new PerformanceObserver((list) => {
+              const entries = list.getEntries();
+              entries.forEach((entry: any) => {
+                vitals.fid = entry.processingStart - entry.startTime;
+                console.log(`[Perf] FID: ${vitals.fid.toFixed(2)}ms`);
+              });
+            });
+            observer.observe({ entryTypes: ['first-input'] });
+          } catch (e) {
+            console.error('FID observation failed:', e);
+          }
+        }
+      }
+
+      // 监控 Cumulative Layout Shift (CLS)
+      function observeCLS() {
+        if ('PerformanceObserver' in window) {
+          try {
+            let clsValue = 0;
+            const observer = new PerformanceObserver((list) => {
+              const entries = list.getEntries();
+              entries.forEach((entry: any) => {
+                if (!entry.hadRecentInput) {
+                  clsValue += entry.value;
+                  vitals.cls = clsValue;
+                }
+              });
+              console.log(`[Perf] CLS: ${vitals.cls.toFixed(4)}`);
+            });
+            observer.observe({ entryTypes: ['layout-shift'] });
+          } catch (e) {
+            console.error('CLS observation failed:', e);
+          }
+        }
+      }
+
+      // 监控 First Contentful Paint (FCP)
+      function observeFCP() {
+        if ('PerformanceObserver' in window) {
+          try {
+            const observer = new PerformanceObserver((list) => {
+              const entries = list.getEntries();
+              entries.forEach((entry) => {
+                if (entry.name === 'first-contentful-paint') {
+                  vitals.fcp = entry.startTime;
+                  console.log(`[Perf] FCP: ${vitals.fcp.toFixed(2)}ms`);
+                }
+              });
+            });
+            observer.observe({ entryTypes: ['paint'] });
+          } catch (e) {
+            console.error('FCP observation failed:', e);
+          }
+        }
+      }
+
+      // 监控 Time to First Byte (TTFB)
+      function observeTTFB() {
+        try {
+          const navTiming = performance.getEntriesByType('navigation')[0] as any;
+          if (navTiming) {
+            vitals.ttfb = navTiming.responseStart - navTiming.requestStart;
+            console.log(`[Perf] TTFB: ${vitals.ttfb.toFixed(2)}ms`);
+          }
+        } catch (e) {
+          console.error('TTFB observation failed:', e);
+        }
+      }
+
+      // 页面加载完成后报告所有指标
+      function reportMetrics() {
+        const metrics = {
+          url: window.location.href,
+          userAgent: navigator.userAgent,
+          timestamp: new Date().toISOString(),
+          vitals: vitals,
+          navigation: {
+            type: performance.navigation?.type || 'unknown',
+            redirectCount: performance.navigation?.redirectCount || 0,
+          },
+          memory: (performance as any).memory ? {
+            usedJSHeapSize: (performance as any).memory.usedJSHeapSize,
+            totalJSHeapSize: (performance as any).memory.totalJSHeapSize,
+          } : null,
+        };
+
+        console.log('[Perf] Performance Metrics:', metrics);
+
+        // 可选：发送到分析服务
+        // sendToAnalytics(metrics);
+      }
+
+      // 初始化所有观察器
+      function init() {
+        observeLCP();
+        observeFID();
+        observeCLS();
+        observeFCP();
+        observeTTFB();
+
+        // 页面加载完成后报告指标
+        if (document.readyState === 'complete') {
+          setTimeout(reportMetrics, 0);
+        } else {
+          window.addEventListener('load', () => {
+            setTimeout(reportMetrics, 0);
+          });
+        }
+
+        // 页面卸载前也报告一次
+        window.addEventListener('beforeunload', reportMetrics);
+      }
+
+      // 启动监控
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+
+      // 暴露给全局以便调试
+      (window as any).__performanceVitals = vitals;
+    })();
+  </script>
+)}
+
+<style>
+  /* 性能优化相关的CSS */
+  :global(img[data-src]) {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  :global(img.lazy-loaded) {
+    opacity: 1;
+  }
+
+  :global(img.lazy-loading) {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+  }
+
+  @keyframes loading {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  :global(img.lazy-error) {
+    opacity: 0.5;
+    filter: grayscale(100%);
+  }
+</style>

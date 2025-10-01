@@ -6,6 +6,10 @@
 				{
 					"key": "Cache-Control",
 					"value": "public, max-age=31536000, immutable"
+				},
+				{
+					"key": "X-Content-Type-Options",
+					"value": "nosniff"
 				}
 			]
 		},
@@ -15,6 +19,10 @@
 				{
 					"key": "Cache-Control",
 					"value": "public, max-age=31536000, immutable"
+				},
+				{
+					"key": "Access-Control-Allow-Origin",
+					"value": "*"
 				}
 			]
 		},
@@ -28,11 +36,24 @@
 			]
 		},
 		{
-			"source": "/:path*.webp",
+			"source": "/:path*.(webp|avif|jpg|jpeg|png|gif|svg)",
 			"headers": [
 				{
 					"key": "Cache-Control",
-					"value": "public, max-age=604800"
+					"value": "public, max-age=31536000, immutable"
+				},
+				{
+					"key": "X-Content-Type-Options",
+					"value": "nosniff"
+				}
+			]
+		},
+		{
+			"source": "/:path*.(js|css|woff|woff2)",
+			"headers": [
+				{
+					"key": "Cache-Control",
+					"value": "public, max-age=31536000, immutable"
 				}
 			]
 		},
@@ -42,6 +63,27 @@
 				{
 					"key": "Cache-Control",
 					"value": "public, s-maxage=60, stale-while-revalidate=300"
+				},
+				{
+					"key": "X-Content-Type-Options",
+					"value": "nosniff"
+				}
+			]
+		},
+		{
+			"source": "/:path*.html",
+			"headers": [
+				{
+					"key": "Cache-Control",
+					"value": "public, max-age=0, must-revalidate"
+				},
+				{
+					"key": "X-Content-Type-Options",
+					"value": "nosniff"
+				},
+				{
+					"key": "X-Frame-Options",
+					"value": "SAMEORIGIN"
 				}
 			]
 		}

@@ -3,6 +3,9 @@ import { createClient } from "redis";
 
 export const prerender = false;
 
+const CACHE_KEY = "cached:totals";
+const CACHE_TTL = 300; // 5分钟缓存
+
 async function getRedisClient() {
 	const client = createClient({
 		url: process.env.REDIS_URL,
@@ -21,6 +24,23 @@ export const GET: APIRoute = async () => {
 	try {
 		const redis = await getRedisClient();
 
+		// 尝试从缓存获取 - 这是最重要的性能优化
+		const cached = await redis.get(CACHE_KEY);
+		if (cached) {
+			await redis.quit();
+			return new Response(cached, {
+				status: 200,
+				headers: {
+					"Content-Type": "application/json",
+					"Cache-Control":
+						"public, max-age=60, s-maxage=300, stale-while-revalidate=600",
+					"Access-Control-Allow-Origin": "*",
+					"X-Cache": "HIT",
+				},
+			});
+		}
+
+		// 缓存未命中时才执行查询
 		// 获取所有 views:* 和 reads:* 的键
 		const viewKeys = await redis.keys("views:*");
 		const readKeys = await redis.keys("reads:*");
@@ -49,20 +69,27 @@ export const GET: APIRoute = async () => {
 			);
 		}
 
-		await redis.quit();
-
 		const response = {
 			totalViews,
 			totalReads,
 			timestamp: Date.now(),
 		};
 
-		return new Response(JSON.stringify(response), {
+		const responseStr = JSON.stringify(response);
+
+		// 缓存结果 - 5分钟内的请求都会命中缓存
+		await redis.setEx(CACHE_KEY, CACHE_TTL, responseStr);
+
+		await redis.quit();
+
+		return new Response(responseStr, {
 			status: 200,
 			headers: {
 				"Content-Type": "application/json",
-				"Cache-Control": "public, max-age=300, s-maxage=300",
+				"Cache-Control":
+					"public, max-age=60, s-maxage=300, stale-while-revalidate=600",
 				"Access-Control-Allow-Origin": "*",
+				"X-Cache": "MISS",
 			},
 		});
 	} catch (error) {
@@ -76,7 +103,10 @@ export const GET: APIRoute = async () => {
 			}),
 			{
 				status: 500,
-				headers: { "Content-Type": "application/json" },
+				headers: {
+					"Content-Type": "application/json",
+					"Access-Control-Allow-Origin": "*",
+				},
 			},
 		);
 	}
