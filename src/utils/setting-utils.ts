@@ -61,57 +61,33 @@ export function setTheme(theme: LIGHT_DARK_MODE): void {
 	});
 	document.dispatchEvent(themeChangeEvent);
 
-	// 调用全局的 Giscus 更新函数（如果存在）
-	if (typeof window.updateGiscusTheme === "function") {
-		// 延迟调用以确保主题已应用到 DOM
-		setTimeout(() => {
-			window.updateGiscusTheme?.();
-		}, 100);
-	}
+	// 优化的 Giscus 主题更新 - 单次尝试
+	requestIdleCallback(
+		() => {
+			const giscusFrame = document.querySelector(
+				"iframe.giscus-frame",
+			) as HTMLIFrameElement;
 
-	// 备用的 Giscus 主题更新机制（保持兼容性）
-	const sendGiscusTheme = (retryCount = 0) => {
-		const maxRetries = 5;
-		const giscusFrame = document.querySelector(
-			"iframe.giscus-frame",
-		) as HTMLIFrameElement;
+			if (giscusFrame?.contentWindow) {
+				const giscusTheme =
+					theme === LIGHT_MODE
+						? "light"
+						: theme === DARK_MODE
+							? "dark"
+							: "preferred_color_scheme";
 
-		if (giscusFrame?.contentWindow) {
-			let giscusTheme: string;
-			switch (theme) {
-				case LIGHT_MODE:
-					giscusTheme = "light";
-					break;
-				case DARK_MODE:
-					giscusTheme = "dark";
-					break;
-				default:
-					giscusTheme = "preferred_color_scheme";
-					break;
+				try {
+					giscusFrame.contentWindow.postMessage(
+						{ giscus: { setConfig: { theme: giscusTheme } } },
+						"https://giscus.app",
+					);
+				} catch {
+					// 静默失败
+				}
 			}
-
-			try {
-				giscusFrame.contentWindow.postMessage(
-					{
-						giscus: {
-							setConfig: {
-								theme: giscusTheme,
-							},
-						},
-					},
-					"https://giscus.app",
-				);
-			} catch (error) {
-				console.warn("Failed to update Giscus theme via backup method:", error);
-			}
-		} else if (retryCount < maxRetries) {
-			// 如果 iframe 未找到且还有重试次数，延迟重试
-			setTimeout(() => sendGiscusTheme(retryCount + 1), 300);
-		}
-	};
-
-	// 延迟执行备用更新机制
-	setTimeout(() => sendGiscusTheme(), 200);
+		},
+		{ timeout: 1000 },
+	);
 }
 
 export function getStoredTheme(): LIGHT_DARK_MODE {

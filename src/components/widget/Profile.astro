@@ -2,7 +2,6 @@
 import { Icon } from "astro-icon/components";
 import { profileConfig } from "../../config";
 import { url } from "../../utils/url-utils";
-import ImageWrapper from "../misc/ImageWrapper.astro";
 
 const config = profileConfig;
 
@@ -18,7 +17,13 @@ let dailyQuote = { content: "加载中...", author: "" };
                   class="transition opacity-0 scale-90 group-hover:scale-100 group-hover:opacity-100 text-white text-5xl">
             </Icon>
         </div>
-        <ImageWrapper src={config.avatar || ""} alt="Profile Image of the Author" class="mx-auto lg:w-full h-full lg:mt-0 " priority={true}></ImageWrapper>
+        <picture class="mx-auto lg:w-full h-full lg:mt-0">
+            <source type="image/avif" srcset="/images/avatar/avatar-256.avif" />
+            <source type="image/webp" srcset="/images/avatar/avatar-256.webp" />
+            <img src="/images/avatar/avatar-256.png" alt="Profile Image of the Author"
+                 width="256" height="256" loading="eager" fetchpriority="high" decoding="sync"
+                 class="w-full h-full object-cover" />
+        </picture>
     </a>
     <div class="px-2">
         <div class="font-bold text-xl text-center mb-1 dark:text-neutral-50 transition">{config.name}</div>

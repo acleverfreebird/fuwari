@@ -106,7 +106,7 @@ const { remarkPluginFrontmatter } = await entry.render();
 </div>
 
 <!-- 客户端脚本：动态加载统计数据 -->
-<script define:vars={{ slug: entry.slug }}>
+<script is:inline define:vars={{ slug: entry.slug }}>
     // 在页面加载后获取统计数据
     (function() {
         // 获取当前卡片的统计元素
@@ -118,20 +118,26 @@ const { remarkPluginFrontmatter } = await entry.render();
         }
         
         // 从 API 获取统计数据
-        fetch(`/api/stats/${slug}`)
+        fetch(`/api/stats/${encodeURIComponent(slug)}`)
             .then(response => {
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+                    // 静默失败 - 不显示错误给用户
+                    return null;
                 }
                 return response.json();
             })
             .then(data => {
-                // 更新显示
-                viewCountElement.textContent = data.views || 0;
-                readCountElement.textContent = data.reads || 0;
+                if (data) {
+                    // 更新显示
+                    viewCountElement.textContent = data.views || 0;
+                    readCountElement.textContent = data.reads || 0;
+                }
             })
-            .catch(error => {
-                console.error(`获取文章 ${slug} 统计数据失败:`, error);
+            .catch(() => {
+                // 静默失败 - 仅在开发环境记录
+                if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+                    console.warn(`[Stats] 获取文章统计失败: ${slug}`);
+                }
             });
     })();
 </script>

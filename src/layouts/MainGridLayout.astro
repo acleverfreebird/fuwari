@@ -6,7 +6,7 @@ import SEOHead from "@components/SEOHead.astro";
 import SideBar from "@components/widget/SideBar.astro";
 import type { MarkdownHeading } from "astro";
 import { Icon } from "astro-icon/components";
-import ImageWrapper from "../components/misc/ImageWrapper.astro";
+import OptimizedBanner from "../components/OptimizedBanner.astro";
 import TOC from "../components/widget/TOC.astro";
 import { siteConfig } from "../config";
 import {
@@ -86,10 +86,9 @@ const mainPanelTop = siteConfig.banner.enable
 
 <!-- Banner -->
 {siteConfig.banner.enable && <div id="banner-wrapper" class={`absolute z-10 w-full transition duration-700 overflow-hidden`} style={`top: -${BANNER_HEIGHT_EXTEND}vh`}>
-    <ImageWrapper id="banner" alt="Banner image of the blog" class:list={["object-cover h-full transition duration-700 opacity-0 scale-105"]}
-                  src={siteConfig.banner.src} position={siteConfig.banner.position} priority={true}
-    >
-    </ImageWrapper>
+    <div id="banner" class="h-full transition duration-700 opacity-0 scale-105">
+        <OptimizedBanner position={siteConfig.banner.position} />
+    </div>
 </div>}
 
 <!-- Main content -->

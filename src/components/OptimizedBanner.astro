@@ -1,0 +1,58 @@
+---
+/**
+ * 优化的 Banner 组件 - 支持响应式图片和现代格式
+ */
+interface Props {
+	position?: "top" | "center" | "bottom";
+	class?: string;
+}
+
+const { position = "center", class: className = "" } = Astro.props;
+
+const objectPosition = {
+	top: "object-top",
+	center: "object-center",
+	bottom: "object-bottom",
+}[position];
+---
+
+<picture>
+  <!-- AVIF 格式 - 最佳压缩 -->
+  <source
+    type="image/avif"
+    srcset="/images/banner/banner-640w.avif 640w,
+            /images/banner/banner-1024w.avif 1024w,
+            /images/banner/banner-1920w.avif 1920w"
+    sizes="100vw"
+  />
+  
+  <!-- WebP 格式 - 良好兼容性 -->
+  <source
+    type="image/webp"
+    srcset="/images/banner/banner-640w.webp 640w,
+            /images/banner/banner-1024w.webp 1024w,
+            /images/banner/banner-1920w.webp 1920w"
+    sizes="100vw"
+  />
+  
+  <!-- JPEG 后备格式 -->
+  <source
+    type="image/jpeg"
+    srcset="/images/banner/banner-640w.jpg 640w,
+            /images/banner/banner-1024w.jpg 1024w,
+            /images/banner/banner-1920w.jpg 1920w"
+    sizes="100vw"
+  />
+  
+  <!-- 后备 img 标签 -->
+  <img
+    src="/images/banner/banner-1024w.jpg"
+    alt="Banner"
+    width="1200"
+    height="800"
+    loading="eager"
+    fetchpriority="high"
+    decoding="sync"
+    class={`w-full h-full object-cover ${objectPosition} ${className}`}
+  />
+</picture>

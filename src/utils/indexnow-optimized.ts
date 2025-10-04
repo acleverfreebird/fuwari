@@ -578,7 +578,7 @@ export function isDevMode(): boolean {
 	if (typeof import.meta !== "undefined" && import.meta.env) {
 		return import.meta.env.DEV === true;
 	}
-	if (typeof process !== "undefined" && process?.env) {
+	if (typeof process !== "undefined" && process?.env?.NODE_ENV) {
 		return process.env.NODE_ENV === "development";
 	}
 	return false;
