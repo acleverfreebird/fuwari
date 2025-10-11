@@ -56,7 +56,9 @@ export function setupLazyLoad(
 	// 观察所有匹配的图片
 	const images = document.querySelectorAll<HTMLImageElement>(selector);
 	images.forEach((img) => {
-		img.classList.add(config.loadingClass!);
+		if (config.loadingClass) {
+			img.classList.add(config.loadingClass);
+		}
 		imageObserver.observe(img);
 	});
 }
@@ -78,8 +80,12 @@ function loadImage(img: HTMLImageElement, config: LazyLoadOptions): void {
 		if (srcset) {
 			img.srcset = srcset;
 		}
-		img.classList.remove(config.loadingClass!);
-		img.classList.add(config.loadedClass!);
+		if (config.loadingClass) {
+			img.classList.remove(config.loadingClass);
+		}
+		if (config.loadedClass) {
+			img.classList.add(config.loadedClass);
+		}
 
 		// 移除 data 属性
 		delete img.dataset.src;
@@ -87,8 +93,12 @@ function loadImage(img: HTMLImageElement, config: LazyLoadOptions): void {
 	};
 
 	tempImg.onerror = () => {
-		img.classList.remove(config.loadingClass!);
-		img.classList.add(config.errorClass!);
+		if (config.loadingClass) {
+			img.classList.remove(config.loadingClass);
+		}
+		if (config.errorClass) {
+			img.classList.add(config.errorClass);
+		}
 		console.error(`Failed to load image: ${src}`);
 	};
 
@@ -119,12 +129,12 @@ function loadAllImages(selector: string): void {
  * 预加载指定的图片
  * @param urls - 图片URL数组
  */
-export function preloadImages(urls: string[]): Promise<void[]> {
+export function preloadImages(urls: string[]): Promise<unknown[]> {
 	const promises = urls.map(
 		(url) =>
-			new Promise<void>((resolve, reject) => {
+			new Promise<unknown>((resolve, reject) => {
 				const img = new Image();
-				img.onload = () => resolve();
+				img.onload = () => resolve(undefined);
 				img.onerror = reject;
 				img.src = url;
 			}),
@@ -137,7 +147,6 @@ export function preloadImages(urls: string[]): Promise<void[]> {
  * 根据设备像素比和视口大小选择合适的图片
  */
 export function getResponsiveImageUrl(
-	baseUrl: string,
 	sizes: { width: number; url: string }[],
 ): string {
 	const dpr = window.devicePixelRatio || 1;
