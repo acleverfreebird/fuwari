@@ -3,6 +3,7 @@ import { Icon } from "astro-icon/components";
 import { profileConfig } from "../../config";
 import { url } from "../../utils/url-utils";
 import ImageWrapper from "../misc/ImageWrapper.astro";
+import UmamiPageViews from "../UmamiPageViews.astro";
 
 const config = profileConfig;
 
@@ -24,6 +25,9 @@ let dailyQuote = { content: "加载中...", author: "" };
         <div class="font-bold text-xl text-center mb-1 dark:text-neutral-50 transition">{config.name}</div>
         <div class="h-1 w-5 bg-[var(--primary)] mx-auto rounded-full mb-2 transition"></div>
         <div class="text-center text-neutral-400 mb-2.5 transition">{config.bio}</div>
+        <div class="flex justify-center mb-2.5">
+            <UmamiPageViews type="total" class="text-sm" />
+        </div>
         <div class="quote-container border-t border-neutral-200 dark:border-neutral-700 pt-2 mb-2.5">
             <div id="quote-content" class="text-center text-sm italic text-neutral-500 dark:text-neutral-400">{dailyQuote.content}</div>
             <div id="quote-author" class="text-center text-xs text-neutral-400 dark:text-neutral-500 mt-1" style="display: none;"></div>

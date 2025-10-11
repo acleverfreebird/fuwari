@@ -1,0 +1,231 @@
+---
+import { Icon } from "astro-icon/components";
+/**
+ * Umami 浏览量显示组件
+ * 支持显示总浏览量和单页浏览量
+ */
+import { umamiStatsConfig } from "@/config";
+
+interface Props {
+	type?: "total" | "page"; // 显示类型: total=总浏览量, page=页面浏览量
+	url?: string; // 页面URL (type=page时必需)
+	showVisitors?: boolean; // 是否显示访问者数量
+	class?: string;
+}
+
+const {
+	type = "total",
+	url,
+	showVisitors = true,
+	class: className,
+} = Astro.props;
+
+// 如果未启用统计功能,不渲染组件
+if (!umamiStatsConfig.enable) {
+	return null;
+}
+
+// 如果是页面浏览量但未提供URL,不渲染
+if (type === "page" && !url) {
+	console.warn("UmamiPageViews: type='page' requires url prop");
+	return null;
+}
+
+// 生成唯一ID用于DOM操作
+const componentId = `umami-views-${Math.random().toString(36).substr(2, 9)}`;
+---
+
+<div class:list={["umami-page-views", className]} id={componentId} data-type={type} data-url={url} data-show-visitors={showVisitors}>
+	<div class="stat-item pageviews-item">
+		<span class="label">浏览量:</span>
+		<span class="views-count">
+			<span class="loading">...</span>
+			<span class="count" style="display: none;">0</span>
+			<span class="error" style="display: none;">--</span>
+		</span>
+	</div>
+	<div class="stat-item visitors-item" style={showVisitors ? "" : "display: none !important;"}>
+		<span class="label">访客数量:</span>
+		<span class="visitors-count">
+			<span class="count">0</span>
+		</span>
+	</div>
+</div>
+
+<script>
+	import { umamiStatsConfig } from "@/config";
+
+	interface ViewsData {
+		pageviews?: number;
+		total?: number;  // 总浏览量使用 total 字段
+		visitors?: number;
+		error?: string;
+	}
+
+	/**
+	 * 格式化数字显示
+	 */
+	function formatNumber(num: number): string {
+		if (num >= 10000) {
+			return (num / 10000).toFixed(1) + "w";
+		}
+		if (num >= 1000) {
+			return (num / 1000).toFixed(1) + "k";
+		}
+		return num.toString();
+	}
+
+	/**
+	 * 获取浏览量数据
+	 */
+	async function fetchPageViews(type: string, url?: string): Promise<ViewsData> {
+		try {
+			let apiUrl = `${umamiStatsConfig.apiUrl}/stats/total`;
+			if (type === "page" && url) {
+				apiUrl = `${umamiStatsConfig.apiUrl}/stats/page?url=${encodeURIComponent(url)}`;
+			}
+
+			const response = await fetch(apiUrl);
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}`);
+			}
+
+			const data = await response.json();
+			return data;
+		} catch (error) {
+			console.error("Failed to fetch Umami page views:", error);
+			return { error: (error as Error).message };
+		}
+	}
+
+	/**
+	 * 更新显示
+	 */
+	function updateDisplay(
+		container: HTMLElement,
+		data: ViewsData,
+	) {
+		const showVisitors = container.getAttribute("data-show-visitors") === "true";
+		const pageviewsItem = container.querySelector(".pageviews-item") as HTMLElement;
+		const loadingEl = pageviewsItem?.querySelector(".loading") as HTMLElement;
+		const countEl = pageviewsItem?.querySelector(".count") as HTMLElement;
+		const errorEl = pageviewsItem?.querySelector(".error") as HTMLElement;
+
+		console.log("🔍 Complete API Response:", JSON.stringify(data, null, 2));
+		console.log("🔍 All data keys:", Object.keys(data));
+		console.log("🔍 showVisitors:", showVisitors);
+
+		if (loadingEl) loadingEl.style.display = "none";
+
+		if (data.error) {
+			console.error("Umami stats error:", data.error);
+			if (errorEl) {
+				errorEl.style.display = "inline";
+			}
+			return;
+		}
+
+		// 更新浏览量 (支持 pageviews 和 total 两种字段)
+		const viewCount = data.pageviews ?? data.total;
+		console.log("🔍 Extracted viewCount:", viewCount, "from pageviews:", data.pageviews, "total:", data.total);
+		
+		if (viewCount !== undefined && countEl) {
+			countEl.textContent = formatNumber(viewCount);
+			countEl.style.display = "inline";
+			console.log("✅ Updated pageviews:", viewCount, "->", countEl.textContent);
+		} else {
+			console.warn("❌ No pageviews/total data or countEl missing:", { data, countEl });
+		}
+
+		// 更新访问者数量
+		console.log("🔍 Checking visitors - showVisitors:", showVisitors, "data.visitors:", data.visitors);
+		if (showVisitors && data.visitors !== undefined) {
+			const visitorsItem = container.querySelector(".visitors-item") as HTMLElement;
+			const visitorsCountEl = visitorsItem?.querySelector(".count") as HTMLElement;
+			
+			console.log("🔍 Visitors elements:", { visitorsItem, visitorsCountEl });
+			
+			if (visitorsItem && visitorsCountEl) {
+				visitorsCountEl.textContent = formatNumber(data.visitors);
+				visitorsItem.style.display = "flex";
+				console.log("✅ Updated visitors:", data.visitors, "->", visitorsCountEl.textContent);
+			}
+		} else {
+			console.log("⚠️ Visitors not shown - showVisitors:", showVisitors, "visitors value:", data.visitors);
+		}
+	}
+
+	/**
+	 * 初始化组件
+	 */
+	function initUmamiPageViews() {
+		if (!umamiStatsConfig.enable) return;
+
+		const containers = document.querySelectorAll(".umami-page-views");
+		containers.forEach(async (container) => {
+			const type = container.getAttribute("data-type") || "total";
+			const url = container.getAttribute("data-url") || undefined;
+
+			const data = await fetchPageViews(type, url);
+			updateDisplay(container as HTMLElement, data);
+		});
+	}
+
+	// 页面加载完成后初始化
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", initUmamiPageViews);
+	} else {
+		initUmamiPageViews();
+	}
+
+	// 支持页面导航后重新加载 (SPA模式)
+	document.addEventListener("astro:page-load", initUmamiPageViews);
+</script>
+
+<style>
+	.umami-page-views {
+		display: inline-flex;
+		align-items: center;
+		gap: 1.5rem;
+		font-size: 0.875rem;
+		color: var(--color-text-secondary, #666);
+	}
+
+	.stat-item {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.label {
+		font-size: 0.875rem;
+		opacity: 0.9;
+		font-weight: 500;
+	}
+
+	.views-count,
+	.visitors-count {
+		font-variant-numeric: tabular-nums;
+		font-weight: 600;
+		color: var(--color-text-primary, #333);
+	}
+
+	.loading {
+		opacity: 0.6;
+		font-size: 0.75rem;
+	}
+
+	.error {
+		opacity: 0.4;
+	}
+
+	/* 深色模式支持 */
+	:global(.dark) .umami-page-views {
+		color: var(--color-text-secondary-dark, #999);
+	}
+
+	:global(.dark) .views-count,
+	:global(.dark) .visitors-count {
+		color: var(--color-text-primary-dark, #eee);
+	}
+</style>

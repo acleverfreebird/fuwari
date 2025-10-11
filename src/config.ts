@@ -94,3 +94,9 @@ export const umamiConfig: UmamiConfig = {
 	autoTrack: true,
 	delayLoad: 2000, // 2秒后加载,优化首屏性能
 };
+
+// Umami 统计 API 配置 (通过 Cloudflare Worker 代理)
+export const umamiStatsConfig = {
+	enable: true, // 是否启用浏览量显示
+	apiUrl: "https://get-views.freebird2913.tech", // Cloudflare Worker 地址
+};
