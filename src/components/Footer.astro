@@ -7,6 +7,35 @@ import UmamiPageViews from "./UmamiPageViews.astro";
 const currentYear = new Date().getFullYear();
 ---
 
+<script>
+function updateUptime() {
+    // 网站开始运行的时间：2023年4月23日 00:00:00 (UTC+8)
+    const startDate = new Date('2023-04-23T00:00:00+08:00');
+    const now = new Date();
+    
+    // 计算时间差（毫秒）
+    const diff = now.getTime() - startDate.getTime();
+    
+    // 转换为天、小时、分钟、秒
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    // 更新显示
+    const uptimeElement = document.getElementById('site-uptime');
+    if (uptimeElement) {
+        uptimeElement.textContent = `${days} 天 ${hours} 时 ${minutes} 分 ${seconds} 秒`;
+    }
+}
+
+// 页面加载时立即更新一次
+updateUptime();
+
+// 每秒更新一次
+setInterval(updateUptime, 1000);
+</script>
+
 <!--<div class="border-t border-[var(&#45;&#45;primary)] mx-16 border-dashed py-8 max-w-[var(&#45;&#45;page-width)] flex flex-col items-center justify-center px-6">-->
 <div class="transition border-t border-black/10 dark:border-white/15 my-10 border-dashed mx-32"></div>
 <!--<div class="transition bg-[oklch(92%_0.01_var(&#45;&#45;hue))] dark:bg-black rounded-2xl py-8 mt-4 mb-8 flex flex-col items-center justify-center px-6">-->
@@ -17,6 +46,11 @@ const currentYear = new Date().getFullYear();
     </div>
     
     <div class="transition text-50 text-sm text-center">
+        <!-- 网站运行时间 -->
+        <div class="mb-2 text-[var(--primary)] font-medium">
+            本站已苟活：<span id="site-uptime">加载中...</span>
+        </div>
+        
         &copy; <span id="copyright-year">{currentYear}</span> {profileConfig.name}. All Rights Reserved. /
         <a class="transition link text-[var(--primary)] font-medium" target="_blank" href={url('rss.xml')}>RSS</a> /
         <a class="transition link text-[var(--primary)] font-medium" target="_blank" href={url('sitemap-index.xml')}>Sitemap</a><br>
