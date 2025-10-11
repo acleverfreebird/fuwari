@@ -49,31 +49,6 @@ const jsonLd = {
 		: siteConfig.lang.replace("_", "-"),
 	// TODO include cover image here
 };
-
-let viewCount = 0;
-let readCount = 0;
-
-if (import.meta.env.SSR) {
-	// Server-side rendering: fetch initial view count and read count
-	try {
-		const viewResponse = await fetch(
-			`${Astro.url.origin}/api/views/${entry.slug}?type=views`,
-		);
-		if (viewResponse.ok) {
-			const data = await viewResponse.json();
-			viewCount = data.views;
-		}
-		const readResponse = await fetch(
-			`${Astro.url.origin}/api/views/${entry.slug}?type=reads`,
-		);
-		if (readResponse.ok) {
-			const data = await readResponse.json();
-			readCount = data.reads;
-		}
-	} catch (error) {
-		console.error("Error fetching initial counts:", error);
-	}
-}
 ---
 <MainGridLayout banner={entry.data.image} title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings}>
     <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
@@ -123,8 +98,6 @@ if (import.meta.env.SSR) {
                         updated={entry.data.updated}
                         tags={entry.data.tags}
                         category={entry.data.category}
-                        viewCount={viewCount}
-                        readCount={readCount}
                 ></PostMetadata>
                 {!entry.data.image && <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>}
             </div>
@@ -185,9 +158,6 @@ if (import.meta.env.SSR) {
             </div>}
         </a>
     </div>
-
-    <!-- 页面分析脚本 -->
-    <script is:inline src="/scripts/page-analytics.js"></script>
 
 </MainGridLayout>
 
