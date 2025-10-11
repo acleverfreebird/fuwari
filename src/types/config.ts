@@ -132,3 +132,12 @@ export type GalleryItem = {
 export type GalleryData = {
 	images: GalleryItem[];
 };
+
+export type UmamiConfig = {
+	enable: boolean; // 是否启用 Umami
+	src: string; // Umami 脚本地址
+	websiteId: string; // 网站 ID
+	domains?: string; // (可选) 限制追踪的域名
+	autoTrack?: boolean; // (可选) 自动追踪,默认 true
+	delayLoad?: number; // (可选) 延迟加载时间(毫秒),默认 2000
+};

@@ -2,6 +2,7 @@
 // 使用Google Fonts CDN优化字体加载性能
 
 import ConfigCarrier from "@components/ConfigCarrier.astro";
+import UmamiAnalytics from "@components/UmamiAnalytics.astro";
 import Analytics from "@vercel/analytics/astro";
 import SpeedInsights from "@vercel/speed-insights/astro";
 import { profileConfig, siteConfig } from "@/config";
@@ -216,6 +217,9 @@ const bannerOffset =
 			"keywords": ["技术博客", "编程学习", "数码科技", "freebird2913", "前端开发", "Python", "JavaScript"]
 		}
 		</script>
+
+		<!-- Umami Analytics -->
+		<UmamiAnalytics />
 
 		<!-- Microsoft Clarity tracking - 延迟加载避免阻塞 -->
 		<script is:inline>

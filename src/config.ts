@@ -4,6 +4,7 @@ import type {
 	NavBarConfig,
 	ProfileConfig,
 	SiteConfig,
+	UmamiConfig,
 } from "./types/config";
 import { LinkPreset } from "./types/config";
 
@@ -83,4 +84,13 @@ export const expressiveCodeConfig: ExpressiveCodeConfig = {
 	// Note: Some styles (such as background color) are being overridden, see the astro.config.mjs file.
 	// Please select a dark theme, as this blog theme currently only supports dark background color
 	theme: "github-dark",
+};
+
+export const umamiConfig: UmamiConfig = {
+	enable: true,
+	src: "https://views.freebird2913.tech/script.js",
+	websiteId: "726431d7-e252-486d-ab90-350313e5a519",
+	domains: "www.freebird2913.tech", // 可选,限制只在此域名追踪
+	autoTrack: true,
+	delayLoad: 2000, // 2秒后加载,优化首屏性能
 };

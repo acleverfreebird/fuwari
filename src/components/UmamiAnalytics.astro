@@ -1,0 +1,52 @@
+---
+import { umamiConfig } from "@/config";
+
+// 如果未启用,不渲染任何内容
+if (!umamiConfig.enable) {
+	return;
+}
+
+const {
+	src,
+	websiteId,
+	domains,
+	autoTrack = true,
+	delayLoad = 2000,
+} = umamiConfig;
+---
+
+<!-- Umami Analytics - 延迟加载避免阻塞首屏 -->
+<script
+	is:inline
+	define:vars={{ src, websiteId, domains, autoTrack, delayLoad }}
+>
+	// 延迟加载 Umami 避免首屏阻塞
+	(function () {
+		const loadUmami = () => {
+			const script = document.createElement("script");
+			script.src = src;
+			script.async = true;
+			script.defer = true;
+			script.setAttribute("data-website-id", websiteId);
+
+			// 可选配置
+			if (domains) {
+				script.setAttribute("data-domains", domains);
+			}
+			if (autoTrack === false) {
+				script.setAttribute("data-auto-track", "false");
+			}
+
+			document.head.appendChild(script);
+		};
+
+		// 根据页面加载状态决定何时加载
+		if (document.readyState === "loading") {
+			document.addEventListener("DOMContentLoaded", function () {
+				setTimeout(loadUmami, delayLoad);
+			});
+		} else {
+			setTimeout(loadUmami, delayLoad);
+		}
+	})();
+</script>
