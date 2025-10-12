@@ -7,23 +7,4 @@
         font-family: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
 
-    /* 折叠按钮样式优化 */
-    button[data-ec-collapse-button] {
-        @apply transition-all duration-200 ease-in-out;
-        @apply opacity-80 hover:opacity-100;
-    }
-
-    /* 折叠区域平滑过渡 */
-    [data-ec-collapsible-section] {
-        @apply transition-all duration-300 ease-in-out;
-    }
-
-    /* 折叠状态指示器 */
-    [data-ec-collapsed="true"] {
-        @apply opacity-60;
-    }
-
-    [data-ec-collapsed="false"] {
-        @apply opacity-100;
-    }
 }

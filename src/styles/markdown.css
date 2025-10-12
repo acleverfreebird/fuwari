@@ -92,56 +92,6 @@
             @apply bg-[var(--codeblock-selection)];
         }
 
-        /* 折叠区域样式 */
-        .collapsible-section {
-            @apply transition-all duration-300 ease-in-out;
-        }
-
-        /* 折叠按钮样式 */
-        .collapse-button {
-            @apply transition-all duration-200 ease-in-out;
-            @apply text-xs font-medium px-3 py-1.5 rounded-md;
-            @apply bg-[oklch(0.45_0.01_var(--hue))] hover:bg-[oklch(0.50_0.01_var(--hue))];
-            @apply dark:bg-[oklch(0.30_0.02_var(--hue))] dark:hover:bg-[oklch(0.35_0.03_var(--hue))];
-            @apply text-white/90 hover:text-white;
-            @apply cursor-pointer select-none;
-            @apply flex items-center gap-2;
-            @apply my-2 mx-auto w-fit;
-        }
-
-        .collapse-button:active {
-            @apply scale-95;
-        }
-
-        /* 折叠图标动画 */
-        .collapse-button svg {
-            @apply transition-transform duration-200;
-        }
-
-        .collapse-button[aria-expanded="false"] svg {
-            @apply rotate-0;
-        }
-
-        .collapse-button[aria-expanded="true"] svg {
-            @apply rotate-180;
-        }
-
-        /* 折叠内容区域 */
-        .collapsed-content {
-            @apply overflow-hidden transition-all duration-300 ease-in-out;
-            max-height: 0;
-            opacity: 0;
-        }
-
-        .collapsed-content.expanded {
-            max-height: 10000px;
-            opacity: 1;
-        }
-
-        /* 折叠提示文本 */
-        .collapse-hint {
-            @apply text-xs text-white/50 dark:text-white/40 text-center my-2;
-        }
     }
 
 

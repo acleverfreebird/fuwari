@@ -1,116 +1,57 @@
-# 代码块自动折叠功能
+# 代码块自动折叠功能 (最终实现)
 
 ## 功能说明
 
-博客现在支持长代码块的自动折叠功能。当代码块的行数超过设定的阈值时，超出部分会自动折叠，用户可以点击展开按钮查看完整代码。
+为了优化长代码块的阅读体验，博客采用了一种结合服务端预处理和客户端增强的混合方案，实现了以下功能：
 
-## 配置
-
-在 [`astro.config.mjs`](../astro.config.mjs) 中配置：
-
-```javascript
-import { pluginAutoCollapse } from "./src/plugins/expressive-code/auto-collapse.ts";
-
-expressiveCode({
-  plugins: [
-    pluginCollapsibleSections(),
-    pluginAutoCollapse({
-      // 当代码块超过20行时自动折叠
-      collapseAfter: 20,
-    }),
-    // ... 其他插件
-  ],
-})
-```
-
-## 参数说明
-
-- `collapseAfter`: 设置折叠阈值（行数），默认值为 20
-  - 当代码块行数 ≤ `collapseAfter` 时，完整显示
-  - 当代码块行数 > `collapseAfter` 时，超出部分自动折叠
-
-## 使用示例
-
-### 短代码块（不会折叠）
-
-```javascript
-function hello() {
-  console.log("Hello World");
-  return true;
-}
-```
-
-### 长代码块（自动折叠）
-
-当代码块超过 20 行时，第 21 行及以后的内容会被自动折叠，读者可以点击"展开"按钮查看完整代码。
-
-## 手动控制折叠
-
-如果你想手动控制某个代码块的折叠行为，可以在代码块的 fence 上添加 `collapse` 属性：
-
-````markdown
-```javascript collapse={10-50}
-// 这里的代码第 10-50 行会被折叠
-```
-````
+- **自动折叠**: 超过 20 行的代码块会自动折叠。
+- **点击切换**: 用户可以**点击**按钮来展开或重新折叠代码块。
+- **平滑动画**: 展开和折叠的过程伴有流畅的动画效果。
+- **智能显示**: “展开/折叠”按钮只在代码块确实超过 20 行时才会出现。
 
 ## 技术实现
 
-该功能通过自定义的 Expressive Code 插件实现：
+这是一个三部分协作的系统：
 
-1. **插件位置**: [`src/plugins/expressive-code/auto-collapse.ts`](../src/plugins/expressive-code/auto-collapse.ts)
-2. **工作原理**:
-   - `pluginAutoCollapse` 在代码块的预处理阶段检查其总行数。
-   - 如果行数超过设定的 `collapseAfter` 阈值，它会自动向代码块的元数据（meta）中注入 `collapse={...}` 属性。
-   - `pluginCollapsibleSections` 随后读取这个元数据，并据此渲染出折叠的代码块 UI。
-   - **关键点**: 插件的执行顺序至关重要。`pluginAutoCollapse` 必须在 `pluginCollapsibleSections` **之前**注册，才能确保元数据在渲染前准备就绪。
+### 1. 服务端插件 (`pluginAutoCollapse`)
 
-## 自定义阈值
+- **文件**: [`src/plugins/expressive-code/auto-collapse.ts`](../src/plugins/expressive-code/auto-collapse.ts)
+- **作用**: 在 Astro 构建时，这个插件会检查每个代码块的行数。如果超过 `collapseAfter` (默认为 20) 的阈值，它会自动为该代码块添加 `collapse={...}` 元数据。
 
-如果你想修改折叠阈值，只需在 [`astro.config.mjs`](../astro.config.mjs) 中调整 `collapseAfter` 参数：
+### 2. 服务端插件 (`pluginCollapsibleSections`)
+
+- **文件**: 这是 `expressive-code` 的官方插件，在 [`astro.config.mjs`](../astro.config.mjs) 中启用。
+- **作用**: 它会读取由 `pluginAutoCollapse` 生成的元数据，并据此生成实现折叠功能所需的 HTML 结构（包括 `<details>`、`<summary>` 元素和一个 svg 图标）。
+
+### 3. 客户端脚本与样式 (`Markdown.astro`)
+
+- **文件**: [`src/components/misc/Markdown.astro`](../src/components/misc/Markdown.astro)
+- **作用**:
+    - **CSS**: 文件内的 `<style>` 标签定义了实现平滑折叠/展开动画的样式。它使用了 `grid-template-rows` 动画，这是实现动态高度平滑过渡的最佳实践。
+    - **JavaScript**: 文件内的 `<script>` 标签负责监听 `astro:page-load` 事件，确保无论是首次加载还是页面切换后，都能为折叠按钮绑定必要的事件监听器。虽然 `expressive-code` 已经处理了大部分点击逻辑，但我们的脚本为未来的功能扩展（如更复杂的动画）预留了空间。
+
+## 自定义
+
+### 修改折叠行数
+
+要调整折叠前显示的最大行数，只需修改 [`astro.config.mjs`](../astro.config.mjs) 文件中传递给 `pluginAutoCollapse` 的参数即可。
 
 ```javascript
-pluginAutoCollapse({
-  collapseAfter: 30, // 改为 30 行
-})
+// astro.config.mjs
+// ...
+plugins: [
+    pluginAutoCollapse({ collapseAfter: 25 }), // 将默认的 20 行改为 25 行
+    // ...
+],
 ```
 
-## 样式定制
+### 调整动画速度
 
-折叠功能的样式已经过优化，包含以下文件：
-
-### 1. [`src/styles/markdown.css`](../src/styles/markdown.css)
-包含折叠区域的核心样式：
-- 折叠按钮的外观和交互效果
-- 折叠内容的展开/收起动画
-- 折叠提示文本样式
-
-### 2. [`src/styles/expressive-code.css`](../src/styles/expressive-code.css)
-包含 Expressive Code 特定的折叠样式：
-- 折叠按钮的过渡效果
-- 折叠区域的平滑动画
-- 折叠状态指示器
-
-### 自定义样式示例
-
-如果你想修改折叠按钮的颜色，可以在 [`src/styles/markdown.css`](../src/styles/markdown.css) 中调整：
+动画的速度由 [`src/components/misc/Markdown.astro`](../src/components/misc/Markdown.astro) 中的 CSS `transition` 属性控制。
 
 ```css
-.expressive-code .collapse-button {
-    /* 修改背景色 */
-    @apply bg-blue-500 hover:bg-blue-600;
-    /* 修改文字颜色 */
-    @apply text-white;
+/* src/components/misc/Markdown.astro */
+.ec-collapsible-section {
+  /* 将 0.3s 改为您想要的时长 */
+  transition: grid-template-rows 0.5s ease-in-out;
 }
-```
-
-### 动画速度调整
-
-修改折叠动画的速度：
-
-```css
-.expressive-code .collapsible-section {
-    /* 将 300ms 改为你想要的时长 */
-    @apply transition-all duration-500 ease-in-out;
-}
-```
