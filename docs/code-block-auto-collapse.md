@@ -59,10 +59,11 @@ function hello() {
 该功能通过自定义的 Expressive Code 插件实现：
 
 1. **插件位置**: [`src/plugins/expressive-code/auto-collapse.ts`](../src/plugins/expressive-code/auto-collapse.ts)
-2. **工作原理**: 
-   - 在代码块预处理阶段检查行数
-   - 如果超过阈值，自动添加 `collapse` 元数据
-   - 配合 `pluginCollapsibleSections` 插件渲染折叠效果
+2. **工作原理**:
+   - `pluginAutoCollapse` 在代码块的预处理阶段检查其总行数。
+   - 如果行数超过设定的 `collapseAfter` 阈值，它会自动向代码块的元数据（meta）中注入 `collapse={...}` 属性。
+   - `pluginCollapsibleSections` 随后读取这个元数据，并据此渲染出折叠的代码块 UI。
+   - **关键点**: 插件的执行顺序至关重要。`pluginAutoCollapse` 必须在 `pluginCollapsibleSections` **之前**注册，才能确保元数据在渲染前准备就绪。
 
 ## 自定义阈值
 

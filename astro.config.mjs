@@ -64,11 +64,11 @@ export default defineConfig({
 		expressiveCode({
 			themes: [expressiveCodeConfig.theme],
 			plugins: [
-				pluginCollapsibleSections(),
 				pluginAutoCollapse({
 					// 当代码块超过20行时自动折叠
 					collapseAfter: 20,
 				}),
+				pluginCollapsibleSections(),
 				pluginLineNumbers(),
 				pluginLanguageBadge(),
 				pluginCustomCopyButton(),
