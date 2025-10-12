@@ -17,6 +17,7 @@ import remarkGithubAdmonitionsToDirectives from "remark-github-admonitions-to-di
 import remarkMath from "remark-math";
 import remarkSectionize from "remark-sectionize";
 import { expressiveCodeConfig } from "./src/config.ts";
+import { pluginAutoCollapse } from "./src/plugins/expressive-code/auto-collapse.ts";
 import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-copy-button.js";
 import { pluginLanguageBadge } from "./src/plugins/expressive-code/language-badge.ts";
 import { AdmonitionComponent } from "./src/plugins/rehype-component-admonition.mjs";
@@ -61,9 +62,13 @@ export default defineConfig({
 			},
 		}),
 		expressiveCode({
-			themes: [expressiveCodeConfig.theme, expressiveCodeConfig.theme],
+			themes: [expressiveCodeConfig.theme],
 			plugins: [
 				pluginCollapsibleSections(),
+				pluginAutoCollapse({
+					// 当代码块超过20行时自动折叠
+					collapseAfter: 20,
+				}),
 				pluginLineNumbers(),
 				pluginLanguageBadge(),
 				pluginCustomCopyButton(),
