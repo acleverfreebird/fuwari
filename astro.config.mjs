@@ -241,7 +241,7 @@ export default defineConfig({
         ],
     },
 
-    adapter: netlify(),
+    adapter: vercel(),
 
     // 图片优化配置
     image: {
