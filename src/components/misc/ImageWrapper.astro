@@ -11,6 +11,8 @@ interface Props {
 	loading?: "lazy" | "eager";
 	priority?: boolean;
 	sizes?: string;
+	width?: number;
+	height?: number;
 }
 
 import { Image } from "astro:assets";
@@ -25,6 +27,8 @@ const {
 	loading = "lazy",
 	priority = false,
 	sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
+	width,
+	height,
 } = Astro.props;
 const className = Astro.props.class;
 
@@ -70,6 +74,8 @@ const imageStyle = `object-position: ${position}`;
             loading={priority ? "eager" : loading}
             decoding={priority ? "sync" : "async"}
             sizes={sizes}
+            width={width}
+            height={height}
         />
     )}
     {!isLocal && (
@@ -80,6 +86,8 @@ const imageStyle = `object-position: ${position}`;
             style={imageStyle}
             loading={priority ? "eager" : loading}
             decoding={priority ? "sync" : "async"}
+            width={width}
+            height={height}
         />
     )}
 </div>

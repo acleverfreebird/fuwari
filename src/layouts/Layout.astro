@@ -21,7 +21,6 @@ import type { Favicon } from "../types/config";
 import { pathsEqual, url } from "../utils/url-utils";
 import "katex/dist/katex.css";
 import "../styles/main.css";
-import "../styles/markdown.css";
 
 interface Props {
 	title?: string;
@@ -223,24 +222,18 @@ const bannerOffset =
 
 		<!-- Microsoft Clarity tracking - 延迟加载避免阻塞 -->
 		<script is:inline>
-			// 延迟加载Clarity避免首屏阻塞
-			if (document.readyState === 'loading') {
-				document.addEventListener('DOMContentLoaded', function() {
-					setTimeout(function() {
-						const script = document.createElement('script');
-						script.src = 'https://www.clarity.ms/tag/tdtze87osu?ref=bwt';
-						script.async = true;
-						document.head.appendChild(script);
-					}, 2000);
-				});
-			} else {
-				setTimeout(function() {
-					const script = document.createElement('script');
-					script.src = 'https://www.clarity.ms/tag/tdtze87osu?ref=bwt';
-					script.async = true;
-					document.head.appendChild(script);
-				}, 2000);
+			function loadClarity() {
+				const script = document.createElement('script');
+				script.src = 'https://www.clarity.ms/tag/tdtze87osu?ref=bwt';
+				script.async = true;
+				document.head.appendChild(script);
 			}
+		
+			// 使用 window.onload 确保在所有资源加载后再执行
+			window.onload = function() {
+				// 延迟2秒执行，以避免影响页面主要内容的加载
+				setTimeout(loadClarity, 2000);
+			};
 		</script>
 	</head>
 	<body class=" min-h-screen transition " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}

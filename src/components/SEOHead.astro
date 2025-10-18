@@ -1,4 +1,7 @@
 ---
+import { getImage } from "astro:assets";
+import defaultBanner from "../assets/images/banner.png";
+
 // Schema.org 结构化数据类型定义
 interface SchemaOrgData {
 	"@context": string;
@@ -43,7 +46,7 @@ interface SchemaOrgData {
 interface Props {
 	title?: string;
 	description?: string;
-	image?: string;
+	image?: any; // Can be string or ImageMetadata
 	article?: boolean;
 	publishedTime?: Date;
 	modifiedTime?: Date;
@@ -86,10 +89,26 @@ if (category) {
 }
 
 // 构建图片URL
-let ogImage = image || "/assets/images/banner.png";
-if (!ogImage.startsWith("http")) {
-	ogImage = new URL(ogImage, Astro.site).href;
+let imageToProcess = image || defaultBanner;
+if (typeof imageToProcess === "string" && !imageToProcess.startsWith("http")) {
+	// This case should no longer happen for the banner with the fix in [...page].astro
+	// but as a fallback, we'll use the default banner.
+	imageToProcess = defaultBanner;
 }
+
+const optimizedImageSrc =
+	typeof imageToProcess === "string"
+		? imageToProcess // It's an external URL
+		: (
+				await getImage({
+					src: imageToProcess,
+					width: 1200,
+					height: 630,
+					format: "webp",
+				})
+			).src;
+
+const ogImage = new URL(optimizedImageSrc, Astro.site).href;
 
 // 增强的结构化数据
 const structuredData: SchemaOrgData = {
@@ -307,7 +326,7 @@ if (article) {
 <link rel="manifest" href="/manifest.json" />
 
 <!-- 性能优化 - 关键资源预加载 -->
-<link rel="preload" href="/assets/images/banner.png" as="image" />
+<link rel="preload" href={ogImage} as="image" fetchpriority="high" />
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" as="style" />
 
 <!-- 图片优化提示 -->
