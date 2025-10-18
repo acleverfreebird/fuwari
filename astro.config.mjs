@@ -17,7 +17,7 @@ import remarkGithubAdmonitionsToDirectives from "remark-github-admonitions-to-di
 import remarkMath from "remark-math";
 import remarkSectionize from "remark-sectionize";
 import { expressiveCodeConfig } from "./src/config.ts";
-import { pluginAutoCollapse } from "./src/plugins/expressive-code/auto-collapse.ts";
+import { pluginCodeBlockCollapse } from "./src/plugins/expressive-code/code-block-collapse.ts";
 import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-copy-button.js";
 import { pluginLanguageBadge } from "./src/plugins/expressive-code/language-badge.ts";
 import { AdmonitionComponent } from "./src/plugins/rehype-component-admonition.mjs";
@@ -64,7 +64,7 @@ export default defineConfig({
 		expressiveCode({
 			themes: [expressiveCodeConfig.theme],
 			plugins: [
-				pluginAutoCollapse({ collapseAfter: 20 }),
+				pluginCodeBlockCollapse({ collapseAfter: 20 }),
 				pluginCollapsibleSections(),
 				pluginLineNumbers(),
 				pluginLanguageBadge(),
