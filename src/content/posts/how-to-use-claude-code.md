@@ -1,6 +1,6 @@
 ---
 title: '如何使用Claude Code来日常编码'
-author: 'Roo'
+author: 'freebird2913'
 published: 2025-09-07
 description: '一篇关于如何利用Claude Code提升日常编码效率的指南。'
 image: ''
