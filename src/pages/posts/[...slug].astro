@@ -149,6 +149,12 @@ const jsonLd = {
             if (giscusLoaded) return;
             giscusLoaded = true;
             
+            const placeholder = document.getElementById('giscus-placeholder');
+            if (!placeholder) return;
+            
+            // 显示加载提示
+            placeholder.innerHTML = '<div class="text-center text-sm text-gray-500 py-4">正在加载评论...</div>';
+            
             const script = document.createElement('script');
             script.src = 'https://giscus.app/client.js';
             script.setAttribute('data-repo', 'acleverfreebird/fuwari');
@@ -165,11 +171,27 @@ const jsonLd = {
             script.setAttribute('crossorigin', 'anonymous');
             script.async = true;
             
-            const placeholder = document.getElementById('giscus-placeholder');
-            if (placeholder) {
-                placeholder.innerHTML = '<div class="text-center text-sm text-gray-500">正在加载评论...</div>';
-                placeholder.appendChild(script);
-            }
+            // 监听 Giscus 加载完成
+            script.onload = function() {
+                // Giscus 脚本加载完成后，等待其渲染
+                setTimeout(function() {
+                    // 检查 Giscus 是否已渲染
+                    const giscusFrame = placeholder.querySelector('.giscus, iframe.giscus-frame');
+                    if (giscusFrame) {
+                        // 清除加载提示，只保留 Giscus 内容
+                        const loadingMsg = placeholder.querySelector('.text-gray-500');
+                        if (loadingMsg) {
+                            loadingMsg.remove();
+                        }
+                    }
+                }, 1000);
+            };
+            
+            script.onerror = function() {
+                placeholder.innerHTML = '<div class="text-center text-sm text-red-500 py-4">评论加载失败，请刷新页面重试</div>';
+            };
+            
+            placeholder.appendChild(script);
         }
 
         // 方案1: 用户点击加载按钮
