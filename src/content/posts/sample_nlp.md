@@ -1,9 +1,9 @@
 ---
 title: 'Python 自然语言处理入门：从零开始的 NLP 之旅'
 published: 2025-08-13
-description: 'Python 自然语言处理入门教程，从基础概念到实战项目，学习 NLTK 和 spaCy 库，实现情感分析和文本处理。'
+description: 'Python NLP零基础入门教程，学习NLTK和spaCy库的使用，掌握分词、词性标注、命名实体识别等核心技术，并实现IMDB情感分析项目。'
 image: ''
-tags: ['Python', 'AI', 'NLP', '自然语言处理', 'NLTK', 'spaCy', '情感分析', '机器学习']
+tags: ['Python', 'NLP', 'NLTK', 'spaCy', '情感分析']
 category: 'Python'
 draft: false
 lang: 'zh-CN'

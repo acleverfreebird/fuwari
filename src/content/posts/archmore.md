@@ -1,9 +1,9 @@
 ---
 title: 'ArchLinux 桌面环境安装配置教程'
 published: 2025-08-15
-description: 'ArchLinux 桌面环境安装配置的完整指南，包括 KDE Plasma 桌面环境、输入法配置、系统优化等详细步骤。'
+description: 'ArchLinux桌面环境完整配置指南，包括KDE Plasma安装、Fcitx5中文输入法、Timeshift系统备份、用户权限配置等，让Arch成为可用的日常系统。'
 image: ''
-tags: ['Linux', 'ArchLinux', 'KDE', 'Plasma', '桌面环境', '系统配置', '输入法']
+tags: ['ArchLinux', 'KDE Plasma', 'Fcitx5', 'Linux桌面', '系统配置']
 category: 'Linux'
 draft: false
 lang: 'zh-CN'

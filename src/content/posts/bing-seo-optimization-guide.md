@@ -1,9 +1,9 @@
 ---
 title: '必应搜索引擎优化完全指南 - Fuwari博客SEO实践'
 published: 2025-10-01
-description: '基于必应网站管理员指南,为Fuwari博客实施的完整SEO优化方案,包括站点地图、Robots.txt、结构化数据、IndexNow API等。'
+description: '必应SEO完整实战指南，包括站点地图优化、Robots.txt配置、Schema.org结构化数据、IndexNow API实时推送等，提升搜索引擎收录和排名。'
 image: ''
-tags: ['SEO', '必应', '搜索引擎优化', 'IndexNow', '站点地图']
+tags: ['SEO', 'Bing', 'IndexNow', 'Schema.org', '搜索优化']
 category: 'SEO优化'
 draft: false
 lang: 'zh-CN'

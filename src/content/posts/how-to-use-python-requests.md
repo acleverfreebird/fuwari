@@ -2,9 +2,9 @@
 title: 'Python Requests库完全指南'
 author: 'freebird2913'
 published: 2025-10-19T01:12:00.000Z
-description: '一篇详细的Python Requests库使用教程，从基础到高级，涵盖HTTP请求的各个方面。'
+description: 'Python Requests库从入门到精通，涵盖GET/POST请求、认证、会话管理、文件上传下载、超时重试、代理设置等完整内容，附实战案例。'
 image: ''
-tags: ['Python', 'Requests', 'HTTP', 'API']
+tags: ['Python', 'Requests', 'HTTP', 'API', 'Web爬虫']
 category: 'Python教程'
 draft: false
 lang: 'zh-CN'

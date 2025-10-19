@@ -1,7 +1,7 @@
 ---
 title: 'Astro博客集成Umami分析服务 - 完整实战指南'
 published: 2025-10-11
-description: '详细记录如何在Astro博客中集成Umami分析服务,包括追踪脚本、浏览量统计显示、Cloudflare Worker代理等完整实现过程。'
+description: 'Astro博客集成Umami完整教程，包括追踪脚本配置、浏览量组件开发、Cloudflare Worker API代理、性能优化等，实现隐私友好的网站分析。'
 image: ''
 tags: ['Umami', 'Astro', 'Cloudflare Worker', 'Web分析', '隐私保护']
 category: '技术教程'

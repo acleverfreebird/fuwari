@@ -1,7 +1,7 @@
 ---
 title: 'CTW Studio(CN) 无限期停止服务公告'
 published: 2025-10-02
-description: '关于 CTW Studio(CN) 停止服务及进入解散程序的正式公告'
+description: 'CTW Studio(CN)因学业繁重和运维疲惫，正式宣布无限期停止服务并进入解散程序，感谢所有用户一年来的支持与信任。'
 image: ''
 tags: ['公告', 'CTW Studio', '服务终止']
 category: '公告'

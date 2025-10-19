@@ -1,12 +1,12 @@
 ---
 title: Arch Linux 上安装和配置 Visual Studio Code 完全指南
 published: 2025-08-24
-description: 详细介绍如何在 Arch Linux 系统上安装和配置 Visual Studio Code，包括不同版本的选择、权限配置以及常见问题解决方案
+description: '详细介绍如何在Arch Linux上安装VSCode，包括Code-OSS、官方版和VSCodium三个版本的对比，以及主题插件权限配置、扩展市场设置等实用技巧。'
 image: ''
-tags: [Arch Linux, VSCode, 开发工具, Linux]
+tags: ['ArchLinux', 'VSCode', 'Code-OSS', 'VSCodium', '开发环境']
 category: '技术教程'
-draft: false 
-lang: ''
+draft: false
+lang: 'zh-CN'
 ---
 
 Visual Studio Code 是由微软开发的跨平台文本编辑器，基于 Electron 框架构建，具有强大的扩展性。在 Arch Linux 系统上，我们有多个版本可供选择，每个版本都有其特定的用途和许可证。

@@ -2,9 +2,9 @@
 title: '如何使用Claude Code来日常编码'
 author: 'freebird2913'
 published: 2025-09-07
-description: '一篇关于如何利用Claude Code提升日常编码效率的指南。'
+description: 'Claude Code完整使用指南，介绍AI代码助手的核心功能、IDE集成方法、代码补全、错误检测、重构优化等实用技巧，提升日常编码效率。'
 image: ''
-tags: ['AI', '编程', 'Claude', '开发工具']
+tags: ['AI', 'Claude Code', '代码助手', '开发工具', '编程效率']
 category: 'AI工具'
 draft: false
 lang: 'zh-CN'

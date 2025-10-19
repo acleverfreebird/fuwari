@@ -1,12 +1,12 @@
 ---
 title: 豆包纯正的SB
 published: 2025-09-06
-description: '豆包是个纯正的SB，要绘画绘画不行，要代码代码不行，总而言之，干啥啥不行'
+description: '豆包AI绘画功能实测评价：测试AI绘画生成动漫角色的效果，包括神奇宝贝、灌篮高手等经典动漫角色的生成质量分析。'
 image: ''
-tags: ['AI']
+tags: ['AI', '豆包', 'AI绘画', '产品评测', '字节跳动']
 category: 'AI'
-draft: false 
-lang: ''
+draft: false
+lang: 'zh-CN'
 ---
 ## 关于绘画
 

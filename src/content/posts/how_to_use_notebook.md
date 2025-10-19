@@ -1,12 +1,12 @@
 ---
 title: 如何使用Jupyter Notebook
 published: 2025-08-13
-description: ''
+description: 'Jupyter Notebook完全入门指南，从安装Anaconda到创建第一个项目，包含Markdown语法、数据可视化实战，零基础也能轻松上手。'
 image: ''
-tags: ['Python']
+tags: ['Python', 'Jupyter Notebook', 'Anaconda', '数据分析', '可视化']
 category: 'Python'
-draft: false 
-lang: ''
+draft: false
+lang: 'zh-CN'
 ---
 # Python Notebook小白入门指南：从安装到实战
 
