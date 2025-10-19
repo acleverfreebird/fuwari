@@ -11,9 +11,12 @@ const sortedPostsList = await getSortedPostsList();
 <MainGridLayout title={i18n(I18nKey.archive)}>
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32 mb-4">
         <div class="card-base z-10 px-9 py-6 relative w-full">
-            <h1 class="text-3xl font-bold text-[var(--primary)] mb-6">
+            <h1 class="text-3xl font-bold text-[var(--primary)] mb-3">
                 {i18n(I18nKey.archive)}
             </h1>
+            <p class="text-black/70 dark:text-white/70 text-base leading-relaxed">
+                这里收录了我在技术探索路上的所有文章，记录着从入门到深入的学习历程。每一篇文章都是对知识的沉淀与思考，希望这些内容能为你的学习之路提供帮助。
+            </p>
         </div>
     </div>
     <ArchivePanel sortedPosts={sortedPostsList} client:only="svelte"></ArchivePanel>
