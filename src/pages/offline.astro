@@ -1,0 +1,116 @@
+---
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { Icon } from "astro-icon/components";
+---
+
+<MainGridLayout title="离线模式">
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-[60vh]">
+        <div class="card-base z-10 px-9 py-12 relative w-full">
+            <div class="flex flex-col items-center justify-center text-center space-y-6">
+                <!-- 离线图标 -->
+                <div class="w-24 h-24 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center">
+                    <Icon name="material-symbols:wifi-off-rounded" class="text-6xl text-black/30 dark:text-white/30" />
+                </div>
+                
+                <!-- 标题 -->
+                <h1 class="text-4xl font-bold text-[var(--primary)]">
+                    您当前处于离线状态
+                </h1>
+                
+                <!-- 描述 -->
+                <p class="text-lg text-black/60 dark:text-white/60 max-w-md">
+                    看起来您的网络连接已断开。请检查您的网络设置，然后重试。
+                </p>
+                
+                <!-- 提示信息 -->
+                <div class="card-base p-6 rounded-xl max-w-lg w-full">
+                    <h2 class="text-xl font-semibold mb-4 text-black/80 dark:text-white/80">
+                        💡 您可以：
+                    </h2>
+                    <ul class="space-y-3 text-left text-black/70 dark:text-white/70">
+                        <li class="flex items-start gap-3">
+                            <Icon name="material-symbols:check-circle-outline-rounded" class="text-xl text-[var(--primary)] mt-0.5 flex-shrink-0" />
+                            <span>浏览您之前访问过的缓存页面</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <Icon name="material-symbols:check-circle-outline-rounded" class="text-xl text-[var(--primary)] mt-0.5 flex-shrink-0" />
+                            <span>检查您的网络连接</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <Icon name="material-symbols:check-circle-outline-rounded" class="text-xl text-[var(--primary)] mt-0.5 flex-shrink-0" />
+                            <span>稍后重新加载此页面</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="flex gap-4 flex-wrap justify-center">
+                    <button 
+                        onclick="window.location.reload()" 
+                        class="btn-card px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 active:scale-95"
+                    >
+                        <Icon name="material-symbols:refresh-rounded" class="inline-block mr-2 text-xl" />
+                        重新加载
+                    </button>
+                    
+                    <a 
+                        href="/" 
+                        class="btn-card px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 active:scale-95"
+                    >
+                        <Icon name="material-symbols:home-rounded" class="inline-block mr-2 text-xl" />
+                        返回首页
+                    </a>
+                </div>
+                
+                <!-- 网络状态检测 -->
+                <div id="network-status" class="text-sm text-black/50 dark:text-white/50"></div>
+            </div>
+        </div>
+    </div>
+</MainGridLayout>
+
+<script>
+    // 网络状态检测
+    function updateNetworkStatus() {
+        const statusElement = document.getElementById('network-status');
+        if (!statusElement) return;
+        
+        if (navigator.onLine) {
+            statusElement.innerHTML = '✅ 网络已连接 - 正在尝试重新加载...';
+            statusElement.className = 'text-sm text-green-600 dark:text-green-400';
+            
+            // 网络恢复后自动重新加载
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            statusElement.innerHTML = '❌ 网络未连接';
+            statusElement.className = 'text-sm text-red-600 dark:text-red-400';
+        }
+    }
+    
+    // 监听网络状态变化
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+    
+    // 初始检测
+    updateNetworkStatus();
+</script>
+
+<style>
+    /* 添加淡入动画 */
+    .card-base {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

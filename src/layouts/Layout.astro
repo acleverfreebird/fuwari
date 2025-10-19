@@ -235,6 +235,37 @@ const bannerOffset =
 				setTimeout(loadClarity, 2000);
 			};
 		</script>
+
+		<!-- Service Worker 注册 - 性能优化 -->
+		<script is:inline>
+		(function() {
+			if ('serviceWorker' in navigator) {
+				window.addEventListener('load', function() {
+					navigator.serviceWorker.register('/sw.js')
+						.then(function(registration) {
+							console.log('✅ Service Worker 注册成功:', registration.scope);
+							
+							// 检查更新
+							registration.addEventListener('updatefound', function() {
+								const newWorker = registration.installing;
+								if (newWorker) {
+									newWorker.addEventListener('statechange', function() {
+										if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+											// 新版本可用
+											console.log('🔄 发现新版本');
+											// 可以在这里显示更新提示
+										}
+									});
+								}
+							});
+						})
+						.catch(function(error) {
+							console.error('❌ Service Worker 注册失败:', error);
+						});
+				});
+			}
+		})();
+		</script>
 	</head>
 	<body class=" min-h-screen transition " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
 		  data-overlayscrollbars-initialize

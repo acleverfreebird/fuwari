@@ -1,5 +1,5 @@
 <script lang="ts">
-import { onMount } from "svelte";
+import { onMount, tick } from "svelte";
 
 import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
@@ -30,6 +30,10 @@ interface Group {
 }
 
 let groups: Group[] = [];
+let isLoading = true;
+let visibleGroups: Group[] = [];
+let containerElement: HTMLElement;
+let observer: IntersectionObserver;
 
 function formatDate(date: Date) {
 	const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -41,52 +45,131 @@ function formatTag(tagList: string[]) {
 	return tagList.map((t) => `#${t}`).join(" ");
 }
 
-onMount(async () => {
-	let filteredPosts: Post[] = sortedPosts;
+onMount(() => {
+	// 使用 requestAnimationFrame 优化初始渲染
+	requestAnimationFrame(async () => {
+		let filteredPosts: Post[] = sortedPosts;
 
-	if (tags.length > 0) {
-		filteredPosts = filteredPosts.filter(
-			(post) =>
-				Array.isArray(post.data.tags) &&
-				post.data.tags.some((tag) => tags.includes(tag)),
+		if (tags.length > 0) {
+			filteredPosts = filteredPosts.filter(
+				(post) =>
+					Array.isArray(post.data.tags) &&
+					post.data.tags.some((tag) => tags.includes(tag)),
+			);
+		}
+
+		if (categories.length > 0) {
+			filteredPosts = filteredPosts.filter(
+				(post) => post.data.category && categories.includes(post.data.category),
+			);
+		}
+
+		if (uncategorized) {
+			filteredPosts = filteredPosts.filter((post) => !post.data.category);
+		}
+
+		const grouped = filteredPosts.reduce(
+			(acc, post) => {
+				const year = post.data.published.getFullYear();
+				if (!acc[year]) {
+					acc[year] = [];
+				}
+				acc[year].push(post);
+				return acc;
+			},
+			{} as Record<number, Post[]>,
 		);
-	}
 
-	if (categories.length > 0) {
-		filteredPosts = filteredPosts.filter(
-			(post) => post.data.category && categories.includes(post.data.category),
-		);
-	}
+		const groupedPostsArray = Object.keys(grouped).map((yearStr) => ({
+			year: Number.parseInt(yearStr, 10),
+			posts: grouped[Number.parseInt(yearStr, 10)],
+		}));
 
-	if (uncategorized) {
-		filteredPosts = filteredPosts.filter((post) => !post.data.category);
-	}
+		groupedPostsArray.sort((a, b) => b.year - a.year);
 
-	const grouped = filteredPosts.reduce(
-		(acc, post) => {
-			const year = post.data.published.getFullYear();
-			if (!acc[year]) {
-				acc[year] = [];
-			}
-			acc[year].push(post);
-			return acc;
+		groups = groupedPostsArray;
+
+		// 初始只显示前3个年份组，其余延迟加载
+		visibleGroups = groups.slice(0, 3);
+
+		await tick();
+		isLoading = false;
+
+		// 设置 Intersection Observer 用于懒加载剩余内容
+		if (groups.length > 3) {
+			setupLazyLoading();
+		}
+	});
+
+	return () => {
+		if (observer) {
+			observer.disconnect();
+		}
+	};
+});
+
+function setupLazyLoading() {
+	observer = new IntersectionObserver(
+		(entries) => {
+			entries.forEach((entry) => {
+				if (entry.isIntersecting && visibleGroups.length < groups.length) {
+					// 每次加载2个年份组
+					const nextBatch = groups.slice(
+						visibleGroups.length,
+						visibleGroups.length + 2,
+					);
+					visibleGroups = [...visibleGroups, ...nextBatch];
+				}
+			});
 		},
-		{} as Record<number, Post[]>,
+		{
+			rootMargin: "200px", // 提前200px开始加载
+			threshold: 0.1,
+		},
 	);
 
-	const groupedPostsArray = Object.keys(grouped).map((yearStr) => ({
-		year: Number.parseInt(yearStr, 10),
-		posts: grouped[Number.parseInt(yearStr, 10)],
-	}));
-
-	groupedPostsArray.sort((a, b) => b.year - a.year);
-
-	groups = groupedPostsArray;
-});
+	// 观察容器底部
+	if (containerElement) {
+		observer.observe(containerElement);
+	}
+}
 </script>
 
-<div class="card-base px-8 py-6">
-    {#each groups as group}
+<div class="card-base px-8 py-6" bind:this={containerElement}>
+    {#if isLoading}
+        <!-- 骨架屏 -->
+        <div class="space-y-6 animate-pulse">
+            {#each Array(3) as _, i}
+                <div>
+                    <div class="flex flex-row w-full items-center h-[3.75rem]">
+                        <div class="w-[15%] md:w-[10%]">
+                            <div class="h-8 bg-gray-300 dark:bg-gray-700 rounded w-16 ml-auto"></div>
+                        </div>
+                        <div class="w-[15%] md:w-[10%]">
+                            <div class="h-3 w-3 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto"></div>
+                        </div>
+                        <div class="w-[70%] md:w-[80%]">
+                            <div class="h-4 bg-gray-300 dark:bg-gray-700 rounded w-32"></div>
+                        </div>
+                    </div>
+                    {#each Array(5) as _, j}
+                        <div class="flex flex-row justify-start items-center h-10">
+                            <div class="w-[15%] md:w-[10%]">
+                                <div class="h-3 bg-gray-200 dark:bg-gray-600 rounded w-12 ml-auto"></div>
+                            </div>
+                            <div class="w-[15%] md:w-[10%]">
+                                <div class="h-1 w-1 bg-gray-200 dark:bg-gray-600 rounded-full mx-auto"></div>
+                            </div>
+                            <div class="w-[70%] md:w-[65%]">
+                                <div class="h-4 bg-gray-200 dark:bg-gray-600 rounded w-3/4"></div>
+                            </div>
+                        </div>
+                    {/each}
+                </div>
+            {/each}
+        </div>
+    {:else}
+        {#each visibleGroups as group}
         <div>
             <div class="flex flex-row w-full items-center h-[3.75rem]">
                 <div class="w-[15%] md:w-[10%] transition text-2xl font-bold text-right text-75">
@@ -147,5 +230,42 @@ onMount(async () => {
                 </a>
             {/each}
         </div>
-    {/each}
+        {/each}
+        
+        <!-- 加载指示器 -->
+        {#if visibleGroups.length < groups.length}
+            <div class="flex justify-center items-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--primary)]"></div>
+            </div>
+        {/if}
+    {/if}
 </div>
+
+<style>
+    /* 优化动画性能 */
+    .animate-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+    
+    .animate-spin {
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
