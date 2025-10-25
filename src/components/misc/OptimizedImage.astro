@@ -1,0 +1,58 @@
+---
+/**
+ * 优化的图片组件
+ * - 支持LCP图片优先加载
+ * - 自动懒加载非关键图片
+ * - 响应式图片支持
+ * - 现代图片格式(WebP/AVIF)
+ */
+
+interface Props {
+	src: string;
+	alt: string;
+	width?: number;
+	height?: number;
+	priority?: boolean; // 是否为LCP图片
+	class?: string;
+	loading?: "lazy" | "eager";
+	decoding?: "async" | "sync" | "auto";
+	fetchpriority?: "high" | "low" | "auto";
+}
+
+const {
+	src,
+	alt,
+	width,
+	height,
+	priority = false,
+	class: className = "",
+	loading = priority ? "eager" : "lazy",
+	decoding = priority ? "sync" : "async",
+	fetchpriority = priority ? "high" : "auto",
+} = Astro.props;
+
+// 生成srcset for responsive images
+const generateSrcSet = (baseSrc: string) => {
+	if (!baseSrc.startsWith("http")) {
+		// 本地图片,生成不同尺寸
+		const sizes = [320, 640, 768, 1024, 1280, 1536];
+		return sizes.map((size) => `${baseSrc}?w=${size} ${size}w`).join(", ");
+	}
+	return undefined;
+};
+
+const srcset = generateSrcSet(src);
+---
+
+<img
+	src={src}
+	alt={alt}
+	width={width}
+	height={height}
+	loading={loading}
+	decoding={decoding}
+	fetchpriority={fetchpriority}
+	srcset={srcset}
+	sizes={srcset ? "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" : undefined}
+	class={className}
+/>

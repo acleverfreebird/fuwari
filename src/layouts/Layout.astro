@@ -267,12 +267,12 @@ const bannerOffset =
 					}
 				}
 
-				// 延迟 5 秒或用户交互后加载
+				// 延迟 10 秒或用户交互后加载 - 优化Lighthouse性能
 				if (document.readyState === 'complete') {
-					setTimeout(loadClarity, 5000);
+					setTimeout(loadClarity, 10000);
 				} else {
 					window.addEventListener('load', function() {
-						setTimeout(loadClarity, 5000);
+						setTimeout(loadClarity, 10000);
 					}, { once: true });
 				}
 				
@@ -707,13 +707,20 @@ window.onresize = () => {
 </script>
 
 <script>
-import PhotoSwipeLightbox from "photoswipe/lightbox"
-import "photoswipe/style.css"
+// 动态导入PhotoSwipe以优化初始加载性能
+let lightbox: any
+let PhotoSwipeLightbox: any
 
-let lightbox: PhotoSwipeLightbox
-let pswp = import("photoswipe")
-
-function createPhotoSwipe() {
+async function createPhotoSwipe() {
+	// 延迟导入PhotoSwipe模块
+	if (!PhotoSwipeLightbox) {
+		const module = await import("photoswipe/lightbox")
+		PhotoSwipeLightbox = module.default
+		await import("photoswipe/style.css")
+	}
+	
+	const pswp = import("photoswipe")
+	
 	lightbox = new PhotoSwipeLightbox({
 		gallery: ".custom-md img, #post-cover img",
 		pswpModule: () => pswp,

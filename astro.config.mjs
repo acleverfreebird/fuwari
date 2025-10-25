@@ -204,11 +204,28 @@ export default defineConfig({
 			rollupOptions: {
 				external: ["@upstash/redis"], // 外部化Upstash Redis依赖，避免构建时解析错误
 				output: {
-					// 优化代码分割，解决Swup模块加载问题
-					manualChunks: {
-						"swup-core": ["@swup/astro"],
-						vendor: ["svelte", "photoswipe"],
-						iconify: ["@iconify/svelte"],
+					// 优化代码分割 - 合并Swup相关模块减少网络依赖链
+					manualChunks: (id) => {
+						// 合并所有Swup相关模块到一个chunk
+						if (id.includes("@swup/") || id.includes("swup")) {
+							return "swup-bundle";
+						}
+						// UI组件库
+						if (id.includes("photoswipe") || id.includes("overlayscrollbars")) {
+							return "ui-components";
+						}
+						// Svelte相关
+						if (id.includes("svelte")) {
+							return "svelte-runtime";
+						}
+						// Iconify
+						if (id.includes("@iconify")) {
+							return "iconify";
+						}
+						// 其他node_modules作为vendor
+						if (id.includes("node_modules")) {
+							return "vendor";
+						}
 					},
 				},
 				onwarn(warning, warn) {
@@ -256,6 +273,6 @@ export default defineConfig({
 	// 输出优化
 	compressHTML: true,
 	build: {
-		inlineStylesheets: "auto",
+		inlineStylesheets: "always", // 内联小CSS文件以减少HTTP请求
 	},
 });
