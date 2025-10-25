@@ -1,5 +1,4 @@
 {
-	"regions": ["sin1", "hkg1", "nrt1", "sfo1", "iad1"],
 	"headers": [
 		{
 			"source": "/_astro/:path*",
