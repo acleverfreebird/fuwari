@@ -57,8 +57,8 @@ const jsonLd = {
     <link slot="head" rel="canonical" href={new URL(`posts/${entry.slug}/`, Astro.site).href} />
     
     <!-- 预连接 Twikoo 以优化评论加载 -->
-    <link slot="head" rel="preconnect" href="https://cdn.jsdelivr.net" />
-    <link slot="head" rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <link slot="head" rel="preconnect" href="https://registry.npmmirror.com" />
+    <link slot="head" rel="dns-prefetch" href="https://registry.npmmirror.com" />
     <link slot="head" rel="preconnect" href="https://twikoojs.freebird2913.tech" />
     <link slot="head" rel="dns-prefetch" href="https://twikoojs.freebird2913.tech" />
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
@@ -177,7 +177,7 @@ const jsonLd = {
             // 动态加载 Twikoo 脚本
             if (!scriptLoaded) {
                 const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/twikoo@1.6.44/dist/twikoo.min.js';
+                script.src = 'https://registry.npmmirror.com/twikoo/1.6.44/files/dist/twikoo.min.js';
                 script.async = true;
                 
                 script.onload = function() {
