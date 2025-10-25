@@ -56,9 +56,11 @@ const jsonLd = {
     <!-- 确保URL规范化，避免必应索引问题 -->
     <link slot="head" rel="canonical" href={new URL(`posts/${entry.slug}/`, Astro.site).href} />
     
-    <!-- 预连接 Giscus 以优化评论加载 -->
-    <link slot="head" rel="preconnect" href="https://giscus.app" />
-    <link slot="head" rel="dns-prefetch" href="https://giscus.app" />
+    <!-- 预连接 Twikoo 以优化评论加载 -->
+    <link slot="head" rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link slot="head" rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <link slot="head" rel="preconnect" href="https://twikoojs.freebird2913.tech" />
+    <link slot="head" rel="dns-prefetch" href="https://twikoojs.freebird2913.tech" />
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
         <div id="post-container" class:list={["card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full ",
             {}
@@ -132,7 +134,7 @@ const jsonLd = {
 
 
     <div id="comments-container" class="card-base p-6 rounded-[var(--radius-large)] mb-4">
-        <div id="giscus-placeholder" class="min-h-[200px] flex items-center justify-center">
+        <div id="twikoo-placeholder" class="min-h-[200px] flex items-center justify-center">
             <button
                 id="load-comments"
                 class="btn-card px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 active:scale-95"
@@ -144,61 +146,110 @@ const jsonLd = {
 
     <script is:inline>
     (function() {
-        let giscusLoaded = false;
+        let twikooLoaded = false;
+        let scriptLoaded = false;
         
-        function loadGiscus() {
-            if (giscusLoaded) return;
-            giscusLoaded = true;
+        // 获取当前主题
+        function getCurrentTheme() {
+            const LIGHT_MODE = "light";
+            const DARK_MODE = "dark";
+            const AUTO_MODE = "auto";
+            const DEFAULT_THEME = AUTO_MODE;
             
-            const placeholder = document.getElementById('giscus-placeholder');
+            const storedTheme = localStorage.getItem("theme") || DEFAULT_THEME;
+            
+            if (storedTheme === AUTO_MODE) {
+                return window.matchMedia("(prefers-color-scheme: dark)").matches ? DARK_MODE : LIGHT_MODE;
+            }
+            return storedTheme;
+        }
+        
+        function loadTwikoo() {
+            if (twikooLoaded) return;
+            twikooLoaded = true;
+            
+            const placeholder = document.getElementById('twikoo-placeholder');
             if (!placeholder) return;
             
             // 显示加载提示
             placeholder.innerHTML = '<div class="text-center text-sm text-gray-500 py-4">正在加载评论...</div>';
             
-            const script = document.createElement('script');
-            script.src = 'https://giscus.app/client.js';
-            script.setAttribute('data-repo', 'acleverfreebird/fuwari');
-            script.setAttribute('data-repo-id', 'R_kgDOPbwShw');
-            script.setAttribute('data-category', 'General');
-            script.setAttribute('data-category-id', 'DIC_kwDOPbwSh84CuH7J');
-            script.setAttribute('data-mapping', 'og:title');
-            script.setAttribute('data-strict', '0');
-            script.setAttribute('data-reactions-enabled', '1');
-            script.setAttribute('data-emit-metadata', '0');
-            script.setAttribute('data-input-position', 'top');
-            script.setAttribute('data-theme', 'preferred_color_scheme');
-            script.setAttribute('data-lang', 'zh-CN');
-            script.setAttribute('crossorigin', 'anonymous');
-            script.async = true;
+            // 动态加载 Twikoo 脚本
+            if (!scriptLoaded) {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/twikoo@1.6.44/dist/twikoo.min.js';
+                script.async = true;
+                
+                script.onload = function() {
+                    scriptLoaded = true;
+                    console.log('Twikoo script loaded');
+                    initTwikoo();
+                };
+                
+                script.onerror = function() {
+                    placeholder.innerHTML = '<div class="text-center text-sm text-red-500 py-4">评论加载失败，请刷新页面重试</div>';
+                };
+                
+                document.head.appendChild(script);
+            } else {
+                initTwikoo();
+            }
+        }
+        
+        function initTwikoo() {
+            const placeholder = document.getElementById('twikoo-placeholder');
+            if (!placeholder) return;
             
-            // 监听 Giscus 加载完成
-            script.onload = function() {
-                // Giscus 脚本加载完成后，等待其渲染
-                setTimeout(function() {
-                    // 检查 Giscus 是否已渲染
-                    const giscusFrame = placeholder.querySelector('.giscus, iframe.giscus-frame');
-                    if (giscusFrame) {
-                        // 清除加载提示，只保留 Giscus 内容
-                        const loadingMsg = placeholder.querySelector('.text-gray-500');
-                        if (loadingMsg) {
-                            loadingMsg.remove();
+            // 等待 twikoo 对象可用
+            var checkTwikoo = setInterval(function() {
+                if (window.twikoo) {
+                    clearInterval(checkTwikoo);
+                    
+                    // 清空占位符
+                    placeholder.innerHTML = '';
+                    
+                    // 创建 Twikoo 容器
+                    const twikooContainer = document.createElement('div');
+                    twikooContainer.id = 'tcomment';
+                    placeholder.appendChild(twikooContainer);
+                    
+                    // 初始化 Twikoo
+                    twikoo.init({
+                        envId: 'https://twikoojs.freebird2913.tech/',
+                        el: '#tcomment',
+                        lang: 'zh-CN',
+                        path: location.pathname,
+                        onCommentLoaded: function() {
+                            console.log('Twikoo comments loaded');
                         }
-                    }
-                }, 1000);
-            };
+                    });
+                    
+                    // 监听主题变化
+                    document.addEventListener('themeChanged', function() {
+                        if (window.twikoo && window.twikoo.update) {
+                            setTimeout(function() {
+                                twikoo.update({
+                                    theme: getCurrentTheme()
+                                });
+                            }, 100);
+                        }
+                    });
+                }
+            }, 100);
             
-            script.onerror = function() {
-                placeholder.innerHTML = '<div class="text-center text-sm text-red-500 py-4">评论加载失败，请刷新页面重试</div>';
-            };
-            
-            placeholder.appendChild(script);
+            // 超时处理
+            setTimeout(function() {
+                if (!window.twikoo) {
+                    clearInterval(checkTwikoo);
+                    placeholder.innerHTML = '<div class="text-center text-sm text-red-500 py-4">评论加载失败，请刷新页面重试</div>';
+                }
+            }, 10000);
         }
 
         // 方案1: 用户点击加载按钮
         const loadButton = document.getElementById('load-comments');
         if (loadButton) {
-            loadButton.addEventListener('click', loadGiscus);
+            loadButton.addEventListener('click', loadTwikoo);
         }
 
         // 方案2: 滚动到评论区域自动加载（使用 Intersection Observer）
@@ -209,13 +260,13 @@ const jsonLd = {
                     entries.forEach(function(entry) {
                         if (entry.isIntersecting) {
                             // 延迟1000ms加载，优化首屏性能
-                            setTimeout(loadGiscus, 1000);
+                            setTimeout(loadTwikoo, 1000);
                             observer.disconnect();
                         }
                     });
                 },
                 {
-                    rootMargin: '100px', // 减少到100px，避免过早加载
+                    rootMargin: '100px',
                     threshold: 0.1
                 }
             );

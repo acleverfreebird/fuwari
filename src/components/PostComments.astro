@@ -1,4 +1,4 @@
-<section class="giscus mx-auto mt-10 w-full transition-colors duration-300"></section>
+<div id="tcomment" class="mx-auto mt-10 w-full transition-colors duration-300"></div>
 
 <script is:inline>
   // 常量定义 - 与主题系统保持一致
@@ -17,86 +17,62 @@
     return storedTheme;
   }
 
-  // 获取 Giscus 主题配置
-  function getGiscusTheme() {
-    const storedTheme = localStorage.getItem("theme") || DEFAULT_THEME;
-    
-    switch (storedTheme) {
-      case DARK_MODE:
-        return "dark";
-      case LIGHT_MODE:
-        return "light";
-      case AUTO_MODE:
-      default:
-        return "preferred_color_scheme";
-    }
+  // 获取 Twikoo 主题配置
+  function getTwikooTheme() {
+    const currentTheme = getCurrentActualTheme();
+    return currentTheme === DARK_MODE ? "dark" : "light";
   }
 
-  // 更新已加载的 Giscus 主题
-  function updateGiscusTheme(retryCount = 0) {
-    const maxRetries = 10;
-    const retryDelay = 500;
-
-    const giscusFrame = document.querySelector("iframe.giscus-frame");
-    
-    if (giscusFrame && giscusFrame.contentWindow) {
-      const giscusTheme = getGiscusTheme();
-      
+  // 更新 Twikoo 主题
+  function updateTwikooTheme() {
+    if (window.twikoo && window.twikoo.update) {
+      const theme = getTwikooTheme();
       try {
-        giscusFrame.contentWindow.postMessage(
-          {
-            giscus: {
-              setConfig: {
-                theme: giscusTheme,
-              },
-            },
-          },
-          "https://giscus.app"
-        );
-        console.log(`Giscus theme updated to: ${giscusTheme}`);
+        window.twikoo.update({
+          theme: theme
+        });
+        console.log(`Twikoo theme updated to: ${theme}`);
       } catch (error) {
-        console.warn("Failed to update Giscus theme:", error);
+        console.warn("Failed to update Twikoo theme:", error);
       }
-    } else if (retryCount < maxRetries) {
-      // 如果 iframe 还未加载完成，延迟重试
-      setTimeout(() => updateGiscusTheme(retryCount + 1), retryDelay);
     }
   }
 
-  // 加载 Giscus 评论组件
-  function loadGiscus() {
+  // 加载 Twikoo 评论组件
+  function loadTwikoo() {
     // 防止重复加载
-    if (document.querySelector("section.giscus script")) {
+    if (window.twikooLoaded) {
       return;
     }
 
+    // 动态加载 Twikoo 脚本
     const script = document.createElement("script");
-    script.src = "https://giscus.app/client.js";
-    script.setAttribute("data-repo", "acleverfreebird/fuwari");
-    script.setAttribute("data-repo-id", "R_kgDOPbwShw");
-    script.setAttribute("data-category", "Announcements");
-    script.setAttribute("data-category-id", "DIC_kwDOPbwSh84CuH7I");
-    script.setAttribute("data-mapping", "og:title");
-    script.setAttribute("data-strict", "0");
-    script.setAttribute("data-reactions-enabled", "1");
-    script.setAttribute("data-emit-metadata", "0");
-    script.setAttribute("data-input-position", "bottom");
-    script.setAttribute("data-theme", getGiscusTheme());
-    script.setAttribute("data-lang", "zh-CN");
-    script.setAttribute("crossorigin", "anonymous");
+    script.src = "https://cdn.jsdelivr.net/npm/twikoo@1.6.39/dist/twikoo.all.min.js";
     script.async = true;
 
-    // 监听 Giscus 加载完成事件
     script.onload = () => {
-      console.log("Giscus script loaded");
-      // 延迟更新主题以确保 iframe 完全初始化
-      setTimeout(() => updateGiscusTheme(), 1000);
+      console.log("Twikoo script loaded");
+      window.twikooLoaded = true;
+
+      // 初始化 Twikoo
+      if (window.twikoo) {
+        window.twikoo.init({
+          envId: "https://twikoojs.freebird2913.tech/",
+          el: "#tcomment",
+          lang: "zh-CN",
+          theme: getTwikooTheme(),
+          onCommentLoaded: () => {
+            console.log("Twikoo comments loaded");
+          }
+        });
+      }
     };
 
-    const giscusSection = document.querySelector("section.giscus");
-    if (giscusSection) {
-      giscusSection.appendChild(script);
-    }
+    script.onerror = () => {
+      console.error("Failed to load Twikoo script");
+    };
+
+    document.head.appendChild(script);
   }
 
   // 监听主题变化事件
@@ -104,7 +80,7 @@
     // 监听存储变化（主要用于多标签页同步）
     window.addEventListener("storage", (event) => {
       if (event.key === "theme") {
-        updateGiscusTheme();
+        updateTwikooTheme();
       }
     });
 
@@ -113,7 +89,7 @@
     const handleSystemThemeChange = () => {
       const storedTheme = localStorage.getItem("theme") || DEFAULT_THEME;
       if (storedTheme === AUTO_MODE) {
-        updateGiscusTheme();
+        updateTwikooTheme();
       }
     };
     
@@ -122,12 +98,12 @@
 
     // 监听自定义主题变化事件（与主题切换组件配合）
     document.addEventListener("themeChanged", () => {
-      setTimeout(() => updateGiscusTheme(), 100);
+      setTimeout(() => updateTwikooTheme(), 100);
     });
   }
 
   // 初始化函数
-  function initGiscusComments() {
+  function initTwikooComments() {
     // 确保主题状态在页面刷新后正确应用
     const currentTheme = getCurrentActualTheme();
     const documentHasDarkClass = document.documentElement.classList.contains("dark");
@@ -143,17 +119,17 @@
     // 设置主题监听器
     setupThemeChangeListener();
 
-    // 加载 Giscus
-    loadGiscus();
+    // 加载 Twikoo
+    loadTwikoo();
   }
 
   // 页面加载时初始化
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initGiscusComments);
+    document.addEventListener("DOMContentLoaded", initTwikooComments);
   } else {
-    initGiscusComments();
+    initTwikooComments();
   }
 
   // 导出全局函数供外部调用
-  window.updateGiscusTheme = updateGiscusTheme;
+  window.updateTwikooTheme = updateTwikooTheme;
 </script>
