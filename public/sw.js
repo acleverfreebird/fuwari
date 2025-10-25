@@ -102,9 +102,33 @@ self.addEventListener("fetch", (event) => {
 		return;
 	}
 
-	// Pagefind 搜索资源 - Cache First
+	// Pagefind 搜索资源 - Network First with graceful fallback
 	if (url.pathname.startsWith("/pagefind/")) {
-		event.respondWith(cacheFirst(request, STATIC_CACHE));
+		event.respondWith(
+			(async () => {
+				try {
+					const response = await fetch(request);
+					// 只缓存成功的响应
+					if (response && response.ok) {
+						const cache = await caches.open(STATIC_CACHE);
+						cache.put(request, response.clone());
+					}
+					return response;
+				} catch (error) {
+					// 尝试从缓存获取
+					const cache = await caches.open(STATIC_CACHE);
+					const cached = await cache.match(request);
+					if (cached) {
+						return cached;
+					}
+					// 返回空的 JSON 响应而不是错误，避免破坏搜索功能
+					return new Response('{"results":[]}', {
+						status: 200,
+						headers: { "Content-Type": "application/json" },
+					});
+				}
+			})(),
+		);
 		return;
 	}
 

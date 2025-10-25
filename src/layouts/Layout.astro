@@ -225,25 +225,56 @@ const bannerOffset =
 		<!-- Umami Analytics -->
 		<UmamiAnalytics />
 
-		<!-- Microsoft Clarity tracking - 延迟加载避免阻塞 -->
+		<!-- Microsoft Clarity tracking - 改进的延迟加载 -->
 		<script is:inline>
 			(function() {
 				let clarityLoaded = false;
+				let clarityAttempted = false;
 				
 				function loadClarity() {
-					if (clarityLoaded) return;
-					clarityLoaded = true;
+					if (clarityLoaded || clarityAttempted) return;
+					clarityAttempted = true;
 					
-					const script = document.createElement('script');
-					script.src = 'https://www.clarity.ms/tag/tdtze87osu?ref=bwt';
-					script.async = true;
-					document.head.appendChild(script);
+					try {
+						// 确保 DOM 完全加载
+						if (document.readyState !== 'complete') {
+							window.addEventListener('load', loadClarity, { once: true });
+							return;
+						}
+						
+						const script = document.createElement('script');
+						script.src = 'https://www.clarity.ms/tag/tdtze87osu?ref=bwt';
+						script.async = true;
+						script.defer = true;
+						
+						script.onload = function() {
+							clarityLoaded = true;
+						};
+						
+						script.onerror = function() {
+							// 静默处理加载失败，不影响用户体验
+							if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+								console.warn('⚠️ Clarity failed to load');
+							}
+						};
+						
+						document.head.appendChild(script);
+					} catch (error) {
+						// 静默处理错误
+						if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+							console.warn('Clarity initialization error:', error);
+						}
+					}
 				}
-			
-				// 延迟 5 秒或用户交互后加载，优化首屏性能
-				window.addEventListener('load', function() {
+
+				// 延迟 5 秒或用户交互后加载
+				if (document.readyState === 'complete') {
 					setTimeout(loadClarity, 5000);
-				});
+				} else {
+					window.addEventListener('load', function() {
+						setTimeout(loadClarity, 5000);
+					}, { once: true });
+				}
 				
 				// 或者在用户首次交互时加载
 				['click', 'scroll', 'keydown', 'touchstart'].forEach(function(event) {

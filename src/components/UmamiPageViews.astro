@@ -62,6 +62,9 @@ const componentId = `umami-views-${Math.random().toString(36).substr(2, 9)}`;
 		error?: string;
 	}
 
+	// 全局 AbortController 用于取消请求
+	let abortController: AbortController | null = null;
+
 	/**
 	 * 格式化数字显示
 	 */
@@ -74,12 +77,26 @@ const componentId = `umami-views-${Math.random().toString(36).substr(2, 9)}`;
 	 */
 	async function fetchPageViews(type: string, url?: string): Promise<ViewsData> {
 		try {
+			// 取消之前的请求
+			if (abortController) {
+				abortController.abort();
+			}
+			
+			// 创建新的 AbortController
+			abortController = new AbortController();
+			
 			let apiUrl = `${umamiStatsConfig.apiUrl}/stats/total`;
 			if (type === "page" && url) {
 				apiUrl = `${umamiStatsConfig.apiUrl}/stats/page?url=${encodeURIComponent(url)}`;
 			}
 
-			const response = await fetch(apiUrl);
+			const response = await fetch(apiUrl, {
+				signal: abortController.signal,
+				headers: {
+					'Accept': 'application/json',
+				}
+			});
+			
 			if (!response.ok) {
 				throw new Error(`HTTP ${response.status}`);
 			}
@@ -87,6 +104,10 @@ const componentId = `umami-views-${Math.random().toString(36).substr(2, 9)}`;
 			const data = await response.json();
 			return data;
 		} catch (error) {
+			// 忽略中断错误,不在控制台显示
+			if (error instanceof Error && error.name === 'AbortError') {
+				return { error: 'Request cancelled' };
+			}
 			console.error("Failed to fetch Umami page views:", error);
 			return { error: (error as Error).message };
 		}
@@ -165,6 +186,14 @@ const componentId = `umami-views-${Math.random().toString(36).substr(2, 9)}`;
 		});
 	}
 
+	// 清理函数
+	function cleanup() {
+		if (abortController) {
+			abortController.abort();
+			abortController = null;
+		}
+	}
+
 	// 页面加载完成后初始化
 	if (document.readyState === "loading") {
 		document.addEventListener("DOMContentLoaded", initUmamiPageViews);
@@ -174,6 +203,9 @@ const componentId = `umami-views-${Math.random().toString(36).substr(2, 9)}`;
 
 	// 支持页面导航后重新加载 (SPA模式)
 	document.addEventListener("astro:page-load", initUmamiPageViews);
+	
+	// 页面卸载前清理请求
+	document.addEventListener("astro:before-swap", cleanup);
 </script>
 
 <style>
