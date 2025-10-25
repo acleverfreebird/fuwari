@@ -50,7 +50,7 @@ function processCodeBlock(
 	preNode: Element,
 	language: string,
 	shouldCollapse: boolean,
-	lineCount: number,
+	_lineCount: number,
 ) {
 	// 1. 创建标题栏
 	const header = createCodeHeader(language);
@@ -202,7 +202,7 @@ function createContentWrapper(shouldCollapse: boolean): Element {
 
 	// 如果需要折叠，添加相关属性和渐变蒙层
 	if (shouldCollapse) {
-		wrapper.properties!["data-collapsed"] = "true";
+		(wrapper.properties as Record<string, unknown>)["data-collapsed"] = "true";
 
 		// 添加渐变蒙层
 		const fadeOverlay: Element = {

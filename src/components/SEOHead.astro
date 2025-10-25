@@ -46,7 +46,7 @@ interface SchemaOrgData {
 interface Props {
 	title?: string;
 	description?: string;
-	image?: any; // Can be string or ImageMetadata
+	image?: string | ImageMetadata; // Can be string or ImageMetadata
 	article?: boolean;
 	publishedTime?: Date;
 	modifiedTime?: Date;
