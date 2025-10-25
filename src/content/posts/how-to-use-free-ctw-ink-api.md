@@ -1,7 +1,7 @@
 ---
 title: '如何使用 free-llm-api.freebird2913.tech 公益API模型站点'
 published: 2025-08-23
-description: '免费AI API服务完整指南，支持GPT-4o、Gemini 2.0等多种主流模型，包括注册方法、API调用示例、模型选择建议等实用内容。'
+description: 'free-llm-api.freebird2913.tech公益API完整使用指南：免费AI模型API服务教程，支持GPT-4o、Claude、Gemini 2.0等主流大语言模型，详解注册流程、API密钥获取、调用示例代码、模型选择建议和最佳实践。'
 image: ''
 tags: ['AI API', 'GPT', 'Gemini', '免费服务', 'AI开发']
 category: 'AI工具'

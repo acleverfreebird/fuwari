@@ -2,7 +2,7 @@
 title: '如何使用Python Flask模块'
 author: 'freebird2913'
 published: 2025-09-07T04:10:28.635Z
-description: 'Python Flask完整入门教程，从安装到第一个应用，包括路由配置、动态URL、模板渲染、静态文件管理等核心功能，快速上手Web开发。'
+description: 'Python Flask框架完整入门教程：从零开始学习Flask Web开发，详细讲解框架安装配置、第一个应用创建、路由系统设计、动态URL参数、HTTP方法处理、Jinja2模板渲染、静态文件管理、表单处理等核心功能，配合实战代码示例，帮助Python开发者快速上手轻量级Web应用开发。'
 image: ''
 tags: ['Python', 'Flask', 'Web开发', 'Web框架', 'Jinja2']
 category: 'Web开发'

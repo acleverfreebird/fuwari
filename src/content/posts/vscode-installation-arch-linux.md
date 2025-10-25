@@ -1,7 +1,7 @@
 ---
 title: Arch Linux 上安装和配置 Visual Studio Code 完全指南
 published: 2025-08-24
-description: '详细介绍如何在Arch Linux上安装VSCode，包括Code-OSS、官方版和VSCodium三个版本的对比，以及主题插件权限配置、扩展市场设置等实用技巧。'
+description: 'Arch Linux安装配置Visual Studio Code完全指南：详细对比Code-OSS、官方版和VSCodium三个版本的特点差异，讲解安装方法、主题插件配置、扩展市场设置、权限管理、中文语言包安装等实用技巧，帮助Linux用户完美配置开发环境。'
 image: ''
 tags: ['ArchLinux', 'VSCode', 'Code-OSS', 'VSCodium', '开发环境']
 category: '技术教程'

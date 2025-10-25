@@ -1,7 +1,7 @@
 ---
 title: 'Python 自然语言处理入门：从零开始的 NLP 之旅'
 published: 2025-08-13
-description: 'Python NLP零基础入门教程，学习NLTK和spaCy库的使用，掌握分词、词性标注、命名实体识别等核心技术，并实现IMDB情感分析项目。'
+description: 'Python自然语言处理入门教程：从零开始的NLP学习之旅，详细讲解NLTK和spaCy库的安装使用、中英文分词技术、词性标注方法、命名实体识别NER、情感分析、TF-IDF特征提取等核心技术，通过IMDB电影评论情感分析实战项目和朴素贝叶斯分类器实现，全面掌握NLP基础知识和实战技能。'
 image: ''
 tags: ['Python', 'NLP', 'NLTK', 'spaCy', '情感分析']
 category: 'Python'

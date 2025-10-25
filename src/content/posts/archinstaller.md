@@ -1,7 +1,7 @@
 ---
 title: ArchLinux 基础安装教程
 published: 2025-08-14
-description: '从零开始安装ArchLinux系统的完整指南，包括分区、Btrfs文件系统配置、GRUB引导安装等详细步骤，适合Linux新手参考。'
+description: 'ArchLinux完整安装教程2025：从零开始安装Arch系统的详细指南，包含UEFI启动配置、磁盘分区方案、Btrfs文件系统设置、GRUB引导安装、网络配置、系统时区设置、用户管理等完整步骤，配有详细截图说明，适合Linux新手和进阶用户参考学习。'
 image: ''
 tags: ['ArchLinux', 'Linux安装', 'Btrfs', 'GRUB', '系统配置']
 category: 'Linux'

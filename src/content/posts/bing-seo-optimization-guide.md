@@ -1,7 +1,7 @@
 ---
 title: '必应搜索引擎优化完全指南 - Fuwari博客SEO实践'
 published: 2025-10-01
-description: '必应SEO完整实战指南，包括站点地图优化、Robots.txt配置、Schema.org结构化数据、IndexNow API实时推送等，提升搜索引擎收录和排名。'
+description: '必应搜索引擎优化完全指南：Fuwari博客SEO实战经验分享，详解站点地图生成、Robots.txt配置、Schema.org结构化数据实现、IndexNow API实时推送、Bing Webmaster Tools使用等技巧，有效提升搜索收录和排名。'
 image: ''
 tags: ['SEO', 'Bing', 'IndexNow', 'Schema.org', '搜索优化']
 category: 'SEO优化'

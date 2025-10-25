@@ -1,7 +1,7 @@
 ---
 title: 'Fuwari博客性能优化实战 - 从理论到实践'
 published: 2025-10-01
-description: 'Fuwari博客完整性能优化实战，包括Redis缓存、Vite构建优化、图片懒加载、Vercel部署配置等，实现API响应提升70%、包体积减少30%。'
+description: 'Fuwari博客性能优化完整实战记录：从理论到实践的全面优化方案，详细讲解Redis缓存集成、Vite构建配置优化、Terser压缩、图片懒加载实现、代码分割策略、Vercel部署优化、Core Web Vitals监控等技术细节，成功实现API响应速度提升70%、构建包体积减少30%、LCP改善60%的显著优化效果。'
 image: ''
 tags: ['性能优化', 'Redis', 'Vercel', 'Web性能', 'Core Web Vitals']
 category: '性能优化'

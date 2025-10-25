@@ -1,7 +1,7 @@
 ---
 title: 'Anaconda 2025 完全使用指南'
 published: 2025-08-12
-description: '零基础Anaconda完全指南，从安装到换源的跨平台教程，包含conda命令、虚拟环境管理、国内镜像源配置等实用技巧，让Python环境管理变简单。'
+description: 'Anaconda 2025完整使用教程：零基础学习Python环境管理，包含Windows/Linux/Mac三大平台安装配置、conda命令详解、虚拟环境创建管理、国内镜像源配置、pip换源等实用技巧，让Python开发环境管理变得简单高效，适合数据科学和机器学习初学者。'
 image: ''
 tags: ['Python', 'Anaconda', 'conda', '环境管理', '数据科学']
 category: 'Python'

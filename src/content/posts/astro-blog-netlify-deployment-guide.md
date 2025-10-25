@@ -2,7 +2,7 @@
 title: "完整指南：从零搭建Astro博客系统并部署到Netlify"
 published: 2025-08-30
 updated: 2025-08-30
-description: "从零搭建Astro博客完整教程，包括项目创建、内容管理、SEO优化、RSS订阅、搜索功能集成，以及Netlify部署的详细步骤和最佳实践。"
+description: "Astro博客搭建完整指南2025：从零开始创建现代化博客系统，涵盖项目初始化、TypeScript配置、Markdown内容管理、SEO优化配置、RSS订阅功能、Pagefind搜索集成、Netlify自动化部署、性能优化等详细步骤和最佳实践，适合前端开发者学习参考。"
 image: ""
 tags: ["Astro", "Netlify", "静态博客", "SSG", "SEO优化"]
 category: "技术教程"

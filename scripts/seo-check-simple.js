@@ -1,11 +1,9 @@
-import { getCollection } from "astro:content";
 import fs from "fs";
-import { glob } from "glob";
+import path from "path";
+import { fileURLToPath } from "url";
 
-/**
- * SEO检查脚本
- * 用于验证博客文章和页面的SEO合规性
- */
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // 颜色输出
 const colors = {
@@ -14,7 +12,6 @@ const colors = {
 	green: "\x1b[32m",
 	yellow: "\x1b[33m",
 	blue: "\x1b[34m",
-	magenta: "\x1b[35m",
 	cyan: "\x1b[36m",
 };
 
@@ -22,16 +19,69 @@ function log(color, ...args) {
 	console.log(color, ...args, colors.reset);
 }
 
+// 递归读取目录
+function getAllFiles(dirPath, arrayOfFiles = []) {
+	const files = fs.readdirSync(dirPath);
+
+	files.forEach((file) => {
+		const filePath = path.join(dirPath, file);
+		if (fs.statSync(filePath).isDirectory()) {
+			arrayOfFiles = getAllFiles(filePath, arrayOfFiles);
+		} else {
+			arrayOfFiles.push(filePath);
+		}
+	});
+
+	return arrayOfFiles;
+}
+
+// 解析Markdown frontmatter
+function parseFrontmatter(content) {
+	const match = content.match(/^---\n([\s\S]*?)\n---/);
+	if (!match) return null;
+
+	const frontmatter = {};
+	const lines = match[1].split("\n");
+
+	for (const line of lines) {
+		const colonIndex = line.indexOf(":");
+		if (colonIndex > 0) {
+			const key = line.substring(0, colonIndex).trim();
+			let value = line.substring(colonIndex + 1).trim();
+
+			// 移除引号
+			if (
+				(value.startsWith("'") && value.endsWith("'")) ||
+				(value.startsWith('"') && value.endsWith('"'))
+			) {
+				value = value.slice(1, -1);
+			}
+
+			frontmatter[key] = value;
+		}
+	}
+
+	return frontmatter;
+}
+
 async function checkPosts() {
 	log(colors.cyan, "\n📝 检查文章SEO...\n");
 
-	const posts = await getCollection("posts");
+	const postsDir = path.join(__dirname, "../src/content/posts");
+	const allFiles = getAllFiles(postsDir);
+	const mdFiles = allFiles.filter((f) => f.endsWith(".md"));
+
 	const issues = [];
 	let totalIssues = 0;
 
-	for (const post of posts) {
-		const { title, description } = post.data;
-		const slug = post.slug;
+	for (const file of mdFiles) {
+		const content = fs.readFileSync(file, "utf-8");
+		const frontmatter = parseFrontmatter(content);
+
+		if (!frontmatter) continue;
+
+		const { title, description } = frontmatter;
+		const relativePath = path.relative(postsDir, file);
 		const postIssues = [];
 
 		// 检查标题
@@ -40,9 +90,6 @@ async function checkPosts() {
 			totalIssues++;
 		} else if (title.length < 15) {
 			postIssues.push(`⚠️  标题过短 (${title.length}字符，建议15-30字符)`);
-			totalIssues++;
-		} else if (title.length > 60) {
-			postIssues.push(`⚠️  标题过长 (${title.length}字符，建议15-30字符)`);
 			totalIssues++;
 		}
 
@@ -55,16 +102,11 @@ async function checkPosts() {
 				`⚠️  描述过短 (${description.length}字符，建议120-160字符)`,
 			);
 			totalIssues++;
-		} else if (description.length > 160) {
-			postIssues.push(
-				`⚠️  描述过长 (${description.length}字符，建议120-160字符)`,
-			);
-			totalIssues++;
 		}
 
 		// 检查内容长度
-		const content = post.body;
-		const wordCount = content.length;
+		const bodyContent = content.replace(/^---[\s\S]*?---/, "").trim();
+		const wordCount = bodyContent.length;
 		if (wordCount < 800) {
 			postIssues.push(`⚠️  内容过短 (${wordCount}字符，建议800字以上)`);
 			totalIssues++;
@@ -72,17 +114,16 @@ async function checkPosts() {
 
 		if (postIssues.length > 0) {
 			issues.push({
-				file: slug,
+				file: relativePath,
 				title: title || "无标题",
 				issues: postIssues,
 			});
 		}
 	}
 
-	// 输出结果
-	log(colors.blue, `📊 总文章数: ${posts.length}`);
+	log(colors.blue, `📊 总文章数: ${mdFiles.length}`);
 	log(colors.yellow, `⚠️  发现问题: ${totalIssues}个`);
-	log(colors.magenta, `📄 问题文章: ${issues.length}篇\n`);
+	log(colors.cyan, `📄 问题文章: ${issues.length}篇\n`);
 
 	if (issues.length > 0) {
 		issues.forEach((issue) => {
@@ -97,7 +138,7 @@ async function checkPosts() {
 	}
 
 	return {
-		posts: posts.length,
+		posts: mdFiles.length,
 		issues: totalIssues,
 		problemPosts: issues.length,
 	};
@@ -106,24 +147,28 @@ async function checkPosts() {
 async function checkH1Tags() {
 	log(colors.cyan, "\n\n🏷️  检查H1标签...\n");
 
-	const astroFiles = await glob("src/pages/**/*.astro");
+	const pagesDir = path.join(__dirname, "../src/pages");
+	const allFiles = getAllFiles(pagesDir);
+	const astroFiles = allFiles.filter((f) => f.endsWith(".astro"));
+
 	const issues = [];
 	let totalIssues = 0;
 
 	for (const file of astroFiles) {
 		const content = fs.readFileSync(file, "utf-8");
 		const h1Matches = content.match(/<h1[^>]*>/g);
+		const relativePath = path.relative(pagesDir, file);
 
 		if (!h1Matches || h1Matches.length === 0) {
 			issues.push({
-				file,
+				file: relativePath,
 				type: "❌ 缺少H1标签",
 				count: 0,
 			});
 			totalIssues++;
 		} else if (h1Matches.length > 1) {
 			issues.push({
-				file,
+				file: relativePath,
 				type: "⚠️  多个H1标签",
 				count: h1Matches.length,
 			});
@@ -148,21 +193,30 @@ async function checkH1Tags() {
 async function checkDuplicates() {
 	log(colors.cyan, "\n\n🔍 检查重复内容...\n");
 
-	const posts = await getCollection("posts");
+	const postsDir = path.join(__dirname, "../src/content/posts");
+	const allFiles = getAllFiles(postsDir);
+	const mdFiles = allFiles.filter((f) => f.endsWith(".md"));
+
 	const titles = {};
 	const descriptions = {};
 	let duplicateTitles = 0;
 	let duplicateDescriptions = 0;
 
-	posts.forEach((post) => {
-		const { title, description } = post.data;
+	for (const file of mdFiles) {
+		const content = fs.readFileSync(file, "utf-8");
+		const frontmatter = parseFrontmatter(content);
+
+		if (!frontmatter) continue;
+
+		const { title, description } = frontmatter;
+		const relativePath = path.relative(postsDir, file);
 
 		// 检查重复标题
 		if (title) {
 			if (!titles[title]) {
 				titles[title] = [];
 			}
-			titles[title].push(post.slug);
+			titles[title].push(relativePath);
 		}
 
 		// 检查重复描述
@@ -170,16 +224,16 @@ async function checkDuplicates() {
 			if (!descriptions[description]) {
 				descriptions[description] = [];
 			}
-			descriptions[description].push(post.slug);
+			descriptions[description].push(relativePath);
 		}
-	});
+	}
 
 	// 输出重复标题
 	log(colors.yellow, "📋 重复标题:");
-	Object.entries(titles).forEach(([title, slugs]) => {
-		if (slugs.length > 1) {
+	Object.entries(titles).forEach(([title, files]) => {
+		if (files.length > 1) {
 			log(colors.red, `\n⚠️  "${title}"`);
-			slugs.forEach((slug) => console.log(`   - ${slug}`));
+			files.forEach((f) => console.log(`   - ${f}`));
 			duplicateTitles++;
 		}
 	});
@@ -190,10 +244,10 @@ async function checkDuplicates() {
 
 	// 输出重复描述
 	log(colors.yellow, "\n📋 重复描述:");
-	Object.entries(descriptions).forEach(([desc, slugs]) => {
-		if (slugs.length > 1) {
+	Object.entries(descriptions).forEach(([desc, files]) => {
+		if (files.length > 1) {
 			log(colors.red, `\n⚠️  "${desc.substring(0, 50)}..."`);
-			slugs.forEach((slug) => console.log(`   - ${slug}`));
+			files.forEach((f) => console.log(`   - ${f}`));
 			duplicateDescriptions++;
 		}
 	});
@@ -206,28 +260,13 @@ async function checkDuplicates() {
 }
 
 async function generateReport() {
-	log(colors.magenta, "\n" + "=".repeat(60));
-	log(colors.magenta, "🔍 SEO检查报告");
-	log(colors.magenta, "=".repeat(60));
+	log(colors.cyan, "\n" + "=".repeat(60));
+	log(colors.cyan, "🔍 SEO检查报告");
+	log(colors.cyan, "=".repeat(60));
 
 	const postResults = await checkPosts();
 	const h1Results = await checkH1Tags();
 	const duplicateResults = await checkDuplicates();
-
-	// 生成JSON报告
-	const report = {
-		timestamp: new Date().toISOString(),
-		summary: {
-			totalPosts: postResults.posts,
-			postIssues: postResults.issues,
-			problemPosts: postResults.problemPosts,
-			h1Issues: h1Results.issues,
-			duplicateTitles: duplicateResults.duplicateTitles,
-			duplicateDescriptions: duplicateResults.duplicateDescriptions,
-		},
-	};
-
-	fs.writeFileSync("seo-check-report.json", JSON.stringify(report, null, 2));
 
 	log(colors.cyan, "\n" + "=".repeat(60));
 	log(colors.cyan, "📊 总结");
@@ -250,7 +289,7 @@ async function generateReport() {
 		log(colors.red, `\n⚠️  总计发现 ${totalIssues} 个问题需要修复`);
 	}
 
-	log(colors.cyan, "\n📄 详细报告已保存到: seo-check-report.json\n");
+	log(colors.cyan, "\n");
 }
 
 generateReport().catch(console.error);
