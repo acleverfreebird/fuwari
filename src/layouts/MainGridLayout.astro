@@ -89,6 +89,7 @@ const mainPanelTop = siteConfig.banner.enable
     <ImageWrapper id="banner" alt="Banner image of the blog" class:list={["object-cover h-full transition duration-700 opacity-0 scale-105"]}
                   src={siteConfig.banner.src} position={siteConfig.banner.position} priority={true}
                   loading="eager"
+                  fetchpriority="high"
                   sizes="100vw"
     >
     </ImageWrapper>

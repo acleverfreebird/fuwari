@@ -92,6 +92,11 @@ const bannerOffset =
 		<link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
 		<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"></noscript>
 		
+		<!-- 预连接关键域名以优化网络性能 -->
+		<link rel="preconnect" href="https://get-views.freebird2913.tech" />
+		<link rel="dns-prefetch" href="https://v1.hitokoto.cn" />
+		<link rel="dns-prefetch" href="https://api.iconify.design" />
+		
 		{favicons.map(favicon => (
 			<link rel="icon"
 				  href={favicon.src.startsWith('/') ? url(favicon.src) : favicon.src}
@@ -222,18 +227,29 @@ const bannerOffset =
 
 		<!-- Microsoft Clarity tracking - 延迟加载避免阻塞 -->
 		<script is:inline>
-			function loadClarity() {
-				const script = document.createElement('script');
-				script.src = 'https://www.clarity.ms/tag/tdtze87osu?ref=bwt';
-				script.async = true;
-				document.head.appendChild(script);
-			}
-		
-			// 使用 window.onload 确保在所有资源加载后再执行
-			window.onload = function() {
-				// 延迟2秒执行，以避免影响页面主要内容的加载
-				setTimeout(loadClarity, 2000);
-			};
+			(function() {
+				let clarityLoaded = false;
+				
+				function loadClarity() {
+					if (clarityLoaded) return;
+					clarityLoaded = true;
+					
+					const script = document.createElement('script');
+					script.src = 'https://www.clarity.ms/tag/tdtze87osu?ref=bwt';
+					script.async = true;
+					document.head.appendChild(script);
+				}
+			
+				// 延迟 5 秒或用户交互后加载，优化首屏性能
+				window.addEventListener('load', function() {
+					setTimeout(loadClarity, 5000);
+				});
+				
+				// 或者在用户首次交互时加载
+				['click', 'scroll', 'keydown', 'touchstart'].forEach(function(event) {
+					window.addEventListener(event, loadClarity, { once: true, passive: true });
+				});
+			})();
 		</script>
 
 		<!-- Service Worker 注册 - 性能优化 -->
@@ -484,11 +500,18 @@ function showBanner() {
 	banner.classList.remove('opacity-0', 'scale-105');
 }
 
-function init() {
+async function init() {
 	// disableAnimation()()		// TODO
 	// 关键初始化 - 立即执行
 	loadTheme();
+	
+	// 让出主线程，避免长任务阻塞
+	await new Promise(resolve => setTimeout(resolve, 0));
+	
 	loadHue();
+	
+	await new Promise(resolve => setTimeout(resolve, 0));
+	
 	showBanner();
 	
 	// 非关键初始化 - 延迟执行以优化 INP
@@ -641,10 +664,13 @@ function throttle(func: (...args: any[]) => void, wait: number) {
 window.onscroll = throttle(scrollFunction, 100);
 
 window.onresize = () => {
-	// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
-	let offset = Math.floor(window.innerHeight * (BANNER_HEIGHT_EXTEND / 100));
-	offset = offset - offset % 4;
-	document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
+	// 使用 requestAnimationFrame 避免强制重排
+	requestAnimationFrame(() => {
+		// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
+		let offset = Math.floor(window.innerHeight * (BANNER_HEIGHT_EXTEND / 100));
+		offset = offset - offset % 4;
+		document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
+	});
 }
 
 </script>

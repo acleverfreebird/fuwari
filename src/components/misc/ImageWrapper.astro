@@ -10,6 +10,7 @@ interface Props {
 	basePath?: string;
 	loading?: "lazy" | "eager";
 	priority?: boolean;
+	fetchpriority?: "high" | "low" | "auto";
 	sizes?: string;
 	width?: number;
 	height?: number;
@@ -26,6 +27,7 @@ const {
 	basePath = "/",
 	loading = "lazy",
 	priority = false,
+	fetchpriority = "auto",
 	sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
 	width,
 	height,
@@ -73,6 +75,7 @@ const imageStyle = `object-position: ${position}`;
             style={imageStyle}
             loading={priority ? "eager" : loading}
             decoding={priority ? "sync" : "async"}
+            fetchpriority={fetchpriority}
             sizes={sizes}
             width={width}
             height={height}
@@ -86,6 +89,7 @@ const imageStyle = `object-position: ${position}`;
             style={imageStyle}
             loading={priority ? "eager" : loading}
             decoding={priority ? "sync" : "async"}
+            fetchpriority={fetchpriority}
             width={width}
             height={height}
         />
