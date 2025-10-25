@@ -486,10 +486,21 @@ function showBanner() {
 
 function init() {
 	// disableAnimation()()		// TODO
+	// 关键初始化 - 立即执行
 	loadTheme();
 	loadHue();
-	initCustomScrollbar();
 	showBanner();
+	
+	// 非关键初始化 - 延迟执行以优化 INP
+	if ('requestIdleCallback' in window) {
+		requestIdleCallback(() => {
+			initCustomScrollbar();
+		}, { timeout: 2000 });
+	} else {
+		setTimeout(() => {
+			initCustomScrollbar();
+		}, 100);
+	}
 }
 
 /* Load settings when entering the site */
@@ -614,7 +625,20 @@ function scrollFunction() {
 		}
 	}
 }
-window.onscroll = scrollFunction
+// 使用节流优化滚动性能，减少 INP
+function throttle(func: (...args: any[]) => void, wait: number) {
+	let timeout: ReturnType<typeof setTimeout> | undefined;
+	return function executedFunction(...args: any[]) {
+		const later = () => {
+			clearTimeout(timeout);
+			func(...args);
+		};
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+	};
+}
+
+window.onscroll = throttle(scrollFunction, 100);
 
 window.onresize = () => {
 	// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
