@@ -1,7 +1,13 @@
 import purgecss from "@fullhuman/postcss-purgecss";
+import postcssImport from "postcss-import";
+import tailwindcss from "tailwindcss";
+import tailwindcssNesting from "tailwindcss/nesting/index.js";
 
 export default {
 	plugins: [
+		postcssImport(),
+		tailwindcssNesting(),
+		tailwindcss(),
 		purgecss({
 			content: [
 				"./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}",
