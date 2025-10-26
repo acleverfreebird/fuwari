@@ -121,8 +121,8 @@ const isProduction = import.meta.env.PROD;
           timestamp: new Date().toISOString(),
           vitals: vitals,
           navigation: {
-            type: performance.navigation?.type || 'unknown',
-            redirectCount: performance.navigation?.redirectCount || 0,
+            type: (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming)?.type || 'unknown',
+            redirectCount: (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming)?.redirectCount || 0,
           },
           memory: (performance as any).memory ? {
             usedJSHeapSize: (performance as any).memory.usedJSHeapSize,

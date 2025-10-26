@@ -1,5 +1,4 @@
 ---
-import { Icon } from "astro-icon/components";
 /**
  * Umami 浏览量显示组件
  * 支持显示总浏览量和单页浏览量
@@ -32,7 +31,7 @@ if (type === "page" && !url) {
 }
 
 // 生成唯一ID用于DOM操作
-const componentId = `umami-views-${Math.random().toString(36).substr(2, 9)}`;
+const componentId = `umami-views-${Math.random().toString(36).slice(2, 11)}`;
 ---
 
 <div class:list={["umami-page-views", className]} id={componentId} data-type={type} data-url={url} data-show-visitors={showVisitors}>
