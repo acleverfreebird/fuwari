@@ -24,6 +24,8 @@ export type SiteConfig = {
 		enable: boolean;
 		src: string;
 		position?: "top" | "center" | "bottom";
+		mobilePosition?: "top" | "center" | "bottom";
+		tabletPosition?: "top" | "center" | "bottom";
 		credit: {
 			enable: boolean;
 			text: string;
