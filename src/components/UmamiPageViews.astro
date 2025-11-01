@@ -43,12 +43,15 @@ const componentId = `umami-views-${Math.random().toString(36).slice(2, 11)}`;
 			<span class="error" style="display: none;">--</span>
 		</span>
 	</div>
-	<div class="stat-item visitors-item" style={showVisitors ? "" : "display: none !important;"}>
-		<span class="label">访客数量:</span>
-		<span class="visitors-count">
-			<span class="count">0</span>
-		</span>
-	</div>
+	{showVisitors && (
+		<div class="stat-item visitors-item">
+			<span class="label">访客数量:</span>
+			<span class="visitors-count">
+				<span class="loading">...</span>
+				<span class="count" style="display: none;">0</span>
+			</span>
+		</div>
+	)}
 </div>
 
 <script>
@@ -56,19 +59,16 @@ const componentId = `umami-views-${Math.random().toString(36).slice(2, 11)}`;
 
 	interface ViewsData {
 		pageviews?: number;
-		total?: number;  // 总浏览量使用 total 字段
+		total?: number;
 		visitors?: number;
 		error?: string;
 	}
-
-	// 全局 AbortController 用于取消请求
-	let abortController: AbortController | null = null;
 
 	/**
 	 * 格式化数字显示
 	 */
 	function formatNumber(num: number): string {
-		return num.toString();
+		return num.toLocaleString();
 	}
 
 	/**
@@ -76,38 +76,30 @@ const componentId = `umami-views-${Math.random().toString(36).slice(2, 11)}`;
 	 */
 	async function fetchPageViews(type: string, url?: string): Promise<ViewsData> {
 		try {
-			// 取消之前的请求
-			if (abortController) {
-				abortController.abort();
-			}
-			
-			// 创建新的 AbortController
-			abortController = new AbortController();
-			
 			let apiUrl = `${umamiStatsConfig.apiUrl}/stats/total`;
 			if (type === "page" && url) {
 				apiUrl = `${umamiStatsConfig.apiUrl}/stats/page?url=${encodeURIComponent(url)}`;
 			}
 
+			console.log("📊 Fetching stats from:", apiUrl);
+			
 			const response = await fetch(apiUrl, {
-				signal: abortController.signal,
+				method: 'GET',
 				headers: {
 					'Accept': 'application/json',
-				}
+				},
+				cache: 'no-cache'
 			});
 			
 			if (!response.ok) {
-				throw new Error(`HTTP ${response.status}`);
+				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 			}
 
 			const data = await response.json();
+			console.log("✅ Stats received:", data);
 			return data;
 		} catch (error) {
-			// 忽略中断错误,不在控制台显示
-			if (error instanceof Error && error.name === 'AbortError') {
-				return { error: 'Request cancelled' };
-			}
-			console.error("Failed to fetch Umami page views:", error);
+			console.error("❌ Failed to fetch stats:", error);
 			return { error: (error as Error).message };
 		}
 	}
@@ -115,96 +107,107 @@ const componentId = `umami-views-${Math.random().toString(36).slice(2, 11)}`;
 	/**
 	 * 更新显示
 	 */
-	function updateDisplay(
-		container: HTMLElement,
-		data: ViewsData,
-	) {
-		const showVisitors = container.getAttribute("data-show-visitors") === "true";
-		const pageviewsItem = container.querySelector(".pageviews-item") as HTMLElement;
-		const loadingEl = pageviewsItem?.querySelector(".loading") as HTMLElement;
-		const countEl = pageviewsItem?.querySelector(".count") as HTMLElement;
-		const errorEl = pageviewsItem?.querySelector(".error") as HTMLElement;
-
-		console.log("🔍 Complete API Response:", JSON.stringify(data, null, 2));
-		console.log("🔍 All data keys:", Object.keys(data));
-		console.log("🔍 showVisitors:", showVisitors);
-
-		if (loadingEl) loadingEl.style.display = "none";
-
-		if (data.error) {
-			console.error("Umami stats error:", data.error);
-			if (errorEl) {
-				errorEl.style.display = "inline";
-			}
+	function updateDisplay(container: HTMLElement, data: ViewsData) {
+		console.log("🔄 Updating display with data:", data);
+		
+		// 获取浏览量相关元素
+		const pageviewsItem = container.querySelector(".pageviews-item");
+		if (!pageviewsItem) {
+			console.error("❌ pageviews-item not found");
 			return;
 		}
 
-		// 更新浏览量 (支持 pageviews 和 total 两种字段)
-		const viewCount = data.pageviews ?? data.total;
-		console.log("🔍 Extracted viewCount:", viewCount, "from pageviews:", data.pageviews, "total:", data.total);
-		
-		if (viewCount !== undefined && countEl) {
-			countEl.textContent = formatNumber(viewCount);
-			countEl.style.display = "inline";
-			console.log("✅ Updated pageviews:", viewCount, "->", countEl.textContent);
-		} else {
-			console.warn("❌ No pageviews/total data or countEl missing:", { data, countEl });
+		const viewsLoading = pageviewsItem.querySelector(".loading") as HTMLElement;
+		const viewsCount = pageviewsItem.querySelector(".count") as HTMLElement;
+		const viewsError = pageviewsItem.querySelector(".error") as HTMLElement;
+
+		// 隐藏加载状态
+		if (viewsLoading) viewsLoading.style.display = "none";
+
+		// 处理错误
+		if (data.error) {
+			console.error("❌ Error in data:", data.error);
+			if (viewsError) viewsError.style.display = "inline";
+			if (viewsCount) viewsCount.style.display = "none";
+			return;
 		}
 
-		// 更新访问者数量
-		console.log("🔍 Checking visitors - showVisitors:", showVisitors, "data.visitors:", data.visitors);
+		// 获取浏览量数值 (优先使用 pageviews，其次 total)
+		const viewCount = data.pageviews ?? data.total ?? 0;
+		console.log("📈 View count:", viewCount);
+
+		// 更新浏览量显示
+		if (viewsCount) {
+			viewsCount.textContent = formatNumber(viewCount);
+			viewsCount.style.display = "inline";
+			if (viewsError) viewsError.style.display = "none";
+			console.log("✅ Pageviews updated to:", viewCount);
+		}
+
+		// 更新访客数量
+		const showVisitors = container.getAttribute("data-show-visitors") === "true";
 		if (showVisitors && data.visitors !== undefined) {
-			const visitorsItem = container.querySelector(".visitors-item") as HTMLElement;
-			const visitorsCountEl = visitorsItem?.querySelector(".count") as HTMLElement;
-			
-			console.log("🔍 Visitors elements:", { visitorsItem, visitorsCountEl });
-			
-			if (visitorsItem && visitorsCountEl) {
-				visitorsCountEl.textContent = formatNumber(data.visitors);
-				visitorsItem.style.display = "flex";
-				console.log("✅ Updated visitors:", data.visitors, "->", visitorsCountEl.textContent);
+			const visitorsItem = container.querySelector(".visitors-item");
+			if (visitorsItem) {
+				const visitorsLoading = visitorsItem.querySelector(".loading") as HTMLElement;
+				const visitorsCount = visitorsItem.querySelector(".count") as HTMLElement;
+
+				if (visitorsLoading) visitorsLoading.style.display = "none";
+				if (visitorsCount) {
+					visitorsCount.textContent = formatNumber(data.visitors);
+					visitorsCount.style.display = "inline";
+					console.log("✅ Visitors updated to:", data.visitors);
+				}
 			}
-		} else {
-			console.log("⚠️ Visitors not shown - showVisitors:", showVisitors, "visitors value:", data.visitors);
 		}
 	}
 
 	/**
-	 * 初始化组件
+	 * 初始化单个组件
 	 */
-	function initUmamiPageViews() {
-		if (!umamiStatsConfig.enable) return;
+	async function initComponent(container: HTMLElement) {
+		const type = container.getAttribute("data-type") || "total";
+		const url = container.getAttribute("data-url") || undefined;
 
-		const containers = document.querySelectorAll(".umami-page-views");
-		containers.forEach(async (container) => {
-			const type = container.getAttribute("data-type") || "total";
-			const url = container.getAttribute("data-url") || undefined;
+		console.log("🚀 Initializing component:", { type, url });
 
+		try {
 			const data = await fetchPageViews(type, url);
-			updateDisplay(container as HTMLElement, data);
-		});
+			updateDisplay(container, data);
+		} catch (error) {
+			console.error("❌ Error initializing component:", error);
+			updateDisplay(container, { error: (error as Error).message });
+		}
 	}
 
-	// 清理函数
-	function cleanup() {
-		if (abortController) {
-			abortController.abort();
-			abortController = null;
+	/**
+	 * 初始化所有组件
+	 */
+	function initAllComponents() {
+		if (!umamiStatsConfig.enable) {
+			console.log("⚠️ Umami stats disabled");
+			return;
 		}
+
+		console.log("🔍 Looking for .umami-page-views components");
+		const containers = document.querySelectorAll(".umami-page-views");
+		console.log(`📦 Found ${containers.length} component(s)`);
+
+		containers.forEach((container) => {
+			initComponent(container as HTMLElement);
+		});
 	}
 
 	// 页面加载完成后初始化
 	if (document.readyState === "loading") {
-		document.addEventListener("DOMContentLoaded", initUmamiPageViews);
+		document.addEventListener("DOMContentLoaded", initAllComponents);
 	} else {
-		initUmamiPageViews();
+		// DOM 已经加载完成，直接初始化
+		initAllComponents();
 	}
 
-	// 支持页面导航后重新加载 (SPA模式)
-	document.addEventListener("astro:page-load", initUmamiPageViews);
-	
-	// 页面卸载前清理请求
-	document.addEventListener("astro:before-swap", cleanup);
+	// 支持 Astro 页面导航
+	document.addEventListener("astro:page-load", initAllComponents);
 </script>
 
 <style>
