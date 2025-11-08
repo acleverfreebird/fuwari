@@ -56,11 +56,11 @@ const jsonLd = {
     <!-- 确保URL规范化，避免必应索引问题 -->
     <link slot="head" rel="canonical" href={new URL(`posts/${entry.slug}/`, Astro.site).href} />
     
-    <!-- 预连接 Twikoo 以优化评论加载 -->
-    <link slot="head" rel="preconnect" href="https://registry.npmmirror.com" />
-    <link slot="head" rel="dns-prefetch" href="https://registry.npmmirror.com" />
-    <link slot="head" rel="preconnect" href="https://twikoojs.freebird2913.tech" />
-    <link slot="head" rel="dns-prefetch" href="https://twikoojs.freebird2913.tech" />
+    <!-- 预连接 Waline 以优化评论加载 -->
+    <link slot="head" rel="preconnect" href="https://unpkg.com" />
+    <link slot="head" rel="dns-prefetch" href="https://unpkg.com" />
+    <link slot="head" rel="preconnect" href="https://waline.freebird2913.tech" />
+    <link slot="head" rel="dns-prefetch" href="https://waline.freebird2913.tech" />
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
         <div id="post-container" class:list={["card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full ",
             {}
@@ -134,7 +134,7 @@ const jsonLd = {
 
 
     <div id="comments-container" class="card-base p-6 rounded-[var(--radius-large)] mb-4">
-        <div id="twikoo-placeholder" class="min-h-[200px] flex items-center justify-center">
+        <div id="waline-placeholder" class="w-full">
             <button
                 id="load-comments"
                 class="btn-card px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 active:scale-95"
@@ -146,8 +146,8 @@ const jsonLd = {
 
     <script is:inline>
     (function() {
-        let twikooLoaded = false;
-        let scriptLoaded = false;
+        let walineLoaded = false;
+        let walineInstance = null;
         
         // 获取当前主题
         function getCurrentTheme() {
@@ -164,92 +164,84 @@ const jsonLd = {
             return storedTheme;
         }
         
-        function loadTwikoo() {
-            if (twikooLoaded) return;
-            twikooLoaded = true;
+        async function loadWaline() {
+            if (walineLoaded) return;
+            walineLoaded = true;
             
-            const placeholder = document.getElementById('twikoo-placeholder');
+            const placeholder = document.getElementById('waline-placeholder');
             if (!placeholder) return;
             
             // 显示加载提示
             placeholder.innerHTML = '<div class="text-center text-sm text-gray-500 py-4">正在加载评论...</div>';
             
-            // 动态加载 Twikoo 脚本
-            if (!scriptLoaded) {
-                const script = document.createElement('script');
-                script.src = 'https://registry.npmmirror.com/twikoo/1.6.44/files/dist/twikoo.min.js';
-                script.async = true;
+            try {
+                // 动态加载 Waline CSS
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = 'https://unpkg.com/@waline/client@v3/dist/waline.css';
+                document.head.appendChild(link);
                 
-                script.onload = function() {
-                    scriptLoaded = true;
-                    console.log('Twikoo script loaded');
-                    initTwikoo();
-                };
+                // 使用动态 import 加载 Waline
+                const { init } = await import('https://unpkg.com/@waline/client@v3/dist/waline.js');
                 
-                script.onerror = function() {
-                    placeholder.innerHTML = '<div class="text-center text-sm text-red-500 py-4">评论加载失败，请刷新页面重试</div>';
-                };
+                console.log('Waline script loaded');
                 
-                document.head.appendChild(script);
-            } else {
-                initTwikoo();
+                // 清空占位符
+                placeholder.innerHTML = '';
+                
+                // 创建 Waline 容器
+                const walineContainer = document.createElement('div');
+                walineContainer.id = 'waline';
+                placeholder.appendChild(walineContainer);
+                
+                // 初始化 Waline
+                const currentTheme = getCurrentTheme();
+                walineInstance = init({
+                    el: '#waline',
+                    serverURL: 'https://waline.freebird2913.tech/',
+                    lang: 'zh-CN',
+                    dark: currentTheme === 'dark',
+                    path: location.pathname,
+                    meta: ['nick', 'mail', 'link'],
+                    requiredMeta: ['nick'],
+                    pageSize: 10,
+                    wordLimit: [0, 1000],
+                    emoji: [
+                        'https://unpkg.com/@waline/emojis@1.2.0/weibo',
+                        'https://unpkg.com/@waline/emojis@1.2.0/alus',
+                        'https://unpkg.com/@waline/emojis@1.2.0/bilibili',
+                    ],
+                    search: false,
+                    pageview: true,
+                    comment: true,
+                    copyright: true,
+                    login: 'enable',
+                });
+                
+                console.log('Waline initialized');
+                
+                // 监听主题变化
+                document.addEventListener('themeChanged', function() {
+                    if (walineInstance && walineInstance.update) {
+                        setTimeout(function() {
+                            const theme = getCurrentTheme();
+                            walineInstance.update({
+                                dark: theme === 'dark'
+                            });
+                        }, 100);
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Failed to load Waline:', error);
+                placeholder.innerHTML = '<div class="text-center text-sm text-red-500 py-4">评论加载失败，请刷新页面重试</div>';
             }
-        }
-        
-        function initTwikoo() {
-            const placeholder = document.getElementById('twikoo-placeholder');
-            if (!placeholder) return;
-            
-            // 等待 twikoo 对象可用
-            var checkTwikoo = setInterval(function() {
-                if (window.twikoo) {
-                    clearInterval(checkTwikoo);
-                    
-                    // 清空占位符
-                    placeholder.innerHTML = '';
-                    
-                    // 创建 Twikoo 容器
-                    const twikooContainer = document.createElement('div');
-                    twikooContainer.id = 'tcomment';
-                    placeholder.appendChild(twikooContainer);
-                    
-                    // 初始化 Twikoo
-                    twikoo.init({
-                        envId: 'https://twikoojs.freebird2913.tech/',
-                        el: '#tcomment',
-                        lang: 'zh-CN',
-                        path: location.pathname,
-                        onCommentLoaded: function() {
-                            console.log('Twikoo comments loaded');
-                        }
-                    });
-                    
-                    // 监听主题变化
-                    document.addEventListener('themeChanged', function() {
-                        if (window.twikoo && window.twikoo.update) {
-                            setTimeout(function() {
-                                twikoo.update({
-                                    theme: getCurrentTheme()
-                                });
-                            }, 100);
-                        }
-                    });
-                }
-            }, 100);
-            
-            // 超时处理
-            setTimeout(function() {
-                if (!window.twikoo) {
-                    clearInterval(checkTwikoo);
-                    placeholder.innerHTML = '<div class="text-center text-sm text-red-500 py-4">评论加载失败，请刷新页面重试</div>';
-                }
-            }, 10000);
         }
 
         // 方案1: 用户点击加载按钮
         const loadButton = document.getElementById('load-comments');
         if (loadButton) {
-            loadButton.addEventListener('click', loadTwikoo);
+            loadButton.addEventListener('click', loadWaline);
         }
 
         // 方案2: 滚动到评论区域自动加载（使用 Intersection Observer）
@@ -260,7 +252,7 @@ const jsonLd = {
                     entries.forEach(function(entry) {
                         if (entry.isIntersecting) {
                             // 延迟1000ms加载，优化首屏性能
-                            setTimeout(loadTwikoo, 1000);
+                            setTimeout(loadWaline, 1000);
                             observer.disconnect();
                         }
                     });

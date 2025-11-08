@@ -1,4 +1,4 @@
-<div id="tcomment" class="mx-auto mt-10 w-full transition-colors duration-300"></div>
+<div id="waline" class="mx-auto mt-10 w-full transition-colors duration-300"></div>
 
 <script is:inline>
   // 常量定义 - 与主题系统保持一致
@@ -17,62 +17,73 @@
     return storedTheme;
   }
 
-  // 获取 Twikoo 主题配置
-  function getTwikooTheme() {
+  // 获取 Waline 主题配置
+  function getWalineTheme() {
     const currentTheme = getCurrentActualTheme();
     return currentTheme === DARK_MODE ? "dark" : "light";
   }
 
-  // 更新 Twikoo 主题
-  function updateTwikooTheme() {
-    if (window.twikoo && window.twikoo.update) {
-      const theme = getTwikooTheme();
+  // 更新 Waline 主题
+  function updateWalineTheme() {
+    if (window.walineInstance) {
+      const theme = getWalineTheme();
       try {
-        window.twikoo.update({
-          theme: theme
+        window.walineInstance.update({
+          dark: theme === "dark"
         });
-        console.log(`Twikoo theme updated to: ${theme}`);
+        console.log(`Waline theme updated to: ${theme}`);
       } catch (error) {
-        console.warn("Failed to update Twikoo theme:", error);
+        console.warn("Failed to update Waline theme:", error);
       }
     }
   }
 
-  // 加载 Twikoo 评论组件
-  function loadTwikoo() {
+  // 加载 Waline 评论组件
+  async function loadWaline() {
     // 防止重复加载
-    if (window.twikooLoaded) {
+    if (window.walineLoaded) {
       return;
     }
 
-    // 动态加载 Twikoo 脚本
-    const script = document.createElement("script");
-    script.src = "https://cdn.jsdelivr.net/npm/twikoo@1.6.39/dist/twikoo.all.min.js";
-    script.async = true;
+    // 动态加载 Waline CSS
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://unpkg.com/@waline/client@v3/dist/waline.css";
+    document.head.appendChild(link);
 
-    script.onload = () => {
-      console.log("Twikoo script loaded");
-      window.twikooLoaded = true;
+    try {
+      // 使用动态 import 加载 Waline
+      const { init } = await import("https://unpkg.com/@waline/client@v3/dist/waline.js");
+      
+      console.log("Waline script loaded");
+      window.walineLoaded = true;
 
-      // 初始化 Twikoo
-      if (window.twikoo) {
-        window.twikoo.init({
-          envId: "https://twikoojs.freebird2913.tech/",
-          el: "#tcomment",
-          lang: "zh-CN",
-          theme: getTwikooTheme(),
-          onCommentLoaded: () => {
-            console.log("Twikoo comments loaded");
-          }
-        });
-      }
-    };
-
-    script.onerror = () => {
-      console.error("Failed to load Twikoo script");
-    };
-
-    document.head.appendChild(script);
+      // 初始化 Waline
+      const currentTheme = getWalineTheme();
+      window.walineInstance = init({
+        el: "#waline",
+        serverURL: "https://waline.freebird2913.tech/",
+        lang: "zh-CN",
+        dark: currentTheme === "dark",
+        meta: ["nick", "mail", "link"],
+        requiredMeta: ["nick"],
+        pageSize: 10,
+        wordLimit: [0, 1000],
+        emoji: [
+          "https://unpkg.com/@waline/emojis@1.2.0/weibo",
+          "https://unpkg.com/@waline/emojis@1.2.0/alus",
+          "https://unpkg.com/@waline/emojis@1.2.0/bilibili",
+        ],
+        search: false,
+        pageview: true,
+        comment: true,
+        copyright: true,
+        login: "enable",
+      });
+      console.log("Waline initialized");
+    } catch (error) {
+      console.error("Failed to load Waline script:", error);
+    }
   }
 
   // 监听主题变化事件
@@ -80,7 +91,7 @@
     // 监听存储变化（主要用于多标签页同步）
     window.addEventListener("storage", (event) => {
       if (event.key === "theme") {
-        updateTwikooTheme();
+        updateWalineTheme();
       }
     });
 
@@ -89,7 +100,7 @@
     const handleSystemThemeChange = () => {
       const storedTheme = localStorage.getItem("theme") || DEFAULT_THEME;
       if (storedTheme === AUTO_MODE) {
-        updateTwikooTheme();
+        updateWalineTheme();
       }
     };
     
@@ -98,12 +109,12 @@
 
     // 监听自定义主题变化事件（与主题切换组件配合）
     document.addEventListener("themeChanged", () => {
-      setTimeout(() => updateTwikooTheme(), 100);
+      setTimeout(() => updateWalineTheme(), 100);
     });
   }
 
   // 初始化函数
-  function initTwikooComments() {
+  function initWalineComments() {
     // 确保主题状态在页面刷新后正确应用
     const currentTheme = getCurrentActualTheme();
     const documentHasDarkClass = document.documentElement.classList.contains("dark");
@@ -119,17 +130,17 @@
     // 设置主题监听器
     setupThemeChangeListener();
 
-    // 加载 Twikoo
-    loadTwikoo();
+    // 加载 Waline
+    loadWaline();
   }
 
   // 页面加载时初始化
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initTwikooComments);
+    document.addEventListener("DOMContentLoaded", initWalineComments);
   } else {
-    initTwikooComments();
+    initWalineComments();
   }
 
   // 导出全局函数供外部调用
-  window.updateTwikooTheme = updateTwikooTheme;
+  window.updateWalineTheme = updateWalineTheme;
 </script>

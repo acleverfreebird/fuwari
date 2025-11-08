@@ -100,3 +100,21 @@ export const umamiStatsConfig = {
 	enable: true, // 是否启用浏览量显示
 	apiUrl: "https://get-views.freebird2913.tech", // Cloudflare Worker 地址
 };
+
+// Waline 评论系统配置
+export const walineConfig = {
+	enable: true, // 是否启用 Waline 评论系统
+	serverURL: "https://waline.freebird2913.tech/", // Waline 服务器地址
+	lang: "zh-CN", // 语言设置
+	meta: ["nick", "mail", "link"], // 评论者信息字段
+	requiredMeta: ["nick"], // 必填字段
+	pageSize: 10, // 每页评论数
+	wordLimit: [0, 1000], // 评论字数限制
+	emoji: [
+		"https://unpkg.com/@waline/emojis@1.2.0/weibo",
+		"https://unpkg.com/@waline/emojis@1.2.0/alus",
+		"https://unpkg.com/@waline/emojis@1.2.0/bilibili",
+	], // 表情包配置
+	pageview: true, // 是否启用浏览量统计
+	comment: true, // 是否启用评论
+};
