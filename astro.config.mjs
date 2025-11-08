@@ -201,7 +201,6 @@ export default defineConfig({
 				},
 			},
 			rollupOptions: {
-				external: ["@upstash/redis"], // 外部化Upstash Redis依赖，避免构建时解析错误
 				output: {
 					// 优化代码分割 - 合并Swup相关模块减少网络依赖链
 					manualChunks: (id) => {
@@ -238,9 +237,6 @@ export default defineConfig({
 					warn(warning);
 				},
 			},
-		},
-		optimizeDeps: {
-			exclude: ["@upstash/redis"],
 		},
 		// 添加构建后IndexNow推送钩子
 		plugins: [
