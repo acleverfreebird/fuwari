@@ -53,8 +53,6 @@ const jsonLd = {
 ---
 <MainGridLayout banner={entry.data.image} title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings}>
     <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
-    <!-- 确保URL规范化，避免必应索引问题 -->
-    <link slot="head" rel="canonical" href={new URL(`posts/${entry.slug}/`, Astro.site).href} />
     
     <!-- 预连接 Waline 以优化评论加载 -->
     <link slot="head" rel="preconnect" href="https://unpkg.com" />
