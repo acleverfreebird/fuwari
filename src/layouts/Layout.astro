@@ -86,19 +86,11 @@ const bannerOffset =
 
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<!-- 使用Google Fonts CDN代替本地字体文件 -->
+		<!-- 优化字体加载 - 使用 font-display: swap 提升性能 -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" as="style" />
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
 		<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"></noscript>
-		<script is:inline>
-			const fontLink = document.querySelector('link[href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"]');
-			if (fontLink) {
-				fontLink.addEventListener('load', () => {
-					fontLink.rel = 'stylesheet';
-				});
-			}
-		</script>
 		
 		<!-- 预连接关键域名以优化网络性能 -->
 		<link rel="preconnect" href="https://get-views.freebird2913.tech" />
@@ -272,12 +264,12 @@ const bannerOffset =
 					}
 				}
 
-				// 延迟 10 秒或用户交互后加载 - 优化Lighthouse性能
+				// 延迟 5 秒或用户交互后加载 - 优化性能同时保证数据收集
 				if (document.readyState === 'complete') {
-					setTimeout(loadClarity, 10000);
+					setTimeout(loadClarity, 5000);
 				} else {
 					window.addEventListener('load', function() {
-						setTimeout(loadClarity, 10000);
+						setTimeout(loadClarity, 5000);
 					}, { once: true });
 				}
 				
