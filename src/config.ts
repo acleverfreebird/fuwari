@@ -89,7 +89,7 @@ export const expressiveCodeConfig: ExpressiveCodeConfig = {
 export const umamiConfig: UmamiConfig = {
 	enable: true,
 	src: "https://views.freebird2913.tech/script.js",
-	websiteId: "726431d7-e252-486d-ab90-350313e5a519",
+	websiteId: "972731d0-f4b5-4e8f-b8a5-5c552326b08b",
 	domains: "www.freebird2913.tech", // 可选,限制只在此域名追踪
 	autoTrack: true,
 	delayLoad: 2000, // 2秒后加载,优化首屏性能
