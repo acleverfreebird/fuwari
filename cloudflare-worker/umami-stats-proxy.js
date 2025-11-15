@@ -1,31 +1,23 @@
 /**
  * Umami 统计数据代理 - Cloudflare Worker
- *
- * 功能:
- * - 代理 Umami API 请求,隐藏 API Token
- * - 支持获取网站总浏览量
- * - 支持获取特定页面浏览量
- * - 支持 CORS
- * - 缓存优化
  */
 
 // ==================== 配置区域 ====================
-// 请在这里填写你的 Umami 配置信息
 const CONFIG = {
-	// Umami API 地址 (不要在末尾加斜杠)
+	// Umami API 地址
 	UMAMI_API_URL: "https://views.freebird2913.tech/api",
 
-	// Umami API Token (在 Umami 后台 Settings -> API 中生成)
+	// Umami API Token (在 Umami 后台生成)
 	UMAMI_API_TOKEN: "YOUR_UMAMI_API_TOKEN_HERE",
 
-	// 网站 ID (在 Umami 后台可以找到)
+	// 网站 ID
 	UMAMI_WEBSITE_ID: "726431d7-e252-486d-ab90-350313e5a519",
 
-	// 允许的来源域名 (用于 CORS,留空则允许所有来源)
+	// 允许的来源域名 (CORS)
 	ALLOWED_ORIGINS: [
 		"https://www.freebird2913.tech",
 		"https://freebird2913.tech",
-		"http://localhost:4321", // 本地开发
+		"http://localhost:4321",
 	],
 
 	// 缓存时间 (秒)
@@ -35,7 +27,7 @@ const CONFIG = {
 
 export default {
 	async fetch(request) {
-		// CORS 预检请求处理
+		// CORS 预检请求
 		if (request.method === "OPTIONS") {
 			return handleCORS(request);
 		}
@@ -51,19 +43,18 @@ export default {
 
 			// 路由处理
 			if (path === "/stats/total") {
-				// 获取网站总浏览量
 				return await getTotalPageviews(request);
 			}
+
 			if (path === "/stats/page") {
-				// 获取特定页面浏览量
 				const pageUrl = url.searchParams.get("url");
 				if (!pageUrl) {
 					return jsonResponse({ error: "Missing url parameter" }, 400);
 				}
 				return await getPagePageviews(request, pageUrl);
 			}
+
 			if (path === "/") {
-				// 健康检查
 				return jsonResponse({
 					status: "ok",
 					message: "Umami Stats Proxy is running",
@@ -73,6 +64,7 @@ export default {
 					},
 				});
 			}
+
 			return jsonResponse({ error: "Not found" }, 404);
 		} catch (error) {
 			console.error("Error:", error);
@@ -88,18 +80,19 @@ export default {
  * 获取网站总浏览量
  */
 async function getTotalPageviews(request) {
-	const cacheKey = "umami:total:pageviews";
+	const cacheUrl = new URL(request.url);
+	cacheUrl.pathname = "/cache/total";
+	const cacheKey = new Request(cacheUrl);
 
 	// 尝试从缓存获取
 	const cached = await getCache(cacheKey);
 	if (cached) {
-		return jsonResponse(cached, 200, request);
+		return cached;
 	}
 
-	// 计算时间范围 (最近30天)
+	// 计算时间范围 (所有时间)
 	const endDate = new Date();
-	const startDate = new Date();
-	startDate.setDate(startDate.getDate() - 30);
+	const startDate = new Date("2020-01-01"); // 一个足够早的日期
 
 	const startAt = startDate.getTime();
 	const endAt = endDate.getTime();
@@ -115,17 +108,19 @@ async function getTotalPageviews(request) {
 	});
 
 	if (!response.ok) {
-		throw new Error(`Umami API error: ${response.status}`);
+		const errorText = await response.text();
+		throw new Error(`Umami API error: ${response.status} - ${errorText}`);
 	}
 
 	const data = await response.json();
 
+	// Umami API 直接返回数值
 	const result = {
-		total: data.pageviews?.value || 0,
-		visitors: data.visitors?.value || 0,
-		visits: data.visits?.value || 0,
-		bounces: data.bounces?.value || 0,
-		totaltime: data.totaltime?.value || 0,
+		total: data.pageviews || 0,
+		visitors: data.visitors || 0,
+		visits: data.visits || 0,
+		bounces: data.bounces || 0,
+		totaltime: data.totaltime || 0,
 		cached: false,
 		timestamp: Date.now(),
 	};
@@ -140,72 +135,46 @@ async function getTotalPageviews(request) {
  * 获取特定页面浏览量和访客数
  */
 async function getPagePageviews(request, pageUrl) {
-	const cacheKey = `umami:page:${pageUrl}`;
+	// 为此页面的缓存构造一个唯一的、有效的 URL
+	const cacheUrl = new URL(request.url);
+	cacheUrl.pathname = `/cache/page${pageUrl.startsWith("/") ? pageUrl : "/" + pageUrl}`;
+	const cacheKey = new Request(cacheUrl);
 
 	// 尝试从缓存获取
 	const cached = await getCache(cacheKey);
 	if (cached) {
-		return jsonResponse(cached, 200, request);
+		// 直接返回缓存的 Response 对象
+		return cached;
 	}
 
 	// 计算时间范围 (所有时间)
 	const endDate = new Date();
-	const startDate = new Date("2020-01-01"); // 从2020年开始
-
+	const startDate = new Date("2020-01-01");
 	const startAt = startDate.getTime();
 	const endAt = endDate.getTime();
 
-	// 调用 Umami API - 获取页面浏览量
-	const pageviewsUrl = `${CONFIG.UMAMI_API_URL}/websites/${CONFIG.UMAMI_WEBSITE_ID}/metrics?startAt=${startAt}&endAt=${endAt}&type=url&url=${encodeURIComponent(pageUrl)}`;
+	// 使用 /stats API 并通过 url 参数过滤
+	const apiUrl = `${CONFIG.UMAMI_API_URL}/websites/${CONFIG.UMAMI_WEBSITE_ID}/stats?startAt=${startAt}&endAt=${endAt}&url=${encodeURIComponent(pageUrl)}`;
 
-	const pageviewsResponse = await fetch(pageviewsUrl, {
+	const response = await fetch(apiUrl, {
 		headers: {
 			Authorization: `Bearer ${CONFIG.UMAMI_API_TOKEN}`,
 			"Content-Type": "application/json",
 		},
 	});
 
-	if (!pageviewsResponse.ok) {
-		throw new Error(`Umami API error: ${pageviewsResponse.status}`);
+	if (!response.ok) {
+		const errorText = await response.text();
+		throw new Error(`Umami API error: ${response.status} - ${errorText}`);
 	}
 
-	const pageviewsData = await pageviewsResponse.json();
+	const data = await response.json();
 
-	// 查找匹配的页面浏览量
-	let pageviews = 0;
-	if (Array.isArray(pageviewsData)) {
-		const pageData = pageviewsData.find((item) => item.x === pageUrl);
-		pageviews = pageData ? pageData.y : 0;
-	}
-
-	// 调用 Umami API - 获取页面访客数
-	const visitorsUrl = `${CONFIG.UMAMI_API_URL}/websites/${CONFIG.UMAMI_WEBSITE_ID}/metrics?startAt=${startAt}&endAt=${endAt}&type=url&url=${encodeURIComponent(pageUrl)}`;
-
-	const visitorsResponse = await fetch(visitorsUrl, {
-		headers: {
-			Authorization: `Bearer ${CONFIG.UMAMI_API_TOKEN}`,
-			"Content-Type": "application/json",
-		},
-	});
-
-	let visitors = 0;
-	if (visitorsResponse.ok) {
-		const visitorsData = await visitorsResponse.json();
-		// Umami API 返回的访客数通常在同一个响应中
-		// 如果需要单独获取,可以使用不同的 API 端点
-		if (Array.isArray(visitorsData)) {
-			const visitorData = visitorsData.find((item) => item.x === pageUrl);
-			// 访客数通常等于或小于浏览量
-			visitors = visitorData
-				? Math.min(visitorData.y, pageviews)
-				: Math.ceil(pageviews * 0.8);
-		}
-	}
-
+	// Umami API 直接返回数值
 	const result = {
 		url: pageUrl,
-		pageviews: pageviews,
-		visitors: visitors,
+		pageviews: data.pageviews || 0,
+		visitors: data.visitors || 0,
 		cached: false,
 		timestamp: Date.now(),
 	};
@@ -244,7 +213,7 @@ function handleCORS(request) {
 function jsonResponse(data, status = 200, request = null) {
 	const headers = {
 		"Content-Type": "application/json",
-		"Cache-Control": "public, max-age=300", // 5分钟浏览器缓存
+		"Cache-Control": "public, max-age=300",
 	};
 
 	// 添加 CORS 头
@@ -263,25 +232,36 @@ function jsonResponse(data, status = 200, request = null) {
 }
 
 /**
- * 简单的内存缓存 (Worker 生命周期内有效)
+ * 使用 Cloudflare Cache API 进行缓存
  */
-const cache = new Map();
-
-async function getCache(key) {
-	const item = cache.get(key);
-	if (!item) return null;
-
-	if (Date.now() > item.expiry) {
-		cache.delete(key);
+async function getCache(cacheKey) {
+	const cache = caches.default;
+	const response = await cache.match(cacheKey);
+	if (!response) {
 		return null;
 	}
 
-	return { ...item.data, cached: true };
+	// 检查缓存是否过期 (自定义头)
+	const expiry = response.headers.get("Cache-Expiry");
+	if (expiry && Date.now() > Number.parseInt(expiry, 10)) {
+		// 异步删除过期缓存
+		// 在没有 ctx.waitUntil 的情况下，这是一个即发即忘的操作
+		caches.default.delete(cacheKey);
+		return null;
+	}
+	return response;
 }
 
-async function setCache(key, data, ttlSeconds) {
-	cache.set(key, {
-		data,
-		expiry: Date.now() + ttlSeconds * 1000,
-	});
+async function setCache(cacheKey, data, ttlSeconds) {
+	const cache = caches.default;
+	const responseBody = JSON.stringify(data);
+	const headers = {
+		"Content-Type": "application/json",
+		"Cache-Control": `public, max-age=${ttlSeconds}`,
+		"Cache-Expiry": Date.now() + ttlSeconds * 1000,
+	};
+	const response = new Response(responseBody, { headers });
+	// 由于我们无法访问 waitUntil，我们将等待缓存操作完成。
+	// 这可能会对第一个用户的响应造成轻微延迟。
+	await cache.put(cacheKey, response);
 }
