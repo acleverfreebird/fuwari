@@ -1,73 +1,75 @@
 ---
-import MainGridLayout from "@layouts/MainGridLayout.astro";
+import Layout from "@layouts/Layout.astro";
 import { Icon } from "astro-icon/components";
 ---
 
-<MainGridLayout title="离线模式">
-    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-[60vh]">
-        <div class="card-base z-10 px-9 py-12 relative w-full">
-            <div class="flex flex-col items-center justify-center text-center space-y-6">
-                <!-- 离线图标 -->
-                <div class="w-24 h-24 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center">
-                    <Icon name="material-symbols:wifi-off-rounded" class="text-6xl text-black/30 dark:text-white/30" />
-                </div>
-                
-                <!-- 标题 -->
-                <h1 class="text-4xl font-bold text-[var(--primary)]">
-                    您当前处于离线状态
-                </h1>
-                
-                <!-- 描述 -->
-                <p class="text-lg text-black/60 dark:text-white/60 max-w-md">
-                    看起来您的网络连接已断开。请检查您的网络设置，然后重试。
-                </p>
-                
-                <!-- 提示信息 -->
-                <div class="card-base p-6 rounded-xl max-w-lg w-full">
-                    <h2 class="text-xl font-semibold mb-4 text-black/80 dark:text-white/80">
-                        💡 您可以：
-                    </h2>
-                    <ul class="space-y-3 text-left text-black/70 dark:text-white/70">
-                        <li class="flex items-start gap-3">
-                            <Icon name="material-symbols:check-circle-outline-rounded" class="text-xl text-[var(--primary)] mt-0.5 flex-shrink-0" />
-                            <span>浏览您之前访问过的缓存页面</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <Icon name="material-symbols:check-circle-outline-rounded" class="text-xl text-[var(--primary)] mt-0.5 flex-shrink-0" />
-                            <span>检查您的网络连接</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <Icon name="material-symbols:check-circle-outline-rounded" class="text-xl text-[var(--primary)] mt-0.5 flex-shrink-0" />
-                            <span>稍后重新加载此页面</span>
-                        </li>
-                    </ul>
-                </div>
-                
-                <!-- 操作按钮 -->
-                <div class="flex gap-4 flex-wrap justify-center">
-                    <button 
-                        onclick="window.location.reload()" 
-                        class="btn-card px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 active:scale-95"
-                    >
-                        <Icon name="material-symbols:refresh-rounded" class="inline-block mr-2 text-xl" />
-                        重新加载
-                    </button>
+<Layout title="离线模式">
+    <main id="swup-container">
+        <div class="min-h-screen flex items-center justify-center px-4 py-12">
+            <div class="card-base z-10 px-6 md:px-9 py-8 md:py-12 relative w-full max-w-2xl">
+                <div class="flex flex-col items-center justify-center text-center space-y-6">
+                    <!-- 离线图标 -->
+                    <div class="w-24 h-24 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center">
+                        <Icon name="material-symbols:wifi-off-rounded" class="text-6xl text-black/30 dark:text-white/30" />
+                    </div>
                     
-                    <a 
-                        href="/" 
-                        class="btn-card px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 active:scale-95"
-                    >
-                        <Icon name="material-symbols:home-rounded" class="inline-block mr-2 text-xl" />
-                        返回首页
-                    </a>
+                    <!-- 标题 -->
+                    <h1 class="text-4xl font-bold text-[var(--primary)]">
+                        您当前处于离线状态
+                    </h1>
+                    
+                    <!-- 描述 -->
+                    <p class="text-lg text-black/60 dark:text-white/60 max-w-md">
+                        看起来您的网络连接已断开。请检查您的网络设置，然后重试。
+                    </p>
+                    
+                    <!-- 提示信息 -->
+                    <div class="card-base p-6 rounded-xl max-w-lg w-full">
+                        <h2 class="text-xl font-semibold mb-4 text-black/80 dark:text-white/80">
+                            💡 您可以：
+                        </h2>
+                        <ul class="space-y-3 text-left text-black/70 dark:text-white/70">
+                            <li class="flex items-start gap-3">
+                                <Icon name="material-symbols:check-circle-outline-rounded" class="text-xl text-[var(--primary)] mt-0.5 flex-shrink-0" />
+                                <span>浏览您之前访问过的缓存页面</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <Icon name="material-symbols:check-circle-outline-rounded" class="text-xl text-[var(--primary)] mt-0.5 flex-shrink-0" />
+                                <span>检查您的网络连接</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <Icon name="material-symbols:check-circle-outline-rounded" class="text-xl text-[var(--primary)] mt-0.5 flex-shrink-0" />
+                                <span>稍后重新加载此页面</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 操作按钮 -->
+                    <div class="flex gap-4 flex-wrap justify-center">
+                        <button
+                                onclick="window.location.reload()"
+                                class="btn-card px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 active:scale-95"
+                        >
+                            <Icon name="material-symbols:refresh-rounded" class="inline-block mr-2 text-xl" />
+                            重新加载
+                        </button>
+                        
+                        <a
+                                href="/"
+                                class="btn-card px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 active:scale-95"
+                        >
+                            <Icon name="material-symbols:home-rounded" class="inline-block mr-2 text-xl" />
+                            返回首页
+                        </a>
+                    </div>
+                    
+                    <!-- 网络状态检测 -->
+                    <div id="network-status" class="text-sm text-black/50 dark:text-white/50"></div>
                 </div>
-                
-                <!-- 网络状态检测 -->
-                <div id="network-status" class="text-sm text-black/50 dark:text-white/50"></div>
             </div>
         </div>
-    </div>
-</MainGridLayout>
+    </main>
+</Layout>
 
 <script>
     // 网络状态检测
@@ -94,7 +96,7 @@ import { Icon } from "astro-icon/components";
     window.addEventListener('offline', updateNetworkStatus);
     
     // 初始检测
-    updateNetworkStatus();
+    document.addEventListener('DOMContentLoaded', updateNetworkStatus);
 </script>
 
 <style>
