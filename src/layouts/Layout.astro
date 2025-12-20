@@ -30,7 +30,7 @@ interface Props {
 	setOGTypeArticle?: boolean;
 }
 
-let { title, banner, description, lang } = Astro.props;
+let { banner, lang } = Astro.props;
 // setOGTypeArticle is defined in Props but not yet implemented
 
 // apply a class to the body element to decide the height of the banner, only used for initial page load
@@ -49,13 +49,6 @@ if (!banner || typeof banner !== "string" || banner.trim() === "") {
 banner = siteConfig.banner.src;
 
 const enableBanner = siteConfig.banner.enable;
-
-let pageTitle: string;
-if (title) {
-	pageTitle = `${title} - ${siteConfig.title}`;
-} else {
-	pageTitle = `${siteConfig.title} - ${siteConfig.subtitle}`;
-}
 
 const favicons: Favicon[] =
 	siteConfig.favicon.length > 0 ? siteConfig.favicon : defaultFavicons;
@@ -89,7 +82,7 @@ const bannerOffset =
 		<!-- 优化字体加载 - 使用 font-display: swap 提升性能 -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" media="print" onload="this.removeAttribute('media')">
 		<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"></noscript>
 		
 		<!-- 预连接关键域名以优化网络性能 -->
